@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python 學習中心</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font for better readability */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            scroll-behavior: smooth; /* Smooth scrolling for anchor links */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center p-4 min-h-screen">
+    <div class="w-full max-w-5xl bg-white p-6 sm:p-8 md:p-10 rounded-xl shadow-2xl border border-gray-200">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800 leading-tight mb-4">
+                歡迎來到 Python 學習中心！
+            </h1>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                在這裡，您可以透過互動式教學和遊戲化測驗，輕鬆學習和掌握 Python 的基礎知識。
+            </p>
+        </header>
+
+        <main id="content-cards" class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            </main>
+
+        <footer class="text-center text-gray-500 text-sm mt-auto p-4 border-t border-gray-200">
+            &copy; 2025 Python 學習中心. 版權所有。
+        </footer>
+    </div>
+
+    <script>
+        // Define your learning pages here
+        // For each page, specify:
+        // - title: Display title of the module
+        // - description: A brief description
+        // - link: The filename of the HTML page
+        // - icon: An optional icon (e.g., emoji for simplicity, or Font Awesome class)
+        const pages = [
+            {
+                title: "字串 (String) 教學",
+                description: "深入了解 Python 字串的建立、索引、切片和各種操作方法。",
+                link: "str.html", // Assuming your string tutorial is str.html
+                icon: "📚" // 統一為學習圖示
+            },
+            {
+                title: "字串 (String) 遊戲化測驗",
+                description: "透過遊戲化測驗，練習並鞏固您對 Python 字串的理解。",
+                link: "str_test.html", // Assuming your string quiz is str_test.html
+                icon: "🎮" // 統一為測驗圖示
+            },
+            {
+                title: "字典 (Dictionary) 教學",
+                description: "全面掌握 Python 字典的建立、存取、修改和常用方法。",
+                link: "dictionary.html", // Assuming your dictionary tutorial is dictionary.html
+                icon: "📚" // 統一為學習圖示
+            },
+            {
+                title: "字典 (Dictionary) 遊戲化測驗",
+                description: "透過互動式測驗，檢視您對 Python 字典操作的掌握程度。",
+                link: "dictionary_game.html", // Assuming your dictionary quiz is dictionary_game.html
+                icon: "🎮" // 統一為測驗圖示
+            }
+            // Add more pages here as you create them:
+            // {
+            //     title: "列表 (List) 教學",
+            //     description: "學習 Python 列表的基礎和進階操作。",
+            //     link: "list.html",
+            //     icon: "📚" // 學習圖示
+            // },
+            // {
+            //     title: "流程控制 (Flow Control) 測驗",
+            //     description: "挑戰您的條件判斷和迴圈知識。",
+            //     link: "flow_control_quiz.html",
+            //     icon: "🎮" // 測驗圖示
+            // }
+        ];
+
+        const contentCardsContainer = document.getElementById('content-cards');
+
+        // Function to render page cards
+        function renderPageCards() {
+            contentCardsContainer.innerHTML = ''; // Clear existing cards
+            pages.forEach(page => {
+                const card = document.createElement('div');
+                card.classList.add(
+                    'bg-white', 'p-6', 'rounded-lg', 'shadow-lg', 'border', 'border-gray-100',
+                    'flex', 'flex-col', 'items-center', 'text-center', 'transition', 'duration-300',
+                    'ease-in-out', 'transform', 'hover:scale-105', 'hover:shadow-xl'
+                );
+
+                card.innerHTML = `
+                    <div class="text-5xl mb-4">${page.icon}</div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-3">${page.title}</h3>
+                    <p class="text-gray-600 mb-5 flex-grow">${page.description}</p>
+                    <a href="${page.link}" class="mt-auto w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-300">
+                        開始學習
+                    </a>
+                `;
+                contentCardsContainer.appendChild(card);
+            });
+        }
+
+        // Render cards when the page loads
+        document.addEventListener('DOMContentLoaded', renderPageCards);
+    </script>
+</body>
+</html>

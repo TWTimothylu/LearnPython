@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python 字典教學 - 完整網站</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <style>
+        /* Custom font for better readability */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            scroll-behavior: smooth; /* Smooth scrolling for anchor links */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        /* Style for code blocks - Prism.js will handle background and text colors */
+        pre {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto; /* Enable horizontal scrolling for long lines */
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; /* Monospace font for code */
+            font-size: 0.9rem;
+            line-height: 1.4;
+            /* Increased margin-bottom to create more space with subsequent elements */
+            margin-top: 0.75rem;
+            margin-bottom: 2.5rem; /* Adjusted for better spacing */
+        }
+        code {
+            font-family: inherit; /* Inherit font from pre */
+            background-color: #e2e8f0; /* Light background for inline code */
+            color: #333; /* Darker text for inline code */
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+        }
+        /* Ensure Prism.js's background is applied correctly to pre */
+        pre[class*="language-"] {
+            background-color: #2d2d2d; /* Re-apply dark background for the pre block, as Prism's theme might only target code */
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center p-4">
+    <div class="w-full max-w-5xl bg-white p-6 sm:p-8 md:p-10 rounded-xl shadow-2xl border border-gray-200">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800 leading-tight mb-4">
+                Python 字典 (Dictionary) 教學
+            </h1>
+            <p class="text-xl text-gray-600">從基礎到進階，全面掌握 Python 字典操作</p>
+        </header>
+
+        <nav class="mb-10 p-4 bg-blue-100 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold text-blue-800 mb-4 text-center">目錄</h2>
+            <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <li><a href="#section1" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">1. 什麼是字典？</a></li>
+                <li><a href="#section2" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">2. 存取字典元素</a></li>
+                <li><a href="#section3" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">3. 修改與新增元素</a></li>
+                <li><a href="#section4" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">4. 刪除字典元素</a></li>
+                <li><a href="#section5" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">5. 字典方法</a></li>
+                <li><a href="#section6" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">6. 遍歷字典</a></li>
+                <li><a href="#section7" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">7. 字典的特性</a></li>
+                <li><a href="#section8" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">8. 巢狀字典</a></li>
+            </ul>
+        </nav>
+
+        <section id="section1" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">1. 什麼是字典？</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                Python 字典是**無序（在 Python 3.7+ 版本中為有序）**的鍵-值（key-value）對集合。每個鍵（key）都與一個值（value）相關聯。鍵必須是唯一的且不可變的（例如：字串、數字、元組），而值可以是任何資料型態。
+            </p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">如何建立字典？</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                您可以使用大括號 <code>{}</code> 來建立字典，並用冒號 <code>:</code> 分隔鍵和值，用逗號 <code>,</code> 分隔每個鍵-值對。
+            </p>
+            <pre><code class="language-python"># 建立一個空字典
+empty_dict = {}
+print(empty_dict) # 輸出: {}
+
+# 建立一個包含資料的字典
+person = {
+    "name": "Alice",
+    "age": 30,
+    "city": "New York"
+}
+print(person) # 輸出: {'name': 'Alice', 'age': 30, 'city': 'New York'}
+
+# 鍵可以是不同資料型態 (但必須是不可變的)
+mixed_keys_dict = {
+    1: "One",
+    "two": 2,
+    (3, 4): "Tuple Key"
+}
+print(mixed_keys_dict) # 輸出: {1: 'One', 'two': 2, (3, 4): 'Tuple Key'}
+
+# 使用 dict() 函數建立字典
+another_dict = dict(brand="Ford", model="Mustang", year=1964)
+print(another_dict) # 輸出: {'brand': 'Ford', 'model': 'Mustang', 'year': 1964}
+</code></pre>
+        </section>
+
+        <section id="section2" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">2. 存取字典元素</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                您可以使用鍵來存取字典中對應的值。
+            </p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">使用方括號 <code>[]</code></h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                這是最常見的存取方式。如果鍵不存在，會引發 <code>KeyError</code>。
+            </p>
+            <pre><code class="language-python">student = {
+    "name": "Bob",
+    "id": "S001",
+    "major": "Computer Science"
+}
+
+print(student["name"])  # 輸出: Bob
+print(student["major"]) # 輸出: Computer Science
+
+# 嘗試存取不存在的鍵會引發 KeyError
+# print(student["age"]) # 這會引發 KeyError
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">使用 <code>.get()</code> 方法</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                <code>.get()</code> 方法是另一種存取元素的方式。如果鍵不存在，它會返回 <code>None</code>（預設），或者您可以指定一個預設值。
+            </p>
+            <pre><code class="language-python">student = {
+    "name": "Bob",
+    "id": "S001"
+}
+
+print(student.get("name")) # 輸出: Bob
+print(student.get("major")) # 輸出: None (因為 'major' 不存在)
+
+# 指定預設值
+print(student.get("major", "未指定")) # 輸出: 未指定
+</code></pre>
+        </section>
+
+        <section id="section3" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">3. 修改與新增字典元素</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                字典是**可變的 (mutable)**，這表示您可以修改現有的值，也可以新增鍵-值對。
+            </p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">修改元素</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                如果鍵已經存在，賦值操作會更新其對應的值。
+            </p>
+            <pre><code class="language-python">car = {
+    "brand": "Ford",
+    "model": "Mustang",
+    "year": 1964
+}
+
+car["year"] = 2020 # 修改 'year' 的值
+print(car) # 輸出: {'brand': 'Ford', 'model': 'Mustang', 'year': 2020}
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">新增元素</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                如果鍵不存在，賦值操作會新增一個新的鍵-值對。
+            </p>
+            <pre><code class="language-python">car = {
+    "brand": "Ford",
+    "model": "Mustang"
+}
+
+car["color"] = "Red" # 新增 'color' 鍵-值對
+print(car) # 輸出: {'brand': 'Ford', 'model': 'Mustang', 'color': 'Red'}
+</code></pre>
+        </section>
+
+        <section id="section4" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">4. 刪除字典元素</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                有多種方法可以從字典中刪除元素。
+            </p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">使用 <code>del</code> 關鍵字</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                <code>del</code> 可以刪除指定的鍵-值對，或刪除整個字典。
+            </p>
+            <pre><code class="language-python">person = {
+    "name": "Alice",
+    "age": 30,
+    "city": "New York"
+}
+
+del person["age"] # 刪除 'age' 鍵-值對
+print(person) # 輸出: {'name': 'Alice', 'city': 'New York'}
+
+# 刪除整個字典
+# del person # 執行後 person 變數將不再存在
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">使用 <code>.pop()</code> 方法</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                <code>.pop()</code> 方法會刪除指定鍵的元素，並返回該鍵對應的值。如果鍵不存在，會引發 <code>KeyError</code>，但可以指定預設值。
+            </p>
+            <pre><code class="language-python">fruits = {
+    "apple": 3,
+    "banana": 5,
+    "cherry": 2
+}
+
+removed_value = fruits.pop("banana") # 刪除 'banana' 並返回其值
+print(removed_value) # 輸出: 5
+print(fruits)        # 輸出: {'apple': 3, 'cherry': 2}
+
+# 嘗試刪除不存在的鍵並指定預設值
+not_found = fruits.pop("grape", 0)
+print(not_found)     # 輸出: 0
+print(fruits)        # 輸出: {'apple': 3, 'cherry': 2}
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">使用 <code>.popitem()</code> 方法</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                <code>.popitem()</code> 方法會刪除並返回字典中最後插入的鍵-值對（在 Python 3.7+）。在舊版本中，它會刪除並返回一個任意的鍵-值對。如果字典為空，會引發 <code>KeyError</code>。
+            </p>
+            <pre><code class="language-python">colors = {
+    "red": "#FF0000",
+    "green": "#00FF00",
+    "blue": "#0000FF"
+}
+
+last_item = colors.popitem()
+print(last_item) # 輸出: ('blue', '#0000FF') (Python 3.7+ 通常是最後一個)
+print(colors)    # 輸出: {'red': '#FF0000', 'green': '#00FF00'}
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">使用 <code>.clear()</code> 方法</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                <code>.clear()</code> 方法會清空字典中的所有元素，使其變為一個空字典。
+            </p>
+            <pre><code class="language-python">settings = {
+    "theme": "dark",
+    "notifications": True
+}
+
+settings.clear()
+print(settings) # 輸出: {}
+</code></pre>
+        </section>
+
+        <section id="section5" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">5. 字典方法 (Dictionary Methods)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                字典物件提供了許多實用的方法來操作和檢視其內容。
+            </p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3"><code>.keys()</code></h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                返回一個包含字典所有鍵的視圖物件（view object）。
+            </p>
+            <pre><code class="language-python">student = {
+    "name": "Bob",
+    "id": "S001",
+    "major": "Computer Science"
+}
+keys = student.keys()
+print(keys)      # 輸出: dict_keys(['name', 'id', 'major'])
+print(list(keys)) # 輸出: ['name', 'id', 'major']
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3"><code>.values()</code></h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                返回一個包含字典所有值的視圖物件。
+            </p>
+            <pre><code class="language-python">student = {
+    "name": "Bob",
+    "id": "S001",
+    "major": "Computer Science"
+}
+values = student.values()
+print(values)      # 輸出: dict_values(['Bob', 'S001', 'Computer Science'])
+print(list(values)) # 輸出: ['Bob', 'S001', 'Computer Science']
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3"><code>.items()</code></h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                返回一個包含字典所有鍵-值對（作為元組）的視圖物件。
+            </p>
+            <pre><code class="language-python">student = {
+    "name": "Bob",
+    "id": "S001",
+    "major": "Computer Science"
+}
+items = student.items()
+print(items)      # 輸出: dict_items([('name', 'Bob'), ('id', 'S001'), ('major', 'Computer Science')])
+print(list(items)) # 輸出: [('name', 'Bob'), ('id', 'S001'), ('major', 'Computer Science')]
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3"><code>.copy()</code></h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                返回字典的一個淺拷貝（shallow copy）。
+            </p>
+            <pre><code class="language-python">original_dict = {"a": 1, "b": 2}
+copied_dict = original_dict.copy()
+print(copied_dict) # 輸出: {'a': 1, 'b': 2}
+
+copied_dict["a"] = 100
+print(original_dict) # 輸出: {'a': 1, 'b': 2} (原字典不受影響)
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3"><code>.update()</code></h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                使用另一個字典或鍵-值對來更新字典。如果鍵已存在，則更新其值；如果鍵不存在，則新增。
+            </p>
+            <pre><code class="language-python">person = {
+    "name": "Alice",
+    "age": 30
+}
+
+person.update({"city": "London", "age": 31}) # 更新 'age' 並新增 'city'
+print(person) # 輸出: {'name': 'Alice', 'age': 31, 'city': 'London'}
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3"><code>.fromkeys()</code></h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                使用給定的鍵序列建立一個新字典，所有鍵都具有相同的值（預設為 <code>None</code>）。
+            </p>
+            <pre><code class="language-python">keys = ["name", "age", "city"]
+default_value = "unknown"
+
+new_person = dict.fromkeys(keys, default_value)
+print(new_person) # 輸出: {'name': 'unknown', 'age': 'unknown', 'city': 'unknown'}
+
+# 沒有指定值時，預設為 None
+another_new_dict = dict.fromkeys(keys)
+print(another_new_dict) # 輸出: {'name': None, 'age': None, 'city': None}
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3"><code>.setdefault()</code></h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                如果鍵存在，返回其值；如果鍵不存在，則插入該鍵並賦予指定值，然後返回該值。
+            </p>
+            <pre><code class="language-python">scores = {"math": 90, "english": 85}
+
+# 鍵存在，返回其值
+math_score = scores.setdefault("math", 100)
+print(math_score) # 輸出: 90
+print(scores)     # 輸出: {'math': 90, 'english': 85}
+
+# 鍵不存在，插入並返回預設值
+science_score = scores.setdefault("science", 75)
+print(science_score) # 輸出: 75
+print(scores)        # 輸出: {'math': 90, 'english': 85, 'science': 75}
+</code></pre>
+        </section>
+
+        <section id="section6" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">6. 遍歷字典 (Iterating Through Dictionaries)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                您可以使用 <code>for</code> 迴圈來遍歷字典。
+            </p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">遍歷鍵 (預設)</h3>
+            <pre><code class="language-python">person = {"name": "Alice", "age": 30, "city": "London"}
+for key in person:
+    print(key)
+# 輸出:
+# name
+# age
+# city
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">遍歷鍵 (使用 <code>.keys()</code>)</h3>
+            <pre><code class="language-python">person = {"name": "Alice", "age": 30, "city": "London"}
+for key in person.keys():
+    print(key)
+# 輸出:
+# name
+# age
+# city
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">遍歷值 (使用 <code>.values()</code>)</h3>
+            <pre><code class="language-python">person = {"name": "Alice", "age": 30, "city": "London"}
+for value in person.values():
+    print(value)
+# 輸出:
+# Alice
+# 30
+# London
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">遍歷鍵-值對 (使用 <code>.items()</code>)</h3>
+            <pre><code class="language-python">person = {"name": "Alice", "age": 30, "city": "London"}
+for key, value in person.items():
+    print(f"{key}: {value}")
+# 輸出:
+# name: Alice
+# age: 30
+# city: London
+</code></pre>
+        </section>
+
+        <section id="section7" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">7. 字典的特性 (Dictionary Properties)</h2>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li>**可變性 (Mutable)：** 字典是可變的資料型態，您可以在建立後新增、修改或刪除其中的元素。</li>
+                <li>**無序 vs. 有序：**
+                    <ul>
+                        <li>在 **Python 3.6 及更早版本**中，字典是**無序**的，鍵-值對的順序不保證與插入順序一致。</li>
+                        <li>從 **Python 3.7 及更高版本**開始，字典是**有序**的，它們會記住元素的插入順序。</li>
+                    </ul>
+                </li>
+                <li>**鍵的唯一性：** 字典中的鍵必須是唯一的。如果您嘗試使用相同的鍵新增一個元素，它會覆蓋現有的值。</li>
+                <li>**鍵的不可變性：** 字典的鍵必須是不可變的資料型態（如字串、數字、元組）。列表（list）因為是可變的，所以不能作為字典的鍵。</li>
+            </ul>
+            <pre><code class="language-python"># 鍵的唯一性範例
+my_dict = {"a": 1, "b": 2}
+my_dict["a"] = 10 # 覆蓋 'a' 的值
+print(my_dict) # 輸出: {'a': 10, 'b': 2}
+
+# 鍵的不可變性範例 (錯誤示範)
+# mutable_list_as_key = {[1, 2]: "value"} # 這會引發 TypeError: unhashable type: 'list'
+</code></pre>
+        </section>
+
+        <section id="section8" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">8. 巢狀字典 (Nested Dictionaries)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                字典的值可以是另一個字典，這允許您建立複雜的、階層式的資料結構。
+            </p>
+            <pre><code class="language-python"># 巢狀字典範例
+students_data = {
+    "S001": {
+        "name": "Alice",
+        "age": 20,
+        "courses": ["Math", "Physics"]
+    },
+    "S002": {
+        "name": "Bob",
+        "age": 22,
+        "courses": ["Chemistry", "Biology"]
+    }
+}
+
+# 存取巢狀字典中的元素
+print(students_data["S001"]["name"])    # 輸出: Alice
+print(students_data["S002"]["courses"][0]) # 輸出: Chemistry
+
+# 修改巢狀字典中的元素
+students_data["S001"]["age"] = 21
+print(students_data["S001"]["age"]) # 輸出: 21
+
+# 新增巢狀字典中的元素
+students_data["S001"]["grade"] = "A"
+print(students_data["S001"]) # 輸出: {'name': 'Alice', 'age': 21, 'courses': ['Math', 'Physics'], 'grade': 'A'}
+</code></pre>
+        </section>
+
+        <footer class="text-center text-gray-500 text-sm mt-10 p-4 border-t border-gray-200">
+            &copy; 2025 Python 字典教學. 版權所有。
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>

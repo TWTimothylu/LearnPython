@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python 字串操作遊戲化測驗 (30題)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font for better readability */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .heart-icon {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+            vertical-align: middle;
+            margin: 0 2px;
+        }
+        /* Message box styling */
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0; /* Initially hidden */
+        }
+        .message-box.show {
+            opacity: 1;
+        }
+        .message-box.info {
+            background-color: #e0f2fe; /* Light blue */
+            color: #0284c7; /* Darker blue */
+            border: 1px solid #94a3b8;
+        }
+        .message-box.error {
+            background-color: #fee2e2; /* Light red */
+            color: #dc2626; /* Darker red */
+            border: 1px solid #ef4444;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div id="game-container" class="bg-white p-6 sm:p-8 md:p-10 rounded-xl shadow-2xl w-full max-w-3xl border border-gray-200">
+        <div id="game-screen">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-center text-gray-800 mb-6 leading-tight">
+                Python 字串操作遊戲化測驗 (30題)
+            </h1>
+
+            <div id="lives-display" class="text-center mb-6 text-red-500 text-2xl font-bold">
+                生命值:
+            </div>
+
+            <div id="question-area" class="space-y-6">
+                </div>
+
+            <div id="hint-area" class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200 text-blue-800 hidden">
+                <p class="font-semibold mb-2">提示：</p>
+                <p id="hint-content"></p>
+                <div id="hint-loading" class="loading-spinner mx-auto mt-4 hidden"></div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:space-x-4 mt-8">
+                <button id="check-answer-btn" class="w-full sm:w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg mb-4 sm:mb-0">
+                    檢查答案
+                </button>
+                <button id="get-hint-btn" class="w-full sm:w-1/2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                    獲取提示 ✨
+                </button>
+            </div>
+
+
+            <div id="feedback-explanation-area" class="mt-6 p-4 rounded-lg hidden">
+                </div>
+
+            <button id="next-question-btn" class="mt-4 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 shadow-lg hidden">
+                下一題
+            </button>
+        </div>
+
+        <div id="game-over-screen" class="hidden text-center p-8 bg-red-50 rounded-lg border border-red-200">
+            <h2 class="text-3xl font-bold text-red-700 mb-4">遊戲結束！</h2>
+            <p id="game-over-score" class="text-xl text-gray-800 mb-6"></p>
+            <button id="restart-game-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                重新開始
+            </button>
+        </div>
+
+        <div id="game-complete-screen" class="hidden text-center p-8 bg-green-50 rounded-lg border border-green-200">
+            <h2 class="text-3xl font-bold text-green-700 mb-4">恭喜您！完成所有題目！</h2>
+            <p id="game-complete-score" class="text-xl text-gray-800 mb-6"></p>
+            <button id="play-again-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                再玩一次
+            </button>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box hidden"></div>
+
+    <script>
+        // Define the quiz questions with explanations, focusing on string operations
+        const questions = [
+            // Level 1: Basics (Creation, Length, Simple Indexing)
+            {
+                question: "在Python中，要建立一個字串變數 `name` 並賦值為 `\"Alice\"`，以下哪種方式是正確的？",
+                options: ["`name = Alice`", "`name = \"Alice\"`", "`name == \"Alice\"`", "`string name = \"Alice\"`"],
+                correctAnswer: 1,
+                explanation: "在Python中，字串必須用單引號 (`'`) 或雙引號 (`\"`) 括起來。`name = \"Alice\"` 是正確的賦值語法。",
+                hint: "思考在Python中，字串內容需要用什麼符號來標示。"
+            },
+            {
+                question: "以下哪種方式可以定義一個多行字串變數 `poem`？",
+                options: ["`poem = \"Line 1\\nLine 2\"`", "`poem = '''Line 1\nLine 2'''`", "`poem = (\"Line 1\", \"Line 2\")`", "`poem = 'Line 1' + 'Line 2'`"],
+                correctAnswer: 1,
+                explanation: "Python 允許使用三引號 (`'''` 或 `\"\"\"`) 來定義多行字串，字串中的換行會被保留。",
+                hint: "除了單引號和雙引號，Python 還有一種特殊符號可以用於多行文字。"
+            },
+            {
+                question: "如何取得字串 `s = \"Python\"` 的長度？",
+                options: ["`s.length()`", "`len(s)`", "`s.size()`", "`s.count()`"],
+                correctAnswer: 1,
+                explanation: "Python 的內建函數 `len()` 用於返回字串、列表、元組等序列的長度。",
+                hint: "Python有一個內建函數，可以計算任何序列（包括字串）的長度。"
+            },
+            {
+                question: "字串 `lang = \"Java\"` 中，字元 'J' 的索引值是多少？",
+                options: ["1", "0", "-1", "無法取得"],
+                correctAnswer: 1,
+                explanation: "在Python中，字串的索引是從 0 開始的。所以第一個字元 'J' 的索引是 0。",
+                hint: "記住Python的索引是從哪個數字開始的。"
+            },
+            {
+                question: "對於字串 `word = \"Keyboard\"`，`word[3]` 的結果是什麼？",
+                options: ["'b'", "'o'", "'y'", "'a'"],
+                correctAnswer: 0,
+                explanation: "字串 `\"Keyboard\"` 的索引如下：\nK(0) e(1) y(2) b(3) o(4) a(5) r(6) d(7)\n因此，`word[3]` 是 'b'。",
+                hint: "從0開始數，找到第四個字元是什麼。"
+            },
+            {
+                question: "對於字串 `data = \"Example\"`，`data[-1]` 的結果是什麼？",
+                options: ["'E'", "'e'", "'l'", "錯誤"],
+                correctAnswer: 1,
+                explanation: "Python 支援負向索引，`[-1]` 表示字串的最後一個字元，`[-2]` 表示倒數第二個字元，依此類推。所以 `data[-1]` 是 'e'。",
+                hint: "負數索引是從字串的哪一端開始計數的？"
+            },
+
+            // Level 2: Slicing and Operators
+            {
+                question: "要從字串 `text = \"Programming\"` 中取得子字串 `\"gram\"`，應該如何切片？",
+                options: ["`text[3:7]`", "`text[4:8]`", "`text[3:6]`", "`text[4:7]`"],
+                correctAnswer: 0,
+                explanation: "字串 `\"Programming\"` 的索引如下：\nP(0) r(1) o(2) g(3) r(4) a(5) m(6) m(7) i(8) n(9) g(10)\n切片語法 `[start:end]` 包含 `start` 索引但不包含 `end` 索引。`text[3:7]` 會取得索引 3 ('g') 到索引 6 ('m') 的字元，即 `\"gram\"`。",
+                hint: "切片語法 `[start:end]` 中，`start` 包含，`end` 不包含。數一數 'g' 和 'm' 的索引。"
+            },
+            {
+                question: "要從字串 `message = \"Hello World\"` 中取得從開頭到索引 5（不包含 5）的子字串，應該如何切片？",
+                options: ["`message[:5]`", "`message[0:5]`", "`message[0:4]`", "選項 A 和 B 皆是"],
+                correctAnswer: 3,
+                explanation: "當 `start` 索引省略時，預設為 0。所以 `message[:5]` 和 `message[0:5]` 都會取得從索引 0 到索引 4 的字元，即 `\"Hello\"`。",
+                hint: "當切片語法省略起始索引時，它預設從哪裡開始？"
+            },
+            {
+                question: "要從字串 `sentence = \"Python is fun\"` 中取得從索引 7 到結尾的子字串，應該如何切片？",
+                options: ["`sentence[7:]`", "`sentence[7:len(sentence)]`", "`sentence[7:end]`", "選項 A 和 B 皆是"],
+                correctAnswer: 3,
+                explanation: "當 `end` 索引省略時，預設為字串的結尾。所以 `sentence[7:]` 和 `sentence[7:len(sentence)]` 都會取得從索引 7 ('i') 到字串末尾的字元，即 `\"is fun\"`。",
+                hint: "當切片語法省略結束索引時，它預設到哪裡結束？"
+            },
+            {
+                question: "對於字串 `original = \"abc\"`，`new_str = original[:]` 的結果是什麼？",
+                options: ["`\"abc\"` (與 `original` 相同物件)", "`\"abc\"` (新的物件)", "錯誤", "空字串"],
+                correctAnswer: 1,
+                explanation: "使用 `[:]` 進行字串切片會建立一個原始字串的完整副本，這是一個新的字串物件，但內容與原始字串相同。字串是不可變的，所以即使內容相同，也是不同的物件。",
+                hint: "思考切片操作是否會創建一個新的字串物件，即使是完整切片。"
+            },
+            {
+                question: "要將字串 `first = \"Py\"` 和 `last = \"thon\"` 連接成 `\"Python\"`，應該使用哪種運算符？",
+                options: ["`first & last`", "`first + last`", "`first, last`", "`first.combine(last)`"],
+                correctAnswer: 1,
+                explanation: "在Python中，`+` 運算符用於字串的連接。",
+                hint: "在Python中，最常用的字串連接符號是什麼？"
+            },
+            {
+                question: "字串 `s = \"abc\" * 3` 的結果是什麼？",
+                options: ["`\"abcabcabc\"`", "`\"abc3\"`", "`\"a3b3c3\"`", "錯誤"],
+                correctAnswer: 0,
+                explanation: "字串與整數的 `*` 運算符會將字串重複指定次數。所以 `\"abc\" * 3` 會得到 `\"abcabcabc\"`。",
+                hint: "字串和整數之間的乘法運算符有什麼特殊用途？"
+            },
+            {
+                question: "如何判斷字串 `full_text = \"Hello Python World\"` 是否包含子字串 `\"Python\"`？",
+                options: ["`full_text.contains(\"Python\")`", "`\"Python\" in full_text`", "`full_text.find(\"Python\")`", "`full_text.has(\"Python\")`"],
+                correctAnswer: 1,
+                explanation: "Python 的 `in` 運算符是檢查子字串是否存在於字串中的最常用且直觀的方式，它會返回布林值（True 或 False）。",
+                hint: "Python提供了一個非常直觀的關鍵字來檢查一個元素是否在序列中。"
+            },
+
+            // Level 3: Case Conversion & Trimming
+            {
+                question: "將字串 `name = \"alice\"` 轉換為全部大寫，結果為 `\"ALICE\"`，應使用哪種方法？",
+                options: ["`name.capitalize()`", "`name.upper()`", "`name.title()`", "`name.to_upper()`"],
+                correctAnswer: 1,
+                explanation: "字串的 `upper()` 方法會返回一個新字串，其中所有字元都轉換為大寫。",
+                hint: "尋找字串物件的一個方法，它可以將所有字母轉換為大寫。"
+            },
+            {
+                question: "將字串 `city = \"NEW YORK\"` 轉換為全部小寫，結果為 `\"new york\"`，應使用哪種方法？",
+                options: ["`city.lower()`", "`city.to_lower()`", "`city.casefold()`", "`city.min()`"],
+                correctAnswer: 0,
+                explanation: "字串的 `lower()` 方法會返回一個新字串，其中所有字元都轉換為小寫。",
+                hint: "尋找字串物件的一個方法，它可以將所有字母轉換為小寫。"
+            },
+            {
+                question: "將字串 `greeting = \"hello world\"` 轉換為首字母大寫（`\"Hello world\"`），應使用哪種方法？",
+                options: ["`greeting.upper()`", "`greeting.title()`", "`greeting.capitalize()`", "`greeting.first_upper()`"],
+                correctAnswer: 2,
+                explanation: "字串的 `capitalize()` 方法會將字串的第一個字元轉換為大寫，其餘字元轉換為小寫。",
+                hint: "哪個方法只會讓字串的第一個字元大寫？"
+            },
+            {
+                question: "將字串 `book_title = \"the python programming guide\"` 轉換為每個單字首字母大寫（`\"The Python Programming Guide\"`），應使用哪種方法？",
+                options: ["`book_title.capitalize()`", "`book_title.upper()`", "`book_title.title()`", "`book_title.proper()`"],
+                correctAnswer: 2,
+                explanation: "字串的 `title()` 方法會將字串中每個單字的第一個字元轉換為大寫，其餘字元轉換為小寫。",
+                hint: "哪個方法會將字串中每個單字的第一個字母大寫？"
+            },
+            {
+                question: "要移除字串 `data = \"   Python   \"` 兩端的空白字元，結果為 `\"Python\"`，應使用哪種方法？",
+                options: ["`data.trim()`", "`data.strip()`", "`data.remove_space()`", "`data.clean()`"],
+                correctAnswer: 1,
+                explanation: "字串的 `strip()` 方法會返回一個新字串，其中移除了字串開頭和結尾的所有空白字元（包括空格、換行符、tab 符等）。",
+                hint: "哪個字串方法專門用來清理字串兩側的空白字元？"
+            },
+            {
+                question: "要移除字串 `path = \"/usr/local/\"` 左側的斜線 `/`，結果為 `\"usr/local/\"`，應使用哪種方法？",
+                options: ["`path.strip('/')`", "`path.lstrip('/')`", "`path.rstrip('/')`", "`path.removeprefix('/')`"],
+                correctAnswer: 1,
+                explanation: "字串的 `lstrip()` 方法會返回一個新字串，其中移除了字串開頭指定字元集中的所有字元。`lstrip('/')` 會移除左側的 `/`。",
+                hint: "哪個方法可以移除字串左側的特定字元？"
+            },
+            {
+                question: "要移除字串 `url = \"www.example.com/\"` 右側的斜線 `/`，結果為 `\"www.example.com\"`，應使用哪種方法？",
+                options: ["`url.strip('/')`", "`url.lstrip('/')`", "`url.rstrip('/')`", "`url.removesuffix('/')`"],
+                correctAnswer: 2,
+                explanation: "字串的 `rstrip()` 方法會返回一個新字串，其中移除了字串結尾指定字元集中的所有字元。`rstrip('/')` 會移除右側的 `/`。",
+                hint: "哪個方法可以移除字串右側的特定字元？"
+            },
+
+            // Level 4: Modification (Returns New String) & Splitting/Joining
+            {
+                question: "將字串 `sentence = \"I like apples, apples are great.\" ` 中的所有 `\"apples\"` 替換為 `\"bananas\"`，結果為 `\"I like bananas, bananas are great.\" `，應使用哪種方法？",
+                options: ["`sentence.change(\"apples\", \"bananas\")`", "`sentence.replace(\"apples\", \"bananas\")`", "`sentence.substitute(\"apples\", \"bananas\")`", "`sentence.modify(\"apples\", \"bananas\")`"],
+                correctAnswer: 1,
+                explanation: "字串的 `replace()` 方法用於將字串中所有出現的指定子字串替換為另一個子字串，並返回一個新的字串。",
+                hint: "哪個字串方法用於將一個子字串替換為另一個？"
+            },
+            {
+                question: "將字串 `data = \"one two three\"` 依空白字元分割成列表 `[\"one\", \"two\", \"three\"]`，應使用哪種方法？",
+                options: ["`data.split()`", "`data.separate()`", "`data.divide()`", "`data.tolist()`"],
+                correctAnswer: 0,
+                explanation: "字串的 `split()` 方法如果沒有提供分隔符，會根據空白字元進行分割，並移除空字串結果。",
+                hint: "哪個字串方法可以將字串分割成列表，如果沒有參數則依空白分割？"
+            },
+            {
+                question: "將字串 `csv_line = \"apple,banana,cherry\"` 依逗號 `,` 分割成列表 `[\"apple\", \"banana\", \"cherry\"]`，應使用哪種方法？",
+                options: ["`csv_line.split(',')`", "`csv_line.separate(',')`", "`csv_line.divide(',')`", "`csv_line.tolist(',')`"],
+                correctAnswer: 0,
+                explanation: "字串的 `split(delimiter)` 方法可以使用指定的分隔符將字串分割成列表。",
+                hint: "哪個字串方法可以根據指定的分隔符將字串分割成列表？"
+            },
+            {
+                question: "將列表 `words = [\"Hello\", \"World\", \"Python\"]` 連接成單一字串 `\"Hello World Python\"`，每個單字之間用空格分隔，應使用哪種方法？",
+                options: ["`\" \".join(words)`", "`words.join(\" \")`", "`words.concat(\" \")`", "`words.merge(\" \")`"],
+                correctAnswer: 0,
+                explanation: "字串的 `join()` 方法是一個強大的方法，它會使用呼叫該方法的字串作為分隔符，將可迭代物件（如列表中的字串）連接起來，並返回一個新字串。語法是 `分隔符字串.join(可迭代物件)`。",
+                hint: "哪個字串方法可以用一個分隔符將列表中的元素連接起來？注意它的呼叫方式。"
+            },
+
+            // Level 5: Searching & Checking Properties
+            {
+                question: "在字串 `sentence = \"Python is a great language\"` 中，`sentence.find(\"great\")` 的結果是什麼？",
+                options: ["10", "11", "12", "-1"],
+                correctAnswer: 2,
+                explanation: "字串的 `find()` 方法會返回子字串第一次出現的起始索引。如果找不到，則返回 -1。\nP(0) y(1) t(2) h(3) o(4) n(5)  (6) i(7) s(8)  (9) a(10)  (11) g(12) r(13) e(14) a(15) t(16)\n所以 `\"great\"` 從索引 12 開始。",
+                hint: "哪個字串方法可以返回子字串第一次出現的起始索引？"
+            },
+            {
+                question: "在字串 `text = \"banana\"` 中，`text.count('a')` 的結果是什麼？",
+                options: ["2", "3", "4", "1"],
+                correctAnswer: 2,
+                explanation: "字串的 `count()` 方法會返回指定子字串在字串中出現的次數。",
+                hint: "哪個字串方法可以計算指定字元或子字串在字串中出現的次數？"
+            },
+            {
+                question: "判斷字串 `filename = \"document.pdf\"` 是否以 `\"document\"` 開頭，應使用哪種方法？",
+                options: ["`filename.contains(\"document\")`", "`filename.beginswith(\"document\")`", "`filename.startswith(\"document\")`", "`filename.isprefix(\"document\")`"],
+                correctAnswer: 2,
+                explanation: "字串的 `startswith()` 方法用於檢查字串是否以指定的字首開頭，返回布林值。",
+                hint: "哪個字串方法用於檢查字串是否以特定字首開頭？"
+            },
+            {
+                question: "判斷字串 `image = \"photo.jpg\"` 是否以 `\".jpg\"` 結尾，應使用哪種方法？",
+                options: ["`image.endswith(\".jpg\")`", "`image.has_suffix(\".jpg\")`", "`image.is_suffix(\".jpg\")`", "`image.terminateswith(\".jpg\")`"],
+                correctAnswer: 0,
+                explanation: "字串的 `endswith()` 方法用於檢查字串是否以指定的字尾結尾，返回布林值。",
+                hint: "哪個字串方法用於檢查字串是否以特定字尾結尾？"
+            },
+            {
+                question: "判斷字串 `s = \"12345\"` 是否只包含數字，應使用哪種方法？",
+                options: ["`s.isnumeric()`", "`s.isdigit()`", "`s.isdecimal()`", "以上皆是"],
+                correctAnswer: 3,
+                explanation: "`isdigit()`、`isnumeric()` 和 `isdecimal()` 都可以用來判斷字串是否只包含數字字元，它們之間有細微的差別，但對於基本數字字串，它們通常返回相同結果。",
+                hint: "有多個方法可以判斷字串是否為數字，但其中一個選項涵蓋了最廣泛的數字形式。"
+            },
+            {
+                question: "判斷字串 `s = \"HelloWorld\"` 是否只包含字母，應使用哪種方法？",
+                options: ["`s.isletter()`", "`s.isalpha()`", "`s.ischar()`", "`s.isalphabetic()`"],
+                correctAnswer: 1,
+                explanation: "字串的 `isalpha()` 方法會返回 `True`，如果字串中的所有字元都是字母（至少有一個字元），並且沒有其他字元（如數字、符號或空格），否則返回 `False`。",
+                hint: "哪個方法可以判斷字串是否只包含字母？"
+            },
+            {
+                question: "判斷字串 `s = \"Python3\"` 是否只包含字母或數字，應使用哪種方法？",
+                options: ["`s.isalphanum()`", "`s.isalnum()`", "`s.isalphanumeric()`", "`s.ischarordigit()`"],
+                correctAnswer: 1,
+                explanation: "字串的 `isalnum()` 方法會返回 `True`，如果字串中的所有字元都是字母或數字（至少有一個字元），並且沒有其他字元（如符號或空格），否則返回 `False`。",
+                hint: "哪個方法可以判斷字串是否只包含字母或數字？"
+            },
+            {
+                question: "判斷字串 `s = \"   \\n\\t   \"` 是否只包含空白字元（空格、tab、換行等），應使用哪種方法？",
+                options: ["`s.isblank()`", "`s.isspace()`", "`s.isempty()`", "`s.iswhitespace()`"],
+                correctAnswer: 1,
+                explanation: "字串的 `isspace()` 方法會返回 `True`，如果字串中只包含空白字元（空格、tab、換行符等，至少有一個字元），否則返回 `False`。",
+                hint: "哪個方法可以判斷字串是否只包含空白字元？"
+            },
+            {
+                question: "使用 f-string 將變數 `item = \"Laptop\"` 和 `price = 1200` 嵌入字串 `\"The Laptop costs $1200.\" ` 的正確語法是？",
+                options: [
+                    "`\"The {} costs ${}.\".format(item, price)`",
+                    "`f\"The {item} costs ${price}.\"`",
+                    "`\"The %s costs $%d.\" % (item, price)`",
+                    "以上皆是"
+                ],
+                correctAnswer: 1,
+                explanation: "f-string（格式化字串文字）是 Python 3.6 引入的一種字串格式化方式，它允許您在字串前加上 `f` 或 `F`，然後在字串中使用花括號 `{}` 來嵌入變數或表達式，語法簡潔且易讀。",
+                hint: "思考 Python 3.6 之後引入的，以 `f` 開頭的字串格式化方式。"
+            },
+            {
+                question: "字串是不可變的資料型態。這意味著什麼？",
+                options: [
+                    "字串的內容不能被修改。",
+                    "字串的長度不能被改變。",
+                    "一旦建立，字串變數不能被重新賦值。",
+                    "字串不能進行切片操作。"
+                ],
+                correctAnswer: 0,
+                explanation: "字串的不可變性意味著一旦建立，您不能改變其內容（例如，您不能直接修改字串中的某個字元）。任何看起來像是修改字串的操作（如 `replace()`）實際上都會返回一個新的字串物件。",
+                hint: "字串的「不可變性」是指一旦創建，它的核心內容是否可以被改變。"
+            }
+        ];
+
+        // Game State Variables
+        let currentQuestionIndex = 0;
+        let lives = 3;
+        let score = 0;
+
+        // DOM Elements
+        const gameScreen = document.getElementById('game-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const gameCompleteScreen = document.getElementById('game-complete-screen');
+
+        const livesDisplay = document.getElementById('lives-display');
+        const questionArea = document.getElementById('question-area');
+        const checkAnswerBtn = document.getElementById('check-answer-btn');
+        const getHintBtn = document.getElementById('get-hint-btn'); // Hint button
+        const hintArea = document.getElementById('hint-area'); // Hint display area
+        const hintContent = document.getElementById('hint-content'); // Hint text content
+        const hintLoading = document.getElementById('hint-loading'); // Hint loading spinner (now always hidden)
+        const feedbackExplanationArea = document.getElementById('feedback-explanation-area');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const messageBox = document.getElementById('message-box'); // Custom message box
+
+        const gameOverScore = document.getElementById('game-over-score');
+        const restartGameBtn = document.getElementById('restart-game-btn');
+        const gameCompleteScore = document.getElementById('game-complete-score');
+        const playAgainBtn = document.getElementById('play-again-btn');
+
+        // Function to show a temporary message
+        function showMessage(message, type = 'info') {
+            messageBox.textContent = message;
+            messageBox.className = `message-box show ${type}`; // Add type class
+            clearTimeout(messageBox.timeoutId);
+            messageBox.timeoutId = setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 3000); // Message disappears after 3 seconds
+        }
+
+        // Function to update lives display
+        function updateLivesDisplay() {
+            let heartsHtml = '生命值: ';
+            for (let i = 0; i < 3; i++) {
+                if (i < lives) {
+                    // Full heart SVG
+                    heartsHtml += `<svg class="heart-icon" viewBox="0 0 24 24" fill="currentColor" style="color: #ef4444;">
+                        <path d="M12 21.35l-1.84-1.66C4.07 14.32 2 12.43 2 10.25 2 7.74 3.86 5.6 6.31 5.6c1.74 0 3.41.81 4.5 2.15C11.69 6.41 13.36 5.6 15.19 5.6c2.45 0 4.31 2.14 4.31 4.6 0 2.18-2.07 4.07-8.16 7.44L12 21.35z"/>
+                    </svg>`;
+                } else {
+                    // Empty heart SVG (outline)
+                    heartsHtml += `<svg class="heart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8;">
+                        <path d="M12 21.35l-1.84-1.66C4.07 14.32 2 12.43 2 10.25 2 7.74 3.86 5.6 6.31 5.6c1.74 0 3.41.81 4.5 2.15C11.69 6.41 13.36 5.6 15.19 5.6c2.45 0 4.31 2.14 4.31 4.6 0 2.18-2.07 4.07-8.16 7.44L12 21.35z"/>
+                    </svg>`;
+                }
+            }
+            livesDisplay.innerHTML = heartsHtml;
+        }
+
+        // Function to render the current question
+        function renderQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                gameComplete();
+                return;
+            }
+
+            const q = questions[currentQuestionIndex];
+            questionArea.innerHTML = `
+                <p class="text-xl font-semibold text-gray-900 mb-4">第 ${currentQuestionIndex + 1} 題: ${q.question}</p>
+                <div class="space-y-3">
+                    ${q.options.map((option, optIndex) => `
+                        <label class="flex items-center cursor-pointer p-2 rounded-md hover:bg-blue-50 transition duration-150 ease-in-out">
+                            <input type="radio" name="currentQuestion" value="${optIndex}" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500 transition duration-150 ease-in-out">
+                            <span class="ml-3 text-gray-700 text-base">${option}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+
+            // Reset feedback area, hint area and buttons
+            feedbackExplanationArea.classList.add('hidden');
+            feedbackExplanationArea.innerHTML = '';
+            hintArea.classList.add('hidden'); // Hide hint area on new question
+            hintContent.textContent = ''; // Clear hint content
+            hintLoading.classList.add('hidden'); // Ensure loading spinner is hidden
+            nextQuestionBtn.classList.add('hidden');
+            checkAnswerBtn.classList.remove('hidden');
+            checkAnswerBtn.disabled = false; // Enable check button
+            getHintBtn.disabled = false; // Enable hint button
+            updateLivesDisplay(); // Update lives display for the new question
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+        }
+
+        // Function to check the answer
+        function checkAnswer() {
+            const selectedOption = document.querySelector('input[name="currentQuestion"]:checked');
+            if (!selectedOption) {
+                showMessage('請選擇一個答案！', 'error'); // Use custom message box
+                return;
+            }
+
+            checkAnswerBtn.disabled = true; // Disable check button after selection
+            getHintBtn.disabled = true; // Disable hint button after checking answer
+            const userAnswer = parseInt(selectedOption.value);
+            const q = questions[currentQuestionIndex];
+
+            feedbackExplanationArea.classList.remove('hidden');
+            feedbackExplanationArea.innerHTML = ''; // Clear previous content
+            hintArea.classList.add('hidden'); // Hide hint area when answer is checked
+
+            if (userAnswer === q.correctAnswer) {
+                score++;
+                feedbackExplanationArea.classList.remove('bg-red-50', 'bg-yellow-50');
+                feedbackExplanationArea.classList.add('bg-green-50', 'border', 'border-green-200');
+                feedbackExplanationArea.innerHTML = `
+                    <p class="font-bold text-green-700 text-lg mb-2">正確！</p>
+                    <p class="text-gray-700 mb-2">您的答案: ${q.options[userAnswer]}</p>
+                    <p class="font-semibold text-gray-800 mb-2">解釋:</p>
+                    <p class="text-gray-600">${q.explanation}</p>
+                `;
+            } else {
+                lives--;
+                feedbackExplanationArea.classList.remove('bg-green-50', 'bg-yellow-50');
+                feedbackExplanationArea.classList.add('bg-red-50', 'border', 'border-red-200');
+                feedbackExplanationArea.innerHTML = `
+                    <p class="font-bold text-red-700 text-lg mb-2">錯誤！</p>
+                    <p class="text-gray-700 mb-2">您的答案: ${q.options[userAnswer]}</p>
+                    <p class="text-gray-700 mb-2">正確答案: ${q.options[q.correctAnswer]}</p>
+                    <p class="font-semibold text-gray-800 mb-2">解釋:</p>
+                    <p class="text-gray-600">${q.explanation}</p>
+                `;
+                updateLivesDisplay(); // Update lives display immediately
+            }
+
+            nextQuestionBtn.classList.remove('hidden'); // Show next question button
+            // If lives run out, show game over screen
+            if (lives <= 0) {
+                gameOver();
+            } else if (currentQuestionIndex === questions.length - 1 && userAnswer === q.correctAnswer) {
+                // If it's the last question and answered correctly, show game complete
+                gameComplete();
+            }
+        }
+
+        // Function to move to the next question
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                renderQuestion();
+            } else {
+                gameComplete();
+            }
+        }
+
+        // Function to handle game over
+        function gameOver() {
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.remove('hidden');
+            gameCompleteScreen.classList.add('hidden');
+            gameOverScore.textContent = `您答對了 ${score} 題。`;
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+        }
+
+        // Function to handle game complete
+        function gameComplete() {
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameCompleteScreen.classList.remove('hidden');
+            gameCompleteScore.textContent = `您答對了 ${score} / ${questions.length} 題。`;
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+        }
+
+        // Function to start/restart the game
+        function startGame() {
+            currentQuestionIndex = 0;
+            lives = 3;
+            score = 0;
+            gameScreen.classList.remove('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameCompleteScreen.classList.add('hidden');
+            renderQuestion();
+        }
+
+        // Function to get a hint (now directly from questions array)
+        function getHint() {
+            const currentQuestion = questions[currentQuestionIndex];
+            if (currentQuestion.hint) {
+                hintArea.classList.remove('hidden'); // Show hint area
+                hintContent.textContent = currentQuestion.hint; // Display the embedded hint
+                hintLoading.classList.add('hidden'); // Ensure loading spinner is hidden
+            } else {
+                hintArea.classList.remove('hidden');
+                hintContent.textContent = "抱歉，此題沒有提示。";
+                hintLoading.classList.add('hidden');
+            }
+            getHintBtn.disabled = true; // Disable hint button after showing hint
+        }
+
+
+        // Event Listeners
+        checkAnswerBtn.addEventListener('click', checkAnswer);
+        nextQuestionBtn.addEventListener('click', nextQuestion);
+        restartGameBtn.addEventListener('click', startGame);
+        playAgainBtn.addEventListener('click', startGame);
+        getHintBtn.addEventListener('click', getHint); // Event listener for hint button
+
+        // Initial game start when the page loads
+        document.addEventListener('DOMContentLoaded', startGame);
+    </script>
+</body>
+</html>
+

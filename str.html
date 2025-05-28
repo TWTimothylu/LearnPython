@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python 字串教學 - 完整網站</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <style>
+        /* Custom font for better readability */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            scroll-behavior: smooth; /* Smooth scrolling for anchor links */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        /* Style for code blocks - Prism.js will handle background and text colors */
+        pre {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto; /* Enable horizontal scrolling for long lines */
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; /* Monospace font for code */
+            font-size: 0.9rem;
+            line-height: 1.4;
+            /* Adjusted margin-bottom to create more space */
+            margin-top: 0.75rem;
+            margin-bottom: 2.5rem; /* Increased for better spacing */
+        }
+        code {
+            font-family: inherit; /* Inherit font from pre */
+            background-color: #e2e8f0; /* Light background for inline code */
+            color: #333; /* Darker text for inline code */
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+        }
+        /* Ensure Prism.js's background is applied correctly to pre */
+        pre[class*="language-"] {
+            background-color: #2d2d2d; /* Re-apply dark background for the pre block, as Prism's theme might only target code */
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center p-4">
+    <div class="w-full max-w-5xl bg-white p-6 sm:p-8 md:p-10 rounded-xl shadow-2xl border border-gray-200">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800 leading-tight mb-4">
+                Python 字串 (String) 教學
+            </h1>
+            <p class="text-xl text-gray-600">從基礎到進階，全面掌握 Python 字串操作</p>
+        </header>
+
+        <nav class="mb-10 p-4 bg-blue-100 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold text-blue-800 mb-4 text-center">目錄</h2>
+            <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <li><a href="#section1" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">1. 什麼是字串？</a></li>
+                <li><a href="#section2" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">2. 字串索引</a></li>
+                <li><a href="#section3" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">3. 字串切片</a></li>
+                <li><a href="#section4" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">4. 字串運算子</a></li>
+                <li><a href="#section5" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">5. 常見字串方法</a></li>
+                <li><a href="#section6" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">6. 字串的不可變性</a></li>
+                <li><a href="#section7" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">7. f-string</a></li>
+            </ul>
+        </nav>
+
+        <section id="section1" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">1. 什麼是字串？</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                字串是**不可變 (immutable)** 的序列，由一個或多個字元組成。在 Python 中，字元就是長度為一的字串。
+            </p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">如何建立字串？</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                您可以使用單引號、雙引號或三引號來建立字串。
+            </p>
+            <pre><code class="language-python"># 單引號
+str1 = 'Hello, Python!'
+print(str1) # 輸出: Hello, Python!
+
+# 雙引號
+str2 = "Python Programming"
+print(str2) # 輸出: Python Programming
+
+# 三引號 (用於多行字串或包含引號的字串)
+str3 = '''這是一個
+多行字串。'''
+print(str3)
+# 輸出:
+# 這是一個
+# 多行字串。
+
+str4 = "他說: '你好!'"
+print(str4) # 輸出: 他說: '你好!'</code></pre>
+        </section>
+
+        <section id="section2" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">2. 字串索引 (Indexing)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                您可以透過索引值來存取字串中的單個字元。Python 的索引是**從 0 開始**的。
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li>**正向索引：** 從左到右，第一個字元的索引是 0。</li>
+                <li>**負向索引：** 從右到左，最後一個字元的索引是 -1。</li>
+            </ul>
+            <pre><code class="language-python">my_string = "Python"
+
+# 正向索引
+print(my_string[0])  # 輸出: P
+print(my_string[1])  # 輸出: y
+print(my_string[5])  # 輸出: n
+
+# 負向索引
+print(my_string[-1]) # 輸出: n (最後一個字元)
+print(my_string[-2]) # 輸出: o (倒數第二個字元)</code></pre>
+        </section>
+
+        <section id="section3" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">3. 字串切片 (Slicing)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                切片允許您從字串中提取一個子字串。語法是 <code>[start:end:step]</code>。
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><code>start</code>：切片的起始索引（包含）。如果省略，預設為 0。</li>
+                <li><code>end</code>：切片的結束索引（不包含）。如果省略，預設為字串的結尾。</li>
+                <li><code>step</code>：步長（每次跳過多少字元）。如果省略，預設為 1。</li>
+            </ul>
+            <pre><code class="language-python">text = "Hello Python World"
+
+# 基本切片
+print(text[0:5])   # 輸出: Hello (從索引 0 到 4)
+print(text[6:12])  # 輸出: Python (從索引 6 到 11)
+
+# 省略起始索引 (從開頭開始)
+print(text[:5])    # 輸出: Hello
+
+# 省略結束索引 (到結尾結束)
+print(text[13:])   # 輸出: World
+
+# 複製整個字串
+print(text[:])     # 輸出: Hello Python World (會建立一個新的字串物件)
+
+# 使用步長 (每隔一個字元)
+print(text[0:10:2]) # 輸出: HloPto (H,l,o,P,t,o)
+
+# 反轉字串
+print(text[::-1])  # 輸出: dlroW nohtyP olleH</code></pre>
+        </section>
+
+        <section id="section4" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">4. 字串運算子 (String Operators)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                字串支援一些常見的運算子：
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li>**連接 (<code>+</code>)：** 將兩個或多個字串連接起來。</li>
+                <li>**重複 (<code>*</code>)：** 將字串重複指定次數。</li>
+                <li>**成員判斷 (<code>in</code>)：** 檢查子字串是否存在於字串中。</li>
+            </ul>
+            <pre><code class="language-python"># 連接
+greeting = "Hello"
+name = "Alice"
+message = greeting + ", " + name + "!"
+print(message) # 輸出: Hello, Alice!
+
+# 重複
+stars = "*" * 10
+print(stars)   # 輸出: **********
+
+# 成員判斷
+sentence = "Python is powerful"
+print("Python" in sentence) # 輸出: True
+print("java" in sentence)   # 輸出: False
+</code></pre>
+        </section>
+
+        <section id="section5" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">5. 常見字串方法 (Common String Methods)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                字串物件提供了許多內建方法，用於執行各種操作。這些方法通常會返回一個**新的字串**，因為字串是不可變的。
+            </p>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">5.1 大小寫轉換</h3>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><code>.upper()</code>：將所有字元轉換為大寫。</li>
+                <li><code>.lower()</code>：將所有字元轉換為小寫。</li>
+                <li><code>.capitalize()</code>：將字串的第一個字元轉換為大寫，其餘為小寫。</li>
+                <li><code>.title()</code>：將字串中每個單字的第一個字元轉換為大寫。</li>
+                <li><code>.swapcase()</code>：將大小寫互換（大寫變小寫，小寫變大寫）。</li>
+            </ul>
+            <pre><code class="language-python">s = "Hello Python World"
+
+print(s.upper())      # 輸出: HELLO PYTHON WORLD
+print(s.lower())      # 輸出: hello python world
+print(s.capitalize()) # 輸出: Hello python world
+print(s.title())      # 輸出: Hello Python World
+print(s.swapcase())   # 輸出: hELLO pYTHON wORLD
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">5.2 移除空白字元</h3>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><code>.strip()</code>：移除字串開頭和結尾的所有空白字元（空格、換行、tab 等）。</li>
+                <li><code>.lstrip()</code>：移除字串開頭的空白字元。</li>
+                <li><code>.rstrip()</code>：移除字串結尾的空白字元。</li>
+                <li>您也可以傳遞參數來指定要移除的字元。</li>
+            </ul>
+            <pre><code class="language-python">data = "   Hello Python   \n"
+
+print(data.strip())    # 輸出: Hello Python
+print(data.lstrip())   # 輸出:    Hello Python   \n
+print(data.rstrip())   # 輸出:    Hello Python
+
+path = "/usr/local/bin/"
+print(path.strip('/')) # 輸出: usr/local/bin (移除兩端的 '/')
+print(path.lstrip('/'))# 輸出: usr/local/bin/ (移除左端的 '/')</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">5.3 替換子字串</h3>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><code>.replace(old, new, count)</code>：將字串中所有 <code>old</code> 子字串替換為 <code>new</code> 子字串。<code>count</code> 是可選參數，指定替換的次數。</li>
+            </ul>
+            <pre><code class="language-python">sentence = "I like apples, apples are great."
+new_sentence = sentence.replace("apples", "bananas")
+print(new_sentence) # 輸出: I like bananas, bananas are great.
+
+# 替換一次
+another_sentence = sentence.replace("apples", "oranges", 1)
+print(another_sentence) # 輸出: I like oranges, apples are great.</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">5.4 分割與連接</h3>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><code>.split(separator)</code>：根據指定的分隔符將字串分割成一個列表。如果省略 <code>separator</code>，則根據任何空白字元分割。</li>
+                <li><code>.join(iterable)</code>：使用字串本身作為分隔符，將可迭代物件（通常是字串列表）中的元素連接成一個新的字串。</li>
+            </ul>
+            <pre><code class="language-python"># 分割
+csv_data = "apple,banana,cherry"
+fruits = csv_data.split(',')
+print(fruits) # 輸出: ['apple', 'banana', 'cherry']
+
+words_str = "one two three"
+words_list = words_str.split() # 依空白分割
+print(words_list) # 輸出: ['one', 'two', 'three']
+
+# 連接
+my_words = ["Hello", "World", "Python"]
+joined_space = " ".join(my_words)
+print(joined_space) # 輸出: Hello World Python
+
+joined_dash = "-".join(my_words)
+print(joined_dash)  # 輸出: Hello-World-Python</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">5.5 搜尋與計數</h3>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><code>.find(substring, start, end)</code>：返回子字串第一次出現的起始索引。如果找不到，返回 -1。</li>
+                <li><code>.index(substring, start, end)</code>：與 <code>find()</code> 類似，但如果找不到子字串，會引發 <code>ValueError</code>。</li>
+                <li><code>.count(substring)</code>：返回子字串在字串中出現的次數。</li>
+            </ul>
+            <pre><code class="language-python">long_text = "Python is fun, Python is easy."
+
+print(long_text.find("Python")) # 輸出: 0
+print(long_text.find("is", 7))   # 輸出: 19 (從索引 7 開始找 'is')
+print(long_text.find("Java"))   # 輸出: -1
+
+# print(long_text.index("Java")) # 這會引發 ValueError
+
+print(long_text.count("Python")) # 輸出: 2
+print(long_text.count("is"))     # 輸出: 2
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">5.6 檢查字串屬性</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                這些方法通常返回布林值 (<code>True</code> 或 <code>False</code>)。
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><code>.startswith(prefix)</code>：檢查字串是否以指定字首開頭。</li>
+                <li><code>.endswith(suffix)</code>：檢查字串是否以指定字尾結尾。</li>
+                <li><code>.isalpha()</code>：檢查是否所有字元都是字母。</li>
+                <li><code>.isdigit()</code>：檢查是否所有字元都是數字。</li>
+                <li><code>.isalnum()</code>：檢查是否所有字元都是字母或數字。</li>
+                <li><code>.isspace()</code>：檢查是否所有字元都是空白字元。</li>
+                <li><code>.islower()</code>：檢查是否所有字母都是小寫。</li>
+                <li><code>.isupper()</code>：檢查是否所有字母都是大寫。</li>
+            </ul>
+            <pre><code class="language-python">file_name = "report.pdf"
+print(file_name.startswith("report")) # 輸出: True
+print(file_name.endswith(".txt"))    # 輸出: False
+
+s1 = "HelloWorld"
+s2 = "Python3"
+s3 = "12345"
+s4 = "   \n\t"
+
+print(s1.isalpha())  # 輸出: True
+print(s2.isalpha())  # 輸出: False (因為有數字 3)
+print(s3.isdigit())  # 輸出: True
+print(s2.isalnum())  # 輸出: True
+print(s4.isspace())  # 輸出: True
+</code></pre>
+        </section>
+
+        <section id="section6" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">6. 字串的不可變性 (Immutability)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                這是 Python 字串的一個核心特性：**字串是不可變的**。這意味著一旦字串被建立，您就不能改變它的內容。任何看起來像是修改字串的操作（例如 <code>replace()</code>、<code>upper()</code> 等）實際上都會返回一個**新的字串物件**，而原始字串保持不變。
+            </p>
+            <pre><code class="language-python">original_string = "apple"
+modified_string = original_string.replace('p', 'x')
+
+print(original_string) # 輸出: apple (原始字串未變)
+print(modified_string) # 輸出: axxle (這是新的字串)
+
+# 嘗試直接修改字串中的字元會引發錯誤
+# original_string[0] = 'A' # 這會引發 TypeError: 'str' object does not support item assignment
+</code></pre>
+        </section>
+
+        <section id="section7" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">7. f-string (格式化字串文字)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                f-string 是 Python 3.6 引入的一種強大且簡潔的字串格式化方式。它允許您在字串前加上 <code>f</code> 或 <code>F</code>，然後在字串中使用花括號 <code>{}</code> 來嵌入變數或表達式。
+            </p>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">7.1 基本使用：嵌入變數與表達式</h3>
+            <pre><code class="language-python">name = "Bob"
+age = 25
+city = "Taipei"
+
+# 嵌入變數
+message = f"我的名字是 {name}，我今年 {age} 歲。我住在 {city}。"
+print(message) # 輸出: 我的名字是 Bob，我今年 25 歲。我住在 Taipei。
+
+# 嵌入表達式
+price = 10.5
+quantity = 3
+total_cost = f"總價是 ${price * quantity}。"
+print(total_cost) # 輸出: 總價是 $31.5。
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">7.2 填充與對齊</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                您可以使用格式說明符來控制字串的寬度並進行左、中、右對齊。語法為 <code>{variable:填充字元對齊方式寬度}</code>。
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><code>&lt;</code>：左對齊</li>
+                <li><code>&gt;</code>：右對齊</li>
+                <li><code>^</code>：居中對齊</li>
+            </ul>
+            <pre><code class="language-python">item = "Laptop"
+value = 123
+
+# 右對齊，寬度為 10，用空格填充
+print(f"商品: {item:>10}") # 輸出: 商品:     Laptop
+
+# 左對齊，寬度為 10，用 '-' 填充
+print(f"商品: {item:<10}-") # 輸出: 商品: Laptop----
+
+# 居中對齊，寬度為 10，用 '*' 填充
+print(f"商品: {item:*^10}") # 輸出: 商品: **Laptop**
+
+# 數字右對齊，寬度為 5
+print(f"值: {value:5}")    # 輸出: 值:   123
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">7.3 數字格式化</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                f-string 提供了多種方式來格式化數字，包括浮點數的精確度、千位分隔符、百分比等。
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><code>.nf</code>：浮點數保留 n 位小數。</li>
+                <li><code>,</code>：千位分隔符。</li>
+                <li><code>%</code>：百分比格式。</li>
+            </ul>
+            <pre><code class="language-python">pi = 3.1415926535
+large_number = 123456789
+percentage = 0.75
+
+# 浮點數保留兩位小數
+print(f"圓周率: {pi:.2f}")        # 輸出: 圓周率: 3.14
+
+# 浮點數保留四位小數，總寬度為 10，右對齊
+print(f"圓周率: {pi:10.4f}")       # 輸出: 圓周率:     3.1416
+
+# 千位分隔符
+print(f"大數字: {large_number:,}") # 輸出: 大數字: 123,456,789
+
+# 百分比
+print(f"完成度: {percentage:.2%}") # 輸出: 完成度: 75.00%
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">7.4 日期和時間格式化</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                您可以結合 <code>datetime</code> 模組來格式化日期和時間。
+            </p>
+            <pre><code class="language-python">from datetime import datetime
+
+now = datetime.now()
+
+# 基本日期時間格式
+print(f"現在時間: {now:%Y-%m-%d %H:%M:%S}") # 輸出: 現在時間: 2025-05-27 12:30:45 (範例)
+
+# 只顯示日期
+print(f"今天的日期: {now:%Y/%m/%d}")    # 輸出: 今天的日期: 2025/05/27 (範例)
+
+# 只顯示時間 (12 小時制帶 AM/PM)
+print(f"現在時間 (AM/PM): {now:%I:%M %p}") # 輸出: 現在時間 (AM/PM): 12:30 PM (範例)
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">7.5 除錯用途 (Python 3.8+)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                從 Python 3.8 開始，您可以在 f-string 中使用 <code>=</code> 符號來方便地顯示變數名稱和其值，這對於除錯非常有用。
+            </p>
+            <pre><code class="language-python">x = 10
+y = 20
+
+# 顯示變數名稱和值
+print(f"{x=}")      # 輸出: x=10
+print(f"{y=}")      # 輸出: y=20
+
+# 結合其他文字
+print(f"變數 x 的值是 {x=}，變數 y 的值是 {y=}") # 輸出: 變數 x 的值是 x=10，變數 y 的值是 y=20
+
+# 也可以結合格式化
+total = 123.456
+print(f"{total=:.2f}") # 輸出: total=123.46
+</code></pre>
+        </section>
+
+        <footer class="text-center text-gray-500 text-sm mt-10 p-4 border-t border-gray-200">
+            &copy; 2025 Python 字串教學. 版權所有。
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>

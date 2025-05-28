@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python 字典 (Dictionary) 遊戲化測驗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <style>
+        /* Custom font for better readability */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .heart-icon {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+            vertical-align: middle;
+            margin: 0 2px;
+        }
+        /* Message box styling */
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0; /* Initially hidden */
+        }
+        .message-box.show {
+            opacity: 1;
+        }
+        .message-box.info {
+            background-color: #e0f2fe; /* Light blue */
+            color: #0284c7; /* Darker blue */
+            border: 1px solid #94a3b8;
+        }
+        .message-box.error {
+            background-color: #fee2e2; /* Light red */
+            color: #dc2626; /* Darker red */
+            border: 1px solid #ef4444;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Style for code blocks - Prism.js will handle background and text colors */
+        pre {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto; /* Enable horizontal scrolling for long lines */
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; /* Monospace font for code */
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-top: 0.75rem;
+            margin-bottom: 2.5rem; /* Adjusted for better spacing */
+        }
+        code {
+            font-family: inherit; /* Inherit font from pre */
+            background-color: #e2e8f0; /* Light background for inline code */
+            color: #333; /* Darker text for inline code */
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+        }
+        /* Ensure Prism.js's background is applied correctly to pre */
+        pre[class*="language-"] {
+            background-color: #2d2d2d; /* Re-apply dark background for the pre block, as Prism's theme might only target code */
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div id="game-container" class="bg-white p-6 sm:p-8 md:p-10 rounded-xl shadow-2xl w-full max-w-3xl border border-gray-200">
+        <div id="game-screen">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-center text-gray-800 mb-6 leading-tight">
+                Python 字典 (Dictionary) 遊戲化測驗
+            </h1>
+
+            <div id="lives-display" class="text-center mb-6 text-red-500 text-2xl font-bold">
+                生命值:
+            </div>
+
+            <div id="question-area" class="space-y-6">
+                </div>
+
+            <div id="hint-area" class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200 text-blue-800 hidden">
+                <p class="font-semibold mb-2">提示:</p>
+                <p id="hint-content"></p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:space-x-4 mt-8">
+                <button id="check-answer-btn" class="w-full sm:w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg mb-4 sm:mb-0">
+                    檢查答案
+                </button>
+                <button id="get-hint-btn" class="w-full sm:w-1/2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                    獲取提示 ✨
+                </button>
+            </div>
+
+
+            <div id="feedback-explanation-area" class="mt-6 p-4 rounded-lg hidden">
+                </div>
+
+            <button id="next-question-btn" class="mt-4 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 shadow-lg hidden">
+                    下一題
+            </button>
+        </div>
+
+        <div id="game-over-screen" class="hidden text-center p-8 bg-red-50 rounded-lg border border-red-200">
+            <h2 class="text-3xl font-bold text-red-700 mb-4">遊戲結束！</h2>
+            <p id="game-over-score" class="text-xl text-gray-800 mb-6"></p>
+            <button id="restart-game-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                重新開始
+            </button>
+        </div>
+
+        <div id="game-complete-screen" class="hidden text-center p-8 bg-green-50 rounded-lg border border-green-200">
+            <h2 class="text-3xl font-bold text-green-700 mb-4">恭喜您！完成所有題目！</h2>
+            <p id="game-complete-score" class="text-xl text-gray-800 mb-6"></p>
+            <button id="play-again-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                再玩一次
+            </button>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box hidden"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <script>
+        // All 30 questions for the dictionary quiz
+        const allQuestions = [
+            // Level 1: Basic Creation and Access
+            {
+                question: "在Python中，要建立一個空字典 (empty Dictionary)，以下哪種方式是正確的？",
+                options: ["`empty_dict = []`", "`empty_dict = {}`", "`empty_dict = ()`", "`empty_dict = set()`"],
+                correctAnswer: 1,
+                explanation: "在Python中，使用大括號 `{}` 可以建立一個空字典 (empty Dictionary)。空列表 (empty List) 使用 `[]`，空元組 (empty Tuple) 使用 `()`，空集合 (empty Set) 使用 `set()`。",
+                hint: "字典 (Dictionary) 的標誌性符號是什麼？"
+            },
+            {
+                question: "對於字典 (Dictionary) `person = {\"name\": \"Alice\", \"age\": 30}`，如何存取其 `\"name\"` 的值？",
+                options: ["`person.name`", "`person['name']`", "`person.get_name()`", "`person(name)`"],
+                correctAnswer: 1,
+                explanation: "可以使用方括號 `[]` 加上鍵名來存取字典 (Dictionary) 中的值，例如 `person['name']`。",
+                hint: "字典 (Dictionary) 的元素存取方式與列表 (List) 類似，但使用鍵而不是索引。"
+            },
+            {
+                question: "如果字典 (Dictionary) `data = {\"a\": 1}` 中不存在鍵 `\"b\"`，使用 `data['b']` 會發生什麼？",
+                options: ["返回 `None`", "返回 `0`", "引發 `KeyError`", "自動新增鍵 `\"b\"`"],
+                correctAnswer: 2,
+                explanation: "當使用方括號 `[]` 存取字典 (Dictionary) 中不存在的鍵時，Python 會引發 `KeyError` 錯誤。",
+                hint: "直接存取不存在的鍵，Python 會如何回應？"
+            },
+            {
+                question: "對於字典 (Dictionary) `settings = {\"theme\": \"dark\"}`，使用 `settings.get(\"language\", \"English\")` 的結果是什麼？",
+                options: ["`None`", "`\"English\"`", "`KeyError`", "`\"dark\"`"],
+                correctAnswer: 1,
+                explanation: "`get()` 方法在鍵不存在時會返回其第二個參數作為預設值。由於 `\"language\"` 不存在，所以返回 `\"English\"`。",
+                hint: "`get()` 方法的第二個參數有什麼作用？"
+            },
+            {
+                question: "以下哪個選項是有效的字典鍵 (Dictionary Key)？",
+                options: ["`[1, 2]` (列表 - List)", "`{\"a\": 1}` (字典 - Dictionary)", "`\"city\"` (字串 - String)", "`{1, 2}` (集合 - Set)"],
+                correctAnswer: 2,
+                explanation: "字典 (Dictionary) 的鍵必須是不可變 (immutable) 的資料型態 (Data Type)。字串 (String) 是不可變的，而列表 (List)、字典 (Dictionary) 和集合 (Set) 都是可變 (mutable) 的，因此不能作為鍵。",
+                hint: "字典 (Dictionary) 的鍵必須是可雜湊（hashable）的，也就是不可變 (immutable) 的資料型態 (Data Type)。"
+            },
+            {
+                question: "對於字典 (Dictionary) `counts = {\"apple\": 5, \"banana\": 3}`，執行 `counts[\"apple\"] = 8` 後，`counts` 的內容是什麼？",
+                options: ["`{\"apple\": 5, \"banana\": 3, \"apple\": 8}`", "`{\"apple\": 8, \"banana\": 3}`", "`{\"banana\": 3, \"apple\": 8}`", "引發錯誤"],
+                correctAnswer: 1,
+                explanation: "如果鍵已存在，對其賦值會更新該鍵對應的值。字典 (Dictionary) 的鍵是唯一的。",
+                hint: "當您為一個已存在的鍵賦予新值時，舊值會發生什麼？"
+            },
+
+            // Level 2: Modification, Deletion, and Basic Methods
+            {
+                question: "要在字典 (Dictionary) `config = {\"debug\": False}` 中新增一個鍵-值對，以下哪種方式是正確的？",
+                options: ["`config.add(\"port\", 8080)`", "`config[\"port\"] = 8080`", "`config.insert(\"port\", 8080)`", "`config.new(\"port\": 8080)`"],
+                correctAnswer: 1,
+                explanation: "如果鍵不存在，使用方括號 `[]` 加上鍵名並賦值，會新增一個新的鍵-值對。",
+                hint: "新增鍵-值對的語法與修改現有鍵的值的語法相同。"
+            },
+            {
+                question: "對於字典 (Dictionary) `items = {\"book\": 1, \"pen\": 2}`，執行 `del items[\"book\"]` 後，`items` 的內容是什麼？",
+                options: ["`{}`", "`{\"pen\": 2}`", "`{\"book\": 1}`", "引發錯誤"],
+                correctAnswer: 1,
+                explanation: "`del` 關鍵字用於刪除字典 (Dictionary) 中指定的鍵-值對。",
+                hint: "`del` 關鍵字的作用是什麼？"
+            },
+            {
+                question: "對於字典 (Dictionary) `data = {\"x\": 10, \"y\": 20}`，執行 `value = data.pop(\"x\")` 後，`value` 和 `data` 的內容分別是什麼？",
+                options: ["`value=10`, `data={'y': 20}`", "`value=None`, `data={'y': 20}`", "`value='x'`, `data={'y': 20}`", "引發錯誤"],
+                correctAnswer: 0,
+                explanation: "`pop()` 方法會刪除指定鍵的元素，並返回該鍵對應的值。",
+                hint: "`pop()` 方法的返回值是什麼？它會對原字典 (Dictionary) 產生什麼影響？"
+            },
+            {
+                question: "對於字典 (Dictionary) `temp = {\"a\": 1, \"b\": 2}`，執行 `temp.clear()` 後，`temp` 的內容是什麼？",
+                options: ["`None`", "`{}`", "`{\"a\": 1, \"b\": 2}`", "引發錯誤"],
+                correctAnswer: 1,
+                explanation: "`clear()` 方法會清空字典 (Dictionary) 中的所有元素，使其變為一個空字典 (empty Dictionary)。",
+                hint: "哪個字典方法 (Dictionary Method) 用於移除字典 (Dictionary) 中的所有元素？"
+            },
+            {
+                question: "如何取得字典 (Dictionary) `scores = {\"Math\": 90, \"English\": 85}` 中的所有鍵？",
+                options: ["`scores.values()`", "`scores.items()`", "`scores.keys()`", "`scores.get_keys()`"],
+                correctAnswer: 2,
+                explanation: "`keys()` 方法返回一個包含字典 (Dictionary) 所有鍵的視圖物件。",
+                hint: "字典 (Dictionary) 有一個方法，其名稱與『鍵』相關。"
+            },
+            {
+                question: "如何取得字典 (Dictionary) `grades = {\"Alice\": \"A\", \"Bob\": \"B\"}` 中的所有值？",
+                options: ["`grades.keys()`", "`grades.values()`", "`grades.items()`", "`grades.get_values()`"],
+                correctAnswer: 1,
+                explanation: "`values()` 方法返回一個包含字典 (Dictionary) 所有值的視圖物件。",
+                hint: "字典 (Dictionary) 有一個方法，其名稱與『值』相關。"
+            },
+            {
+                question: "如何取得字典 (Dictionary) `product = {\"name\": \"Laptop\", \"price\": 1200}` 中的所有鍵-值對（作為元組 - Tuple）？",
+                options: ["`product.keys()`", "`product.values()`", "`product.items()`", "`product.get_all()`"],
+                correctAnswer: 2,
+                explanation: "`items()` 方法返回一個包含字典 (Dictionary) 所有鍵-值對（作為元組 - Tuple）的視圖物件。",
+                hint: "哪個方法可以同時獲取鍵和值？"
+            },
+            {
+                question: "對於字典 (Dictionary) `original = {\"x\": 10, \"y\": 20}`，執行 `copied = original.copy()` 後，修改 `copied['x'] = 100` 會影響 `original` 嗎？",
+                options: ["會，`original['x']` 也會變成 100", "不會，`original` 保持不變", "引發錯誤", "取決於 Python 版本"],
+                correctAnswer: 1,
+                explanation: "`copy()` 方法會創建字典 (Dictionary) 的一個淺拷貝。這意味著 `copied` 是一個獨立的字典物件，對其的修改不會影響原始字典 (Dictionary)（除非值本身是可變物件並被修改）。",
+                hint: "`copy()` 方法創建的是一個深拷貝還是淺拷貝？"
+            },
+            {
+                question: "對於字典 (Dictionary) `d1 = {\"a\": 1, \"b\": 2}`，執行 `d1.update({\"b\": 3, \"c\": 4})` 後，`d1` 的內容是什麼？",
+                options: ["`{\"a\": 1, \"b\": 2, \"c\": 4}`", "`{\"a\": 1, \"b\": 3, \"c\": 4}`", "`{\"b\": 3, \"c\": 4}`", "引發錯誤"],
+                correctAnswer: 1,
+                explanation: "`update()` 方法會用另一個字典 (Dictionary) 或鍵-值對的內容來更新當前字典 (Dictionary)。如果鍵已存在，則更新其值；如果鍵不存在，則新增。",
+                hint: "`update()` 方法如何處理已存在的鍵和新鍵？"
+            },
+
+            // Level 3: Iteration and Advanced Concepts
+            {
+                question: "以下哪種方式可以遍歷字典 (Dictionary) `data = {\"key1\": \"value1\", \"key2\": \"value2\"}` 的所有鍵？",
+                options: ["`for k in data:`", "`for k in data.keys():`", "選項 A 和 B 皆是", "`for k in data.values():`"],
+                correctAnswer: 2,
+                explanation: "當直接遍歷字典 (Dictionary) 時，預設會遍歷其鍵。`keys()` 方法也明確返回鍵的視圖物件，因此兩種方式都正確。",
+                hint: "直接遍歷字典 (Dictionary) 時，預設會遍歷什麼？"
+            },
+            {
+                question: "要同時遍歷字典 (Dictionary) `info = {\"name\": \"John\", \"age\": 25}` 的鍵和值，以下哪種方式是正確的？",
+                options: ["`for k, v in info:`", "`for k, v in info.items():`", "`for k, v in info.keys(), info.values():`", "`for k in info; for v in info:`"],
+                correctAnswer: 1,
+                explanation: "`items()` 方法返回鍵-值對的元組 (Tuple) 視圖，可以透過 `for key, value in dict.items():` 的方式進行解包遍歷。",
+                hint: "哪個字典方法 (Dictionary Method) 可以同時獲取鍵和值，並適合在 `for` 迴圈中解包？"
+            },
+            {
+                question: "從 Python 3.7 開始，字典 (Dictionary) 的鍵-值對順序是：",
+                options: ["隨機的", "與插入順序一致的", "按鍵的字母順序排列", "按值的字母順序排列"],
+                correctAnswer: 1,
+                explanation: "從 Python 3.7 (以及 CPython 3.6 的實現細節) 開始，字典 (Dictionary) 會保留元素的插入順序。在更早的版本中，字典 (Dictionary) 是無序的。",
+                hint: "思考 Python 3.7+ 版本中字典 (Dictionary) 的順序特性。"
+            },
+            {
+                question: "以下哪種資料型態 (Data Type) 不能作為字典 (Dictionary) 的鍵？",
+                options: ["字串 (String) (`\"name\"`)", "整數 (Integer) (`123`)", "元組 (Tuple) (`(1, 2)`)", "列表 (List) (`[1, 2]`)"],
+                correctAnswer: 3,
+                explanation: "字典 (Dictionary) 的鍵必須是不可變 (immutable) 的資料型態 (Data Type)，因為它們需要是可雜湊（hashable）的。列表 (List) 是可變 (mutable) 的，因此不能作為字典 (Dictionary) 的鍵。",
+                hint: "字典 (Dictionary) 的鍵必須是不可變 (immutable) 的（hashable）資料型態 (Data Type)。"
+            },
+            {
+                question: "對於字典 (Dictionary) `d = {}`，執行 `d.setdefault('count', 0)` 的結果是什麼？",
+                options: ["`0`，並且 `d` 變為 `{'count': 0}`", "`None`，並且 `d` 保持 `{}`", "`KeyError`", "`0`，並且 `d` 保持 `{}`"],
+                correctAnswer: 0,
+                explanation: "`setdefault()` 方法在鍵不存在時會插入該鍵並賦予指定值，然後返回該值。",
+                hint: "`setdefault()` 方法在鍵不存在時會做什麼？"
+            },
+            {
+                question: "如何使用 `dict.fromkeys()` 建立一個新字典 (new Dictionary)，鍵為 `['a', 'b']`，值都為 `10`？",
+                options: ["`dict({'a': 10, 'b': 10})`", "`dict.fromkeys(['a', 'b'], 10)`", "`{'a': 10, 'b': 10}.fromkeys()`", "`dict.new(['a', 'b'], 10)`"],
+                correctAnswer: 1,
+                explanation: "`dict.fromkeys(iterable, value)` 是一個類別方法，用於從一個可迭代物件（作為鍵）和一個單一值（作為所有鍵的值）建立字典 (Dictionary)。",
+                hint: "有一個字典方法 (Dictionary Method)，其名稱與『鍵』相關，可以用一個列表 (List) 作為鍵，並為所有鍵設定相同的值。"
+            },
+
+            // Level 4: Nested Dictionaries and Complex Operations
+            {
+                question: "對於巢狀字典 (Nested Dictionary) `data = {'user1': {'name': 'Alice', 'age': 25}}`，如何存取 `Alice` 的年齡？",
+                options: ["`data['user1'].age`", "`data['user1']['age']`", "`data.user1.age`", "`data.get('user1').get('age')`"],
+                correctAnswer: 1,
+                explanation: "存取巢狀字典 (Nested Dictionary) 的元素需要連續使用方括號 `[]` 來指定每一層的鍵。選項 D 也是正確的，但選項 B 更直接。",
+                hint: "要存取巢狀字典 (Nested Dictionary)，您需要逐層使用鍵來索引。"
+            },
+            {
+                question: "對於字典 (Dictionary) `d = {'a': 1, 'b': 2}`，執行 `d.popitem()` 後，`d` 的內容和返回的元組 (Tuple) 是什麼？",
+                options: ["`d={'a': 1}`, 返回 `('b', 2)`", "`d={'b': 2}`, 返回 `('a', 1)`", "`d={}`, 返回 `('a', 1)`", "引發錯誤"],
+                correctAnswer: 0,
+                explanation: "`popitem()` 方法在 Python 3.7+ 中會刪除並返回字典 (Dictionary) 中最後插入的鍵-值對。",
+                hint: "`popitem()` 方法會移除哪個鍵-值對？"
+            },
+            {
+                question: "如何檢查鍵 `\"email\"` 是否存在於字典 (Dictionary) `contact = {\"name\": \"Jane\", \"phone\": \"123\"}` 中？",
+                options: ["`contact.has_key(\"email\")`", "`\"email\" in contact`", "`contact.contains(\"email\")`", "`contact.find(\"email\")`"],
+                correctAnswer: 1,
+                explanation: "使用 `in` 運算符是檢查字典 (Dictionary) 中是否存在特定鍵的最常用且直觀的方式。",
+                hint: "Python 提供了一個非常直觀的關鍵字來檢查元素是否存在於集合中。"
+            },
+            {
+                question: "對於字典 (Dictionary) `d = {'a': 1, 'b': 2}`，執行 `d.update(c=3, d=4)` 後，`d` 的內容是什麼？",
+                options: ["`{'a': 1, 'b': 2, 'c': 3, 'd': 4}`", "`{'c': 3, 'd': 4}`", "引發錯誤", "`{'a': 1, 'b': 2}`"],
+                correctAnswer: 0,
+                explanation: "`update()` 方法除了接受字典 (Dictionary) 外，也可以接受關鍵字參數來更新或新增鍵-值對。",
+                hint: "`update()` 方法除了字典 (Dictionary)，還能接受什麼形式的參數？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？\n<pre><code class=\"language-python\">my_dict = {'x': 10, 'y': 20}\nfor key in my_dict:\n    print(my_dict[key])</code></pre>",
+                options: ["`x\ny`", "`10\n20`", "`x: 10\ny: 20`", "引發錯誤"],
+                correctAnswer: 1,
+                explanation: "直接遍歷字典 (Dictionary) 會得到鍵，然後使用這些鍵通過方括號 `[]` 存取對應的值。",
+                hint: "當您直接遍歷字典 (Dictionary) 時，迴圈變數會是什麼？然後如何使用它來獲取值？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？\n<pre><code class=\"language-python\">data = {'a': 1, 'b': 2}\nnew_data = data\nnew_data['a'] = 100\nprint(data['a'])</code></pre>",
+                options: ["`1`", "`100`", "引發錯誤", "`None`"],
+                correctAnswer: 1,
+                explanation: "字典 (Dictionary) 是可變 (mutable) 的。當您將一個字典 (Dictionary) 賦值給另一個變數時，兩個變數都指向同一個字典物件。因此，透過 `new_data` 修改字典 (Dictionary) 會影響 `data`。",
+                hint: "字典 (Dictionary) 是可變 (mutable) 的資料型態 (Data Type)。直接賦值是創建副本還是引用？"
+            },
+            {
+                question: "如何將兩個字典 (Dictionaries) `d1 = {'a': 1}` 和 `d2 = {'b': 2}` 合併成一個新字典 (new Dictionary) `d3 = {'a': 1, 'b': 2}` (Python 3.5+)?",
+                options: ["`d3 = d1 + d2`", "`d3 = d1.merge(d2)`", "`d3 = {**d1, **d2}`", "`d3 = d1.combine(d2)`"],
+                correctAnswer: 2,
+                explanation: "在 Python 3.5+ 中，可以使用字典解包運算符 `**` 來合併字典 (Dictionaries)。如果鍵重複，後面的字典 (Dictionary) 會覆蓋前面的值。",
+                hint: "思考字典解包運算符 `**` 的用途。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？\n<pre><code class=\"language-python\">my_dict = {'k1': 'v1', 'k2': 'v2'}\nfor k, v in my_dict.items():\n    if v == 'v1':\n        print(k)</code></pre>",
+                options: ["`k1`", "`v1`", "`v2`", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`items()` 方法返回鍵-值對，`k` 會是鍵，`v` 會是值。當 `v` 等於 `'v1'` 時，對應的 `k` 是 `'k1'`，所以會印出 `'k1'`。",
+                hint: "`items()` 方法在遍歷時，`k` 和 `v` 分別代表什麼？"
+            },
+            {
+                question: "對於字典 (Dictionary) `data = {'count': 0}`，執行 `data['count'] += 1` 後，`data` 的內容是什麼？",
+                options: ["`{'count': 0}`", "`{'count': 1}`", "引發錯誤", "`None`"],
+                correctAnswer: 1,
+                explanation: "字典 (Dictionary) 的值是可變的，您可以直接對其進行算術運算。`data['count'] += 1` 等同於 `data['count'] = data['count'] + 1`。",
+                hint: "字典 (Dictionary) 中的數值可以像普通變數一樣進行操作嗎？"
+            },
+            {
+                question: "要從字典 (Dictionary) `d = {'a': 1, 'b': 2, 'c': 3}` 中刪除鍵 `\"b\"`，並確保即使 `\"b\"` 不存在也不會引發錯誤，同時返回 `\"b\"` 的值（如果存在），以下哪種方式最合適？",
+                options: ["`del d['b']`", "`d.pop('b')`", "`d.pop('b', None)`", "`d.remove('b')`"],
+                correctAnswer: 2,
+                explanation: "`pop()` 方法允許您指定一個預設值，當鍵不存在時返回該預設值而不會引發 `KeyError`。",
+                hint: "`pop()` 方法如何處理不存在的鍵？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？\n<pre><code class=\"language-python\">my_dict = {'a': 1}\nmy_dict.setdefault('b', 2)\nmy_dict.setdefault('a', 3)\nprint(my_dict)</code></pre>",
+                options: ["`{'a': 1, 'b': 2}`", "`{'a': 3, 'b': 2}`", "`{'a': 1}`", "`{'b': 2}`"],
+                correctAnswer: 0,
+                explanation: "`setdefault()` 方法只有在鍵不存在時才會設定值。對於 `'a'`，它已經存在，所以 `setdefault('a', 3)` 不會改變其值。對於 `'b'`，它不存在，所以會被設定為 `2`。",
+                hint: "`setdefault()` 方法的行為是『如果鍵不存在，則設定並返回；如果存在，則返回現有值』。"
+            },
+            {
+                question: "對於巢狀字典 (Nested Dictionary) `data = {'users': [{'id': 1, 'name': 'A'}, {'id': 2, 'name': 'B'}]}`，如何存取第二個使用者 (user) 的名稱？",
+                options: ["`data['users'][1]['name']`", "`data.users[1].name`", "`data['users']['1']['name']`", "`data['users'][2]['name']`"],
+                correctAnswer: 0,
+                explanation: "`data['users']` 是一個列表 (List)，所以需要使用列表索引 `[1]` 來存取第二個元素，然後再用字典鍵 `['name']` 存取名稱。",
+                hint: "這是一個列表 (List) 中的字典 (Dictionary)，需要先索引列表 (List)，再索引字典 (Dictionary)。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？\n<pre><code class=\"language-python\">d = {'a': 1, 'b': 2}\nnew_d = d.copy()\nnew_d['a'] = 10\nprint(d['a'])</code></pre>",
+                options: ["`1`", "`10`", "引發錯誤", "`None`"],
+                correctAnswer: 0,
+                explanation: "`copy()` 方法創建的是一個淺拷貝，這意味著 `new_d` 是一個獨立的字典物件。對 `new_d` 的修改不會影響 `d`。",
+                hint: "`copy()` 方法創建的是一個獨立的字典副本。"
+            },
+            {
+                question: "要建立一個新字典 (new Dictionary)，其鍵為 `('apple', 'banana')`，值都為 `0`，以下哪種方式是正確的？",
+                options: ["`dict.fromkeys(('apple', 'banana'), 0)`", "`{'apple': 0, 'banana': 0}`", "選項 A 和 B 皆是", "`dict(('apple', 0), ('banana', 0))`"],
+                correctAnswer: 2,
+                explanation: "兩種方式都可以達到目的。`dict.fromkeys()` 是一種更簡潔的方式來為多個鍵設定相同的值。",
+                hint: "除了直接定義字典 (Dictionary)，還有一個方法可以用一個可迭代物件作為鍵的來源。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？\n<pre><code class=\"language-python\">my_dict = {'a': 1, 'b': 2}\nfor key, value in my_dict.items():\n    if value == 2:\n        print(key)</code></pre>",
+                options: ["`a`", "`b`", "`1`", "`2`"],
+                correctAnswer: 1,
+                explanation: "迴圈會遍歷鍵-值對。當 `value` 等於 `2` 時，對應的 `key` 是 `'b'`，所以會印出 `'b'`。",
+                hint: "注意 `key` 和 `value` 在遍歷時分別代表什麼。"
+            },
+            {
+                question: "對於字典 (Dictionary) `data = {'count': 0}`，執行 `data['count'] += 1` 後，`data` 的內容是什麼？",
+                options: ["`{'count': 0}`", "`{'count': 1}`", "引發錯誤", "`None`"],
+                correctAnswer: 1,
+                explanation: "字典 (Dictionary) 的值是可變的，您可以直接對其進行算術運算。`data['count'] += 1` 等同於 `data['count'] = data['count'] + 1`。",
+                hint: "字典 (Dictionary) 中的數值可以像普通變數一樣進行操作嗎？"
+            },
+            {
+                question: "對於字典 (Dictionary) `d = {'x': 10}`，執行 `d.update(y=20)` 後，`d` 的內容是什麼？",
+                options: ["`{'x': 10}`", "`{'x': 10, 'y': 20}`", "`{'y': 20}`", "引發錯誤"],
+                correctAnswer: 1,
+                explanation: "`update()` 方法可以接受關鍵字參數來新增或更新鍵-值對。",
+                hint: "`update()` 方法除了字典 (Dictionary)，還能接受什麼形式的參數？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？\n<pre><code class=\"language-python\">my_dict = {'a': 1, 'b': 2}\nmy_dict['c'] = 3\nprint(len(my_dict))</code></pre>",
+                options: ["`2`", "`3`", "`KeyError`", "`None`"],
+                correctAnswer: 1,
+                explanation: "`len()` 函數返回字典 (Dictionary) 中鍵-值對的數量。新增元素後，字典 (Dictionary) 的大小會增加。",
+                hint: "`len()` 函數對於字典 (Dictionary) 的作用是什麼？"
+            },
+            {
+                question: "要從字典 (Dictionary) `d = {'x': 1, 'y': 2, 'z': 3}` 中刪除所有元素，以下哪種方式是正確的？",
+                options: ["`d.remove_all()`", "`d.empty()`", "`d.clear()`", "`del d.all()`"],
+                correctAnswer: 2,
+                explanation: "`clear()` 方法用於清空字典 (Dictionary) 中的所有元素。",
+                hint: "哪個方法可以讓字典 (Dictionary) 變為空字典 (empty Dictionary)？"
+            },
+            {
+                question: "以下哪種資料型態 (Data Type) 的物件可以用作字典 (Dictionary) 的鍵？",
+                options: ["列表 (List)", "集合 (Set)", "元組 (Tuple)", "字典 (Dictionary)"],
+                correctAnswer: 2,
+                explanation: "元組 (Tuple) 是不可變 (immutable) 的資料型態 (Data Type)，因此可以作為字典 (Dictionary) 的鍵。列表 (List)、集合 (Set) 和字典 (Dictionary) 都是可變 (mutable) 的，不能作為鍵。",
+                hint: "字典 (Dictionary) 的鍵必須是不可變 (immutable) 的資料型態 (Data Type)。"
+            },
+            {
+                question: "對於字典 (Dictionary) `d = {'a': 1}`，執行 `d['a'] = d['a'] + 5` 後，`d` 的內容是什麼？",
+                options: ["`{'a': 1}`", "`{'a': 6}`", "引發錯誤", "`None`"],
+                correctAnswer: 1,
+                explanation: "這會將鍵 `'a'` 對應的值增加 5。字典 (Dictionary) 的值是可變的，可以直接進行算術運算。",
+                hint: "字典 (Dictionary) 中的數值可以像普通變數一樣進行算術運算嗎？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？\n<pre><code class=\"language-python\">my_dict = {'a': 1, 'b': 2}\nprint('a' in my_dict)</code></pre>",
+                options: ["`True`", "`False`", "引發錯誤", "`None`"],
+                correctAnswer: 0,
+                explanation: "`in` 運算符用於檢查字典 (Dictionary) 中是否存在指定的鍵。",
+                hint: "`in` 運算符在字典 (Dictionary) 中檢查的是鍵還是值？"
+            },
+            {
+                question: "要將字典 (Dictionary) `d = {'a': 1, 'b': 2}` 複製到 `new_d`，使得對 `new_d` 的修改不會影響 `d`，以下哪種方式是正確的？",
+                options: ["`new_d = d`", "`new_d = d.copy()`", "`new_d = dict(d)`", "選項 B 和 C 皆是"],
+                correctAnswer: 3,
+                explanation: "`copy()` 方法和 `dict()` 函數都可以創建字典 (Dictionary) 的淺拷貝，確保對新字典 (Dictionary) 的頂層修改不會影響原始字典 (Dictionary)。",
+                hint: "如何創建一個獨立的字典副本 (Dictionary Copy)，而不是引用？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？\n<pre><code class=\"language-python\">d = dict.fromkeys(['x', 'y'], 0)\nprint(d['x'])</code></pre>",
+                options: ["`'x'`", "`0`", "引發錯誤", "`None`"],
+                correctAnswer: 1,
+                explanation: "`dict.fromkeys()` 會為所有鍵設定指定的值。所以 `d['x']` 的值是 `0`。",
+                hint: "`fromkeys()` 方法如何設定鍵的值？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？\n<pre><code class=\"language-python\">person = {'name': 'Alice'}\nperson['age'] = 30\nprint(person)</code></pre>",
+                options: ["`{'name': 'Alice'}`", "`{'name': 'Alice', 'age': 30}`", "引發錯誤", "`None`"],
+                correctAnswer: 1,
+                explanation: "為字典 (Dictionary) 中不存在的鍵賦值會新增該鍵-值對。",
+                hint: "為字典 (Dictionary) 中不存在的鍵賦值會產生什麼效果？"
+            },
+            {
+                question: "要將字典 (Dictionary) `d = {'a': 1, 'b': 2}` 轉換為一個列表 (List)，其中包含所有的值，以下哪種方式是正確的？",
+                options: ["`list(d.keys())`", "`list(d.values())`", "`list(d.items())`", "`list(d)`"],
+                correctAnswer: 1,
+                explanation: "`values()` 方法返回字典 (Dictionary) 值的視圖物件，可以將其轉換為列表 (List)。",
+                hint: "哪個方法可以獲取字典 (Dictionary) 中所有的值？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？\n<pre><code class=\"language-python\">my_dict = {'a': 1}\nmy_dict['a'] = 5\nprint(my_dict['a'])</code></pre>",
+                options: ["`1`", "`5`", "引發錯誤", "`None`"],
+                correctAnswer: 1,
+                explanation: "為已存在的鍵賦值會更新其值。",
+                hint: "當您為一個已存在的鍵賦予新值時，舊值會發生什麼？"
+            },
+            {
+                question: "對於字典 (Dictionary) `d = {'x': 10, 'y': 20}`，執行 `d.pop('z', 0)` 的結果是什麼？",
+                options: ["引發 `KeyError`", "`0`", "`None`", "`d` 的內容會改變"],
+                correctAnswer: 1,
+                explanation: "`pop()` 方法的第二個參數是預設值。當鍵 `\"z\"` 不存在時，它會返回 `0` 而不會引發錯誤。",
+                hint: "`pop()` 方法的第二個參數在鍵不存在時有什麼作用？"
+            }
+        ];
+
+        // Game State Variables
+        let questions = []; // This will hold the 10 selected questions for the current game
+        let currentQuestionIndex = 0;
+        let lives = 3;
+        let score = 0;
+        const NUM_QUESTIONS_PER_GAME = 10; // Number of questions to play per game
+
+        // DOM Elements
+        const gameScreen = document.getElementById('game-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const gameCompleteScreen = document.getElementById('game-complete-screen');
+
+        const livesDisplay = document.getElementById('lives-display');
+        const questionArea = document.getElementById('question-area');
+        const checkAnswerBtn = document.getElementById('check-answer-btn');
+        const getHintBtn = document.getElementById('get-hint-btn'); // Hint button
+        const hintArea = document.getElementById('hint-area'); // Hint display area
+        const hintContent = document.getElementById('hint-content'); // Hint text content
+        const feedbackExplanationArea = document.getElementById('feedback-explanation-area');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const messageBox = document.getElementById('message-box'); // Custom message box
+
+        const gameOverScore = document.getElementById('game-over-score');
+        const restartGameBtn = document.getElementById('restart-game-btn');
+        const gameCompleteScore = document.getElementById('game-complete-score');
+        const playAgainBtn = document.getElementById('play-again-btn');
+
+        // Function to show a temporary message
+        function showMessage(message, type = 'info') {
+            messageBox.textContent = message;
+            messageBox.className = `message-box show ${type}`; // Add type class
+            clearTimeout(messageBox.timeoutId);
+            messageBox.timeoutId = setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 3000); // Message disappears after 3 seconds
+        }
+
+        // Function to update lives display
+        function updateLivesDisplay() {
+            let heartsHtml = '生命值: ';
+            for (let i = 0; i < 3; i++) {
+                if (i < lives) {
+                    // Full heart SVG
+                    heartsHtml += `<svg class="heart-icon" viewBox="0 0 24 24" fill="currentColor" style="color: #ef4444;">
+                        <path d="M12 21.35l-1.84-1.66C4.07 14.32 2 12.43 2 10.25 2 7.74 3.86 5.6 6.31 5.6c1.74 0 3.41.81 4.5 2.15C11.69 6.41 13.36 5.6 15.19 5.6c2.45 0 4.31 2.14 4.31 4.6 0 2.18-2.07 4.07-8.16 7.44L12 21.35z"/>
+                    </svg>`;
+                } else {
+                    // Empty heart SVG (outline)
+                    heartsHtml += `<svg class="heart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8;">
+                        <path d="M12 21.35l-1.84-1.66C4.07 14.32 2 12.43 2 10.25 2 7.74 3.86 5.6 6.31 5.6c1.74 0 3.41.81 4.5 2.15C11.69 6.41 13.36 5.6 15.19 5.6c2.45 0 4.31 2.14 4.31 4.6 0 2.18-2.07 4.07-8.16 7.44L12 21.35z"/>
+                    </svg>`;
+                }
+            }
+            livesDisplay.innerHTML = heartsHtml;
+        }
+
+        // Function to shuffle an array (Fisher-Yates algorithm)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+            return array;
+        }
+
+        // Function to render the current question
+        function renderQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                gameComplete();
+                return;
+            }
+
+            const q = questions[currentQuestionIndex];
+            questionArea.innerHTML = `
+                <p class="text-xl font-semibold text-gray-900 mb-4">第 ${currentQuestionIndex + 1} 題: ${q.question}</p>
+                <div class="space-y-3">
+                    ${q.options.map((option, optIndex) => `
+                        <label class="flex items-center cursor-pointer p-2 rounded-md hover:bg-blue-50 transition duration-150 ease-in-out">
+                            <input type="radio" name="currentQuestion" value="${optIndex}" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500 transition duration-150 ease-in-out">
+                            <span class="ml-3 text-gray-700 text-base">${option}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+
+            // Reset feedback area, hint area and buttons
+            feedbackExplanationArea.classList.add('hidden');
+            feedbackExplanationArea.innerHTML = '';
+            hintArea.classList.add('hidden'); // Hide hint area on new question
+            hintContent.textContent = ''; // Clear hint content
+            nextQuestionBtn.classList.add('hidden');
+            checkAnswerBtn.classList.remove('hidden');
+            checkAnswerBtn.disabled = false; // Enable check button
+            getHintBtn.disabled = false; // Enable hint button
+            updateLivesDisplay(); // Update lives display for the new game
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+
+            // Re-highlight code blocks if any in the question text
+            Prism.highlightAll();
+        }
+
+        // Function to check the answer
+        function checkAnswer() {
+            const selectedOption = document.querySelector('input[name="currentQuestion"]:checked');
+            if (!selectedOption) {
+                showMessage('請選擇一個答案！', 'error'); // Use custom message box
+                return;
+            }
+
+            checkAnswerBtn.disabled = true; // Disable check button after selection
+            getHintBtn.disabled = true; // Disable hint button after checking answer
+            const userAnswer = parseInt(selectedOption.value);
+            const q = questions[currentQuestionIndex];
+
+            feedbackExplanationArea.classList.remove('hidden');
+            feedbackExplanationArea.innerHTML = ''; // Clear previous content
+            hintArea.classList.add('hidden'); // Hide hint area when answer is checked
+
+            if (userAnswer === q.correctAnswer) {
+                score++;
+                feedbackExplanationArea.classList.remove('bg-red-50', 'bg-yellow-50');
+                feedbackExplanationArea.classList.add('bg-green-50', 'border', 'border-green-200');
+                feedbackExplanationArea.innerHTML = `
+                    <p class="font-bold text-green-700 text-lg mb-2">正確！</p>
+                    <p class="text-gray-700 mb-2">您的答案: ${q.options[userAnswer]}</p>
+                    <p class="font-semibold text-gray-800 mb-2">解釋:</p>
+                    <p class="text-gray-600">${q.explanation}</p>
+                `;
+            } else {
+                lives--;
+                feedbackExplanationArea.classList.remove('bg-green-50', 'bg-yellow-50');
+                feedbackExplanationArea.classList.add('bg-red-50', 'border', 'border-red-200');
+                feedbackExplanationArea.innerHTML = `
+                    <p class="font-bold text-red-700 text-lg mb-2">錯誤！</p>
+                    <p class="text-gray-700 mb-2">您的答案: ${q.options[userAnswer]}</p>
+                    <p class="text-gray-700 mb-2">正確答案: ${q.options[q.correctAnswer]}</p>
+                    <p class="font-semibold text-gray-800 mb-2">解釋:</p>
+                    <p class="text-gray-600">${q.explanation}</p>
+                `;
+                updateLivesDisplay(); // Update lives display immediately
+            }
+
+            nextQuestionBtn.classList.remove('hidden'); // Show next question button
+            // If lives run out, show game over screen
+            if (lives <= 0) {
+                gameOver();
+            } else if (currentQuestionIndex === questions.length - 1) { // Check if it's the last question
+                gameComplete();
+            }
+            // Re-highlight code blocks in explanation if any
+            Prism.highlightAll();
+        }
+
+        // Function to move to the next question
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                renderQuestion();
+            } else {
+                gameComplete();
+            }
+        }
+
+        // Function to handle game over
+        function gameOver() {
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.remove('hidden');
+            gameCompleteScreen.classList.add('hidden');
+            gameOverScore.textContent = `您答對了 ${score} 題。`;
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+        }
+
+        // Function to handle game complete
+        function gameComplete() {
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameCompleteScreen.classList.remove('hidden');
+            gameCompleteScore.textContent = `您答對了 ${score} / ${questions.length} 題。`;
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+        }
+
+        // Function to start/restart the game
+        function startGame() {
+            // Shuffle all questions and select the first NUM_QUESTIONS_PER_GAME
+            questions = shuffleArray([...allQuestions]).slice(0, NUM_QUESTIONS_PER_GAME);
+
+            currentQuestionIndex = 0;
+            lives = 3;
+            score = 0;
+            gameScreen.classList.remove('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameCompleteScreen.classList.add('hidden');
+            renderQuestion();
+        }
+
+        // Function to get a hint (now directly from questions array)
+        function getHint() {
+            const currentQuestion = questions[currentQuestionIndex];
+            if (currentQuestion.hint) {
+                hintArea.classList.remove('hidden'); // Show hint area
+                hintContent.textContent = currentQuestion.hint; // Display the embedded hint
+            } else {
+                hintArea.classList.remove('hidden');
+                hintContent.textContent = "抱歉，此題沒有提示。";
+            }
+            getHintBtn.disabled = true; // Disable hint button after showing hint
+        }
+
+
+        // Event Listeners
+        checkAnswerBtn.addEventListener('click', checkAnswer);
+        nextQuestionBtn.addEventListener('click', nextQuestion);
+        restartGameBtn.addEventListener('click', startGame);
+        playAgainBtn.addEventListener('click', startGame);
+        getHintBtn.addEventListener('click', getHint); // Event listener for hint button
+
+        // Initial game start when the page loads
+        document.addEventListener('DOMContentLoaded', startGame);
+    </script>
+</body>
+</html>
