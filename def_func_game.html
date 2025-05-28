@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python 自定義函式 (Custom Functions) 遊戲化測驗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <style>
+        /* Custom font for better readability */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .heart-icon {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+            vertical-align: middle;
+            margin: 0 2px;
+        }
+        /* Message box styling */
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0; /* Initially hidden */
+        }
+        .message-box.show {
+            opacity: 1;
+        }
+        .message-box.info {
+            background-color: #e0f2fe; /* Light blue */
+            color: #0284c7; /* Darker blue */
+            border: 1px solid #94a3b8;
+        }
+        .message-box.error {
+            background-color: #fee2e2; /* Light red */
+            color: #dc2626; /* Darker red */
+            border: 1px solid #ef4444;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Style for code blocks - Prism.js will handle background and text colors */
+        pre {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto; /* Enable horizontal scrolling for long lines */
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; /* Monospace font for code */
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-top: 0.75rem;
+            margin-bottom: 2.5rem; /* Adjusted for better spacing */
+        }
+        code {
+            font-family: inherit; /* Inherit font from pre */
+            background-color: #e2e8f0; /* Light background for inline code */
+            color: #333; /* Darker text for inline code */
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+        }
+        /* Ensure Prism.js's background is applied correctly to pre */
+        pre[class*="language-"] {
+            background-color: #2d2d2d; /* Re-apply dark background for the pre block, as Prism's theme might only target code */
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div id="game-container" class="bg-white p-6 sm:p-8 md:p-10 rounded-xl shadow-2xl w-full max-w-3xl border border-gray-200">
+        <div id="game-screen">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-center text-gray-800 mb-6 leading-tight">
+                Python 自定義函式 (Custom Functions) 遊戲化測驗
+            </h1>
+
+            <div id="lives-display" class="text-center mb-6 text-red-500 text-2xl font-bold">
+                生命值:
+            </div>
+
+            <div id="question-area" class="space-y-6">
+                </div>
+
+            <div id="hint-area" class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200 text-blue-800 hidden">
+                <p class="font-semibold mb-2">提示:</p>
+                <p id="hint-content"></p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:space-x-4 mt-8">
+                <button id="check-answer-btn" class="w-full sm:w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg mb-4 sm:mb-0">
+                    檢查答案
+                </button>
+                <button id="get-hint-btn" class="w-full sm:w-1/2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                    獲取提示 ✨
+                </button>
+            </div>
+
+
+            <div id="feedback-explanation-area" class="mt-6 p-4 rounded-lg hidden">
+                </div>
+
+            <button id="next-question-btn" class="mt-4 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 shadow-lg hidden">
+                    下一題
+            </button>
+        </div>
+
+        <div id="game-over-screen" class="hidden text-center p-8 bg-red-50 rounded-lg border border-red-200">
+            <h2 class="text-3xl font-bold text-red-700 mb-4">遊戲結束！</h2>
+            <p id="game-over-score" class="text-xl text-gray-800 mb-6"></p>
+            <button id="restart-game-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                重新開始
+            </button>
+        </div>
+
+        <div id="game-complete-screen" class="hidden text-center p-8 bg-green-50 rounded-lg border border-green-200">
+            <h2 class="text-3xl font-bold text-green-700 mb-4">恭喜您！完成所有題目！</h2>
+            <p id="game-complete-score" class="text-xl text-gray-800 mb-6"></p>
+            <button id="play-again-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                再玩一次
+            </button>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box hidden"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <script>
+        // All 30 questions for the custom functions quiz
+        const allQuestions = [
+            // Level 1: Basic Definition & Call
+            {
+                question: "定義一個名為 `greet` 的函式，印出 \"Hello!\"，正確的語法是什麼？",
+                options: ["`function greet():`", "`def greet():`", "`create function greet():`", "`greet = def():`"],
+                correctAnswer: 1,
+                explanation: "`def` 關鍵字用於定義函式。",
+                hint: "函式定義以哪個關鍵字開頭？"
+            },
+            {
+                question: "定義函式 `say_hi()` 後，如何呼叫它？",
+                options: ["`say_hi`", "`call say_hi()`", "`say_hi()`", "`run say_hi`"],
+                correctAnswer: 2,
+                explanation: "呼叫函式需要使用函式名稱後跟括號 `()`。",
+                hint: "呼叫函式時，函式名稱後需要加上什麼？"
+            },
+            {
+                question: "函式定義 `def add(a, b):` 中的 `a` 和 `b` 稱為什麼？",
+                options: ["引數 (Arguments)", "變數", "參數 (Parameters)", "屬性"],
+                correctAnswer: 2,
+                explanation: "函式定義中括號內的是參數 (Parameters)。",
+                hint: "函式定義中，預期接收的輸入叫做什麼？"
+            },
+            {
+                question: "呼叫函式 `multiply(5, 3)` 時，`5` 和 `3` 稱為什麼？",
+                options: ["參數 (Parameters)", "引數 (Arguments)", "數值", "變數"],
+                correctAnswer: 1,
+                explanation: "呼叫函式時傳遞的值稱為引數 (Arguments)。",
+                hint: "函式呼叫時，實際傳遞的值叫做什麼？"
+            },
+            {
+                question: "以下函式的輸出是什麼？<pre><code class=\"language-python\">def get_number():\n    return 10\nprint(get_number())</code></pre>",
+                options: ["`None`", "`10`", "`get_number`", "錯誤"],
+                correctAnswer: 1,
+                explanation: "`return` 語句會將值回傳給呼叫者，`print()` 會印出這個回傳值。",
+                hint: "`return` 語句的作用是什麼？"
+            },
+            {
+                question: "以下函式的輸出是什麼？<pre><code class=\"language-python\">def do_something():\n    print(\"Hello\")\nresult = do_something()\nprint(result)</code></pre>",
+                options: ["`Hello\nNone`", "`Hello`", "`None`", "錯誤"],
+                correctAnswer: 0,
+                explanation: "函式會先印出 \"Hello\"，然後因為沒有明確的 `return` 語句，函式會隱式地回傳 `None`。",
+                hint: "如果函式沒有明確回傳值，它預設會回傳什麼？"
+            },
+
+            // Level 2: Parameters & Arguments
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def subtract(a, b):\n    print(a - b)\nsubtract(10, 3)</code></pre>",
+                options: ["`7`", "`-7`", "`10`", "錯誤"],
+                correctAnswer: 0,
+                explanation: "`10` 賦值給 `a`，`3` 賦值給 `b`，所以 `10 - 3 = 7`。",
+                hint: "追蹤引數如何根據位置賦值給參數。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def greet_user(name, message):\n    print(f\"{message}, {name}!\")\ngreet_user(message=\"你好\", name=\"小明\")</code></pre>",
+                options: ["`你好, 小明!`", "`小明, 你好!`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "使用關鍵字引數時，順序不重要，會根據鍵名正確賦值。",
+                hint: "關鍵字引數的順序重要嗎？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def power(base, exp=2):\n    print(base ** exp)\npower(3)</code></pre>",
+                options: ["`9`", "`6`", "錯誤", "`3`"],
+                correctAnswer: 0,
+                explanation: "`base` 接收 `3`，`exp` 使用預設值 `2`，所以 `3 ** 2 = 9`。",
+                hint: "如果沒有提供引數，預設參數值會被使用。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def display_info(name=\"Guest\", age=0):\n    print(f\"{name}, {age}\")\ndisplay_info(\"Alice\", 30)</code></pre>",
+                options: ["`Guest, 0`", "`Alice, 30`", "`Guest, 30`", "錯誤"],
+                correctAnswer: 1,
+                explanation: "提供的引數會覆蓋預設值。",
+                hint: "提供的引數會優先於預設值。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def print_all(*items):\n    print(items)\nprint_all(1, \"hello\", True)</code></pre>",
+                options: ["`(1, 'hello', True)`", "`[1, 'hello', True]`", "`1 hello True`", "錯誤"],
+                correctAnswer: 0,
+                explanation: "`*items` 會將所有位置引數收集為一個元組 (Tuple)。",
+                hint: "`*args` 會將多個位置引數收集成哪種資料型態 (Data Type)？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def show_details(**details):\n    print(details)\nshow_details(id=101, status=\"active\")</code></pre>",
+                options: ["`{'id': 101, 'status': 'active'}`", "`id=101 status=active`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`**details` 會將所有關鍵字引數收集為一個字典 (Dictionary)。",
+                hint: "`**kwargs` 會將多個關鍵字引數收集成哪種資料型態 (Data Type)？"
+            },
+
+            // Level 3: Return Values & Scope
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def get_coords():\n    return 10, 20\nx, y = get_coords()\nprint(x + y)</code></pre>",
+                options: ["`30`", "` (10, 20)`", "錯誤", "`10`"],
+                correctAnswer: 0,
+                explanation: "函式回傳的是一個元組 (Tuple)，在接收時被解包，`x` 為 10，`y` 為 20，所以 `x + y = 30`。",
+                hint: "函式可以回傳多個值，它們會被打包成哪種資料型態 (Data Type)？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def get_data():\n    return \"name\", 25\ninfo = get_data()\nprint(info[0])</code></pre>",
+                options: ["`('name', 25)`", "`name`", "`25`", "錯誤"],
+                correctAnswer: 1,
+                explanation: "`info` 接收到的是一個元組 (Tuple) `('name', 25)`，`info[0]` 存取元組的第一個元素。",
+                hint: "如果不解包，函式回傳的多個值會以什麼形式被接收？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def my_func():\n    x = 10\n    print(x)\nmy_func()</code></pre>",
+                options: ["`10`", "`NameError`", "沒有輸出", "`None`"],
+                correctAnswer: 0,
+                explanation: "`x` 是在函式內部定義的區域變數，只能在函式內部被存取。函式內部可以正常印出。",
+                hint: "變數的『作用域』限制了它在哪裡可以被使用。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">global_var = 50\ndef display_global():\n    print(global_var)\ndisplay_global()</code></pre>",
+                options: ["`50`", "`NameError`", "沒有輸出", "`None`"],
+                correctAnswer: 0,
+                explanation: "`global_var` 是全域變數，可以在函式內部被存取。",
+                hint: "預設情況下，函式可以讀取全域變數嗎？"
+            },
+            {
+                question: "以下程式碼會產生什麼結果？<pre><code class=\"language-python\">counter = 0\ndef increment():\n    counter = 1 # 這裡會創建一個新的區域變數\nincrement()\nprint(counter)</code></pre>",
+                options: ["`0`", "`1`", "錯誤", "`None`"],
+                correctAnswer: 0,
+                explanation: "在函式內部直接對 `counter` 賦值會創建一個新的區域變數 (Local Variable)，不會修改同名的全域變數 (Global Variable)。",
+                hint: "在函式內部直接賦值給一個與全域變數同名的變數時，會發生什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">count = 0\ndef add_one():\n    global count\n    count += 1\nadd_one()\nprint(count)</code></pre>",
+                options: ["`0`", "`1`", "錯誤", "`None`"],
+                correctAnswer: 1,
+                explanation: "使用 `global` 關鍵字宣告後，`count += 1` 會修改全域變數 (Global Variable) `count`。",
+                hint: "如果想在函式內部修改全域變數 (Global Variable)，需要使用哪個關鍵字？"
+            },
+
+            // Level 4: Docstrings & Advanced Parameters
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def my_func():\n    \"\"\"這是一個測試函式。\"\"\"\n    pass\nprint(my_func.__doc__)</code></pre>",
+                options: ["`這是一個測試函式。`", "`None`", "錯誤", "`my_func`"],
+                correctAnswer: 0,
+                explanation: "函式的文件字串 (Docstring) 可以透過 `__doc__` 屬性存取。",
+                hint: "函式的文件字串 (Docstring) 儲存在哪個特殊屬性中？"
+            },
+            {
+                question: "文件字串 (Docstring) 的主要目的是什麼？",
+                options: ["提高程式碼執行速度", "為函式提供簡要說明", "標記程式碼的版權", "隱藏函式內部細節"],
+                correctAnswer: 1,
+                explanation: "文件字串 (Docstring) 用於解釋函式的功能、參數、回傳值等，提高程式碼的可讀性。",
+                hint: "函式的文件字串 (Docstring) 是給誰看的？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def print_message():\n    print(\"Hello Python\")\nprint_message()</code></pre>",
+                options: ["`Hello Python`", "`None`", "錯誤", "`print_message`"],
+                correctAnswer: 0,
+                explanation: "函式被呼叫後，執行其內部的 `print` 語句。",
+                hint: "函式會執行其主體內的程式碼。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def greet_person(name):\n    print(f\"Hello, {name}!\")\ngreet_person(\"World\")</code></pre>",
+                options: ["`Hello, World!`", "`World`", "錯誤", "`None`"],
+                correctAnswer: 0,
+                explanation: "函式接收 `\"World\"` 作為 `name`，並在 f-string 中使用它。",
+                hint: "追蹤參數 `name` 的值。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def get_sum(a, b):\n    return a + b\nresult = get_sum(2, 3)\nprint(result)</code></pre>",
+                options: ["`5`", "`get_sum(2, 3)`", "錯誤", "`None`"],
+                correctAnswer: 0,
+                explanation: "`get_sum(2, 3)` 回傳 `5`，這個值被賦值給 `result`，然後被印出。",
+                hint: "函式的回傳值是什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def empty_func():\n    pass\nprint(\"Done\")</code></pre>",
+                options: ["`Done`", "`None`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`pass` 語句是一個空操作，函式執行後直接跳過，程式會繼續執行函式呼叫後的語句。",
+                hint: "`pass` 語句的作用是什麼？"
+            },
+
+            // Level 5: Complex Scenarios
+            {
+                question: "以下哪個函式定義會引發 `SyntaxError`？",
+                options: ["`def func(a, b=1):`", "`def func(a=1, b):`", "`def func(a, b):`", "`def func(a=1, b=2):`"],
+                correctAnswer: 1,
+                explanation: "帶有預設值的參數必須放在不帶預設值的參數之後。",
+                hint: "預設參數值在函式定義中的位置有嚴格要求。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def combine_args(first, *rest):\n    print(f\"{first} {rest}\")\ncombine_args(\"A\", \"B\", \"C\")</code></pre>",
+                options: ["`A ('B', 'C')`", "`A B C`", "`('A', 'B', 'C')`", "錯誤"],
+                correctAnswer: 0,
+                explanation: "`first` 接收 `\"A\"`，其餘的位置引數 `\"B\"`, `\"C\"` 被 `*rest` 收集成元組 (Tuple) `('B', 'C')`。",
+                hint: "`*args` 會收集除了明確參數之外的所有位置引數。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def process_data(id, **options):\n    print(f\"ID: {id}, Options: {options}\")\nprocess_data(101, name=\"Test\", value=True)</code></pre>",
+                options: ["`ID: 101, Options: {'name': 'Test', 'value': True}`", "`ID: 101, Options: (name='Test', value=True)`", "錯誤", "`ID: 101, Options: Test True`"],
+                correctAnswer: 0,
+                explanation: "`id` 接收 `101`，其餘的關鍵字引數被 `**options` 收集成字典 (Dictionary)。",
+                hint: "`**kwargs` 會將多個關鍵字引數收集成哪種資料型態 (Data Type)？"
+            },
+            {
+                question: "以下函式的輸出是什麼？<pre><code class=\"language-python\">def is_even(number):\n    return number % 2 == 0\nprint(is_even(4))</code></pre>",
+                options: ["`True`", "`False`", "`4`", "錯誤"],
+                correctAnswer: 0,
+                explanation: "`4 % 2 == 0` 的結果是 `True`。",
+                hint: "比較運算符會回傳布林值 (Boolean Value)。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def create_list(item1, item2):\n    return [item1, item2]\nmy_items = create_list(\"apple\", \"banana\")\nprint(my_items[0])</code></pre>",
+                options: ["`apple`", "`banana`", "`['apple', 'banana']`", "錯誤"],
+                correctAnswer: 0,
+                explanation: "函式回傳清單 (List) `['apple', 'banana']`，`my_items` 接收這個清單 (List)，`my_items[0]` 存取清單 (List) 的第一個元素。",
+                hint: "函式可以回傳任何資料型態 (Data Type)，包括清單 (List)。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def add(a, b):\n    return a + b\ndef calculate(x, y):\n    return add(x, y) * 2\nprint(calculate(2, 3))</code></pre>",
+                options: ["`10`", "`5`", "`12`", "錯誤"],
+                correctAnswer: 0,
+                explanation: "`add(2, 3)` 回傳 `5`。然後 `calculate` 函式將 `5 * 2`，結果為 `10`。",
+                hint: "追蹤函式呼叫的順序和回傳值。"
+            }
+        ];
+
+        // Game State Variables
+        let questions = []; // This will hold the 10 selected questions for the current game
+        let currentQuestionIndex = 0;
+        let lives = 3;
+        let score = 0;
+        const NUM_QUESTIONS_PER_GAME = 10; // Number of questions to play per game
+
+        // DOM Elements
+        const gameScreen = document.getElementById('game-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const gameCompleteScreen = document.getElementById('game-complete-screen');
+
+        const livesDisplay = document.getElementById('lives-display');
+        const questionArea = document.getElementById('question-area');
+        const checkAnswerBtn = document.getElementById('check-answer-btn');
+        const getHintBtn = document.getElementById('get-hint-btn'); // Hint button
+        const hintArea = document.getElementById('hint-area'); // Hint display area
+        const hintContent = document.getElementById('hint-content'); // Hint text content
+        const feedbackExplanationArea = document.getElementById('feedback-explanation-area');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const messageBox = document.getElementById('message-box'); // Custom message box
+
+        const gameOverScore = document.getElementById('game-over-score');
+        const restartGameBtn = document.getElementById('restart-game-btn');
+        const gameCompleteScore = document.getElementById('game-complete-score');
+        const playAgainBtn = document.getElementById('play-again-btn');
+
+        // Function to show a temporary message
+        function showMessage(message, type = 'info') {
+            messageBox.textContent = message;
+            messageBox.className = `message-box show ${type}`; // Add type class
+            clearTimeout(messageBox.timeoutId);
+            messageBox.timeoutId = setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 3000); // Message disappears after 3 seconds
+        }
+
+        // Function to update lives display
+        function updateLivesDisplay() {
+            let heartsHtml = '生命值: ';
+            for (let i = 0; i < 3; i++) {
+                if (i < lives) {
+                    // Full heart SVG
+                    heartsHtml += `<svg class="heart-icon" viewBox="0 0 24 24" fill="currentColor" style="color: #ef4444;">
+                        <path d="M12 21.35l-1.84-1.66C4.07 14.32 2 12.43 2 10.25 2 7.74 3.86 5.6 6.31 5.6c1.74 0 3.41.81 4.5 2.15C11.69 6.41 13.36 5.6 15.19 5.6c2.45 0 4.31 2.14 4.31 4.6 0 2.18-2.07 4.07-8.16 7.44L12 21.35z"/>
+                    </svg>`;
+                } else {
+                    // Empty heart SVG (outline)
+                    heartsHtml += `<svg class="heart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8;">
+                        <path d="M12 21.35l-1.84-1.66C4.07 14.32 2 12.43 2 10.25 2 7.74 3.86 5.6 6.31 5.6c1.74 0 3.41.81 4.5 2.15C11.69 6.41 13.36 5.6 15.19 5.6c2.45 0 4.31 2.14 4.31 4.6 0 2.18-2.07 4.07-8.16 7.44L12 21.35z"/>
+                    </svg>`;
+                }
+            }
+            livesDisplay.innerHTML = heartsHtml;
+        }
+
+        // Function to shuffle an array (Fisher-Yates algorithm)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+            return array;
+        }
+
+        // Function to render the current question
+        function renderQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                gameComplete();
+                return;
+            }
+
+            const q = questions[currentQuestionIndex];
+            questionArea.innerHTML = `
+                <p class="text-xl font-semibold text-gray-900 mb-4">第 ${currentQuestionIndex + 1} 題: ${q.question}</p>
+                <div class="space-y-3">
+                    ${q.options.map((option, optIndex) => `
+                        <label class="flex items-center cursor-pointer p-2 rounded-md hover:bg-blue-50 transition duration-150 ease-in-out">
+                            <input type="radio" name="currentQuestion" value="${optIndex}" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500 transition duration-150 ease-in-out">
+                            <span class="ml-3 text-gray-700 text-base">${option}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+
+            // Reset feedback area, hint area and buttons
+            feedbackExplanationArea.classList.add('hidden');
+            feedbackExplanationArea.innerHTML = '';
+            hintArea.classList.add('hidden'); // Hide hint area on new question
+            hintContent.textContent = ''; // Clear hint content
+            nextQuestionBtn.classList.add('hidden');
+            checkAnswerBtn.classList.remove('hidden');
+            checkAnswerBtn.disabled = false; // Enable check button
+            getHintBtn.disabled = false; // Enable hint button
+            updateLivesDisplay(); // Update lives display for the new game
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+
+            // Re-highlight code blocks if any in the question text
+            Prism.highlightAll();
+        }
+
+        // Function to check the answer
+        function checkAnswer() {
+            const selectedOption = document.querySelector('input[name="currentQuestion"]:checked');
+            if (!selectedOption) {
+                showMessage('請選擇一個答案！', 'error'); // Use custom message box
+                return;
+            }
+
+            checkAnswerBtn.disabled = true; // Disable check button after selection
+            getHintBtn.disabled = true; // Disable hint button after checking answer
+            const userAnswer = parseInt(selectedOption.value);
+            const q = questions[currentQuestionIndex];
+
+            feedbackExplanationArea.classList.remove('hidden');
+            feedbackExplanationArea.innerHTML = ''; // Clear previous content
+            hintArea.classList.add('hidden'); // Hide hint area when answer is checked
+
+            if (userAnswer === q.correctAnswer) {
+                score++;
+                feedbackExplanationArea.classList.remove('bg-red-50', 'bg-yellow-50');
+                feedbackExplanationArea.classList.add('bg-green-50', 'border', 'border-green-200');
+                feedbackExplanationArea.innerHTML = `
+                    <p class="font-bold text-green-700 text-lg mb-2">正確！</p>
+                    <p class="text-gray-700 mb-2">您的答案: ${q.options[userAnswer]}</p>
+                    <p class="font-semibold text-gray-800 mb-2">解釋:</p>
+                    <p class="text-gray-600">${q.explanation}</p>
+                `;
+            } else {
+                lives--;
+                feedbackExplanationArea.classList.remove('bg-green-50', 'bg-yellow-50');
+                feedbackExplanationArea.classList.add('bg-red-50', 'border', 'border-red-200');
+                feedbackExplanationArea.innerHTML = `
+                    <p class="font-bold text-red-700 text-lg mb-2">錯誤！</p>
+                    <p class="text-gray-700 mb-2">您的答案: ${q.options[userAnswer]}</p>
+                    <p class="text-gray-700 mb-2">正確答案: ${q.options[q.correctAnswer]}</p>
+                    <p class="font-semibold text-gray-800 mb-2">解釋:</p>
+                    <p class="text-gray-600">${q.explanation}</p>
+                `;
+                updateLivesDisplay(); // Update lives display immediately
+            }
+
+            nextQuestionBtn.classList.remove('hidden'); // Show next question button
+            // If lives run out, show game over screen
+            if (lives <= 0) {
+                gameOver();
+            } else if (currentQuestionIndex === questions.length - 1) { // Check if it's the last question
+                gameComplete();
+            }
+            // Re-highlight code blocks in explanation if any
+            Prism.highlightAll();
+        }
+
+        // Function to move to the next question
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                renderQuestion();
+            } else {
+                gameComplete();
+            }
+        }
+
+        // Function to handle game over
+        function gameOver() {
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.remove('hidden');
+            gameCompleteScreen.classList.add('hidden');
+            gameOverScore.textContent = `您答對了 ${score} 題。`;
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+        }
+
+        // Function to handle game complete
+        function gameComplete() {
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameCompleteScreen.classList.remove('hidden');
+            gameCompleteScore.textContent = `您答對了 ${score} / ${questions.length} 題。`;
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+        }
+
+        // Function to start/restart the game
+        function startGame() {
+            // Shuffle all questions and select the first NUM_QUESTIONS_PER_GAME
+            questions = shuffleArray([...allQuestions]).slice(0, NUM_QUESTIONS_PER_GAME);
+
+            currentQuestionIndex = 0;
+            lives = 3;
+            score = 0;
+            gameScreen.classList.remove('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameCompleteScreen.classList.add('hidden');
+            renderQuestion();
+        }
+
+        // Function to get a hint (now directly from questions array)
+        function getHint() {
+            const currentQuestion = questions[currentQuestionIndex];
+            if (currentQuestion.hint) {
+                hintArea.classList.remove('hidden'); // Show hint area
+                hintContent.textContent = currentQuestion.hint; // Display the embedded hint
+            } else {
+                hintArea.classList.remove('hidden');
+                hintContent.textContent = "抱歉，此題沒有提示。";
+            }
+            getHintBtn.disabled = true; // Disable hint button after showing hint
+        }
+
+
+        // Event Listeners
+        checkAnswerBtn.addEventListener('click', checkAnswer);
+        nextQuestionBtn.addEventListener('click', nextQuestion);
+        restartGameBtn.addEventListener('click', startGame);
+        playAgainBtn.addEventListener('click', startGame);
+        getHintBtn.addEventListener('click', getHint); // Event listener for hint button
+
+        // Initial game start when the page loads
+        document.addEventListener('DOMContentLoaded', startGame);
+    </script>
+</body>
+</html>

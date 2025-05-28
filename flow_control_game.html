@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python 流程控制 (Flow Control) 遊戲化測驗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <style>
+        /* Custom font for better readability */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .heart-icon {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+            vertical-align: middle;
+            margin: 0 2px;
+        }
+        /* Message box styling */
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0; /* Initially hidden */
+        }
+        .message-box.show {
+            opacity: 1;
+        }
+        .message-box.info {
+            background-color: #e0f2fe; /* Light blue */
+            color: #0284c7; /* Darker blue */
+            border: 1px solid #94a3b8;
+        }
+        .message-box.error {
+            background-color: #fee2e2; /* Light red */
+            color: #dc2626; /* Darker red */
+            border: 1px solid #ef4444;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Style for code blocks - Prism.js will handle background and text colors */
+        pre {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto; /* Enable horizontal scrolling for long lines */
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; /* Monospace font for code */
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-top: 0.75rem;
+            margin-bottom: 2.5rem; /* Adjusted for better spacing */
+        }
+        code {
+            font-family: inherit; /* Inherit font from pre */
+            background-color: #e2e8f0; /* Light background for inline code */
+            color: #333; /* Darker text for inline code */
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+        }
+        /* Ensure Prism.js's background is applied correctly to pre */
+        pre[class*="language-"] {
+            background-color: #2d2d2d; /* Re-apply dark background for the pre block, as Prism's theme might only target code */
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div id="game-container" class="bg-white p-6 sm:p-8 md:p-10 rounded-xl shadow-2xl w-full max-w-3xl border border-gray-200">
+        <div id="game-screen">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-center text-gray-800 mb-6 leading-tight">
+                Python 流程控制 (Flow Control) 遊戲化測驗
+            </h1>
+
+            <div id="lives-display" class="text-center mb-6 text-red-500 text-2xl font-bold">
+                生命值:
+            </div>
+
+            <div id="question-area" class="space-y-6">
+                </div>
+
+            <div id="hint-area" class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200 text-blue-800 hidden">
+                <p class="font-semibold mb-2">提示:</p>
+                <p id="hint-content"></p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:space-x-4 mt-8">
+                <button id="check-answer-btn" class="w-full sm:w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg mb-4 sm:mb-0">
+                    檢查答案
+                </button>
+                <button id="get-hint-btn" class="w-full sm:w-1/2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                    獲取提示 ✨
+                </button>
+            </div>
+
+
+            <div id="feedback-explanation-area" class="mt-6 p-4 rounded-lg hidden">
+                </div>
+
+            <button id="next-question-btn" class="mt-4 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 shadow-lg hidden">
+                    下一題
+            </button>
+        </div>
+
+        <div id="game-over-screen" class="hidden text-center p-8 bg-red-50 rounded-lg border border-red-200">
+            <h2 class="text-3xl font-bold text-red-700 mb-4">遊戲結束！</h2>
+            <p id="game-over-score" class="text-xl text-gray-800 mb-6"></p>
+            <button id="restart-game-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                重新開始
+            </button>
+        </div>
+
+        <div id="game-complete-screen" class="hidden text-center p-8 bg-green-50 rounded-lg border border-green-200">
+            <h2 class="text-3xl font-bold text-green-700 mb-4">恭喜您！完成所有題目！</h2>
+            <p id="game-complete-score" class="text-xl text-gray-800 mb-6"></p>
+            <button id="play-again-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                再玩一次
+            </button>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box hidden"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <script>
+        // All 30 questions for the flow control quiz
+        const allQuestions = [
+            // Level 1: Basic if/else
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">age = 20\nif age >= 18:\n    print(\"成年\")\nelse:\n    print(\"未成年\")</code></pre>",
+                options: ["成年", "未成年", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "由於 `age` 的值是 20，`age >= 18` 條件為 `True`，因此執行 `if` 區塊中的程式碼。",
+                hint: "判斷 `age` 是否滿足 `if` 條件。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">temperature = 15\nif temperature > 25:\n    print(\"炎熱\")\nelif temperature > 10:\n    print(\"溫和\")\nelse:\n    print(\"寒冷\")</code></pre>",
+                options: ["炎熱", "溫和", "寒冷", "錯誤"],
+                correctAnswer: 1,
+                explanation: "首先 `temperature > 25` 為 `False`。接著 `temperature > 10` (15 > 10) 為 `True`，所以執行 `elif` 區塊。",
+                hint: "`if-elif-else` 語句會依序檢查條件。"
+            },
+            {
+                question: "要檢查變數 `x` 是否為正數，以下哪種條件判斷是正確的？",
+                options: ["`if x = 0:`", "`if x > 0:`", "`if x is positive:`", "`if x == True:`"],
+                correctAnswer: 1,
+                explanation: "在 Python 中，`>` 用於檢查是否大於。`=` 是賦值運算符，`==` 才是比較運算符。",
+                hint: "比較運算符用於檢查大小關係。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">is_admin = False\nif not is_admin:\n    print(\"普通使用者\")\nelse:\n    print(\"管理員\")</code></pre>",
+                options: ["普通使用者", "管理員", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`not False` 的結果是 `True`，所以 `if` 條件為 `True`，執行 `print(\"普通使用者\")`。",
+                hint: "`not` 運算符會反轉布林值。"
+            },
+            {
+                question: "如果 `a = 5` 且 `b = 10`，以下哪個條件判斷會為 `True`？",
+                options: ["`a > b`", "`a == b`", "`a < b`", "`a >= b`"],
+                correctAnswer: 2,
+                explanation: "5 小於 10，所以 `a < b` 為 `True`。",
+                hint: "逐一檢查每個比較運算符的結果。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">x = 10\ny = 5\nif x > 5 and y < 10:\n    print(\"條件成立\")\nelse:\n    print(\"條件不成立\")</code></pre>",
+                options: ["條件成立", "條件不成立", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`x > 5` (10 > 5) 為 `True`，`y < 10` (5 < 10) 為 `True`。`True and True` 的結果是 `True`，所以條件成立。",
+                hint: "`and` 運算符要求所有條件都為 `True`。"
+            },
+
+            // Level 2: for loops
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">for i in range(3):\n    print(i)</code></pre>",
+                options: ["0\n1\n2", "1\n2\n3", "0\n1\n2\n3", "錯誤"],
+                correctAnswer: 0,
+                explanation: "`range(3)` 會生成 0, 1, 2 的序列，`for` 迴圈會依序遍歷並印出這些數字。",
+                hint: "`range(n)` 預設從哪個數字開始，到哪個數字結束？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">fruits = [\"apple\", \"banana\"]\nfor fruit in fruits:\n    print(fruit)</code></pre>",
+                options: ["apple\nbanana", "['apple', 'banana']", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`for` 迴圈會遍歷列表 `fruits` 中的每個元素，並將其賦值給 `fruit` 變數，然後印出。",
+                hint: "`for` 迴圈遍歷列表時，每次迭代會取到什麼？"
+            },
+            {
+                question: "要遍歷字串 `word = \"Python\"` 中的每個字元，以下哪種方式是正確的？",
+                options: ["`for char in word:`", "`for i in range(len(word)): print(word[i])`", "選項 A 和 B 皆是", "`for char in word.chars():`"],
+                correctAnswer: 2,
+                explanation: "兩種方式都正確。直接遍歷字串會得到每個字元，也可以透過索引和 `range(len())` 來遍歷。",
+                hint: "Python 的 `for` 迴圈可以直接遍歷字串嗎？或者需要使用索引？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">for i in range(1, 5, 2):\n    print(i)</code></pre>",
+                options: ["1\n2\n3\n4", "1\n3", "0\n2\n4", "錯誤"],
+                correctAnswer: 1,
+                explanation: "`range(1, 5, 2)` 表示從 1 開始，到 5 之前（不包含 5），步長為 2。所以序列是 1, 3。",
+                hint: "`range(start, stop, step)` 的含義是什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">total = 0\nfor num in [1, 2, 3]:\n    total += num\nprint(total)</code></pre>",
+                options: ["123", "6", "錯誤", "0"],
+                correctAnswer: 1,
+                explanation: "迴圈將 1、2、3 依次加到 `total` 中。`0 + 1 = 1`，`1 + 2 = 3`，`3 + 3 = 6`。",
+                hint: "追蹤 `total` 變數在每次迴圈後的變化。"
+            },
+            {
+                question: "要遍歷字典 `my_dict = {'a': 1, 'b': 2}` 中的所有鍵 (key) 和值 (value)，以下哪種方式是正確的？",
+                options: ["`for k, v in my_dict:`", "`for k, v in my_dict.items():`", "`for k, v in my_dict.values():`", "`for k in my_dict.keys(), v in my_dict.values():`"],
+                correctAnswer: 1,
+                explanation: "`items()` 方法返回鍵-值對的元組序列，適合在 `for` 迴圈中解包。",
+                hint: "哪個字典方法可以同時獲取鍵和值？"
+            },
+
+            // Level 3: while loops
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">count = 0\nwhile count < 2:\n    print(\"Hello\")\n    count += 1</code></pre>",
+                options: ["Hello", "Hello\nHello", "無限迴圈", "錯誤"],
+                correctAnswer: 1,
+                explanation: "迴圈會執行兩次：當 `count` 為 0 和 1 時。當 `count` 變為 2 時，條件 `count < 2` 為 `False`，迴圈終止。",
+                hint: "追蹤 `count` 變數的變化，直到 `while` 條件為 `False`。"
+            },
+            {
+                question: "要建立一個無限迴圈，以下哪種方式是正確的？",
+                options: ["`while False:`", "`while 0:`", "`while True:`", "`while None:`"],
+                correctAnswer: 2,
+                explanation: "`True` 是一個永恆為真的布林值，所以 `while True:` 會創建一個無限迴圈，除非內部有 `break` 語句。",
+                hint: "`while` 迴圈的條件需要是什麼才能一直執行？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">x = 0\nwhile x < 5:\n    x += 1\n    if x == 3:\n        break\n    print(x)</code></pre>",
+                options: ["1\n2", "1\n2\n3", "1\n2\n3\n4\n5", "錯誤"],
+                correctAnswer: 0,
+                explanation: "當 `x` 變為 3 時，`break` 語句會立即終止迴圈。所以只會印出 1 和 2。",
+                hint: "`break` 語句的作用是什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">i = 0\nwhile i < 3:\n    i += 1\n    if i == 2:\n        continue\n    print(i)</code></pre>",
+                options: ["1\n2\n3", "1\n3", "0\n1\n3", "錯誤"],
+                correctAnswer: 1,
+                explanation: "當 `i` 變為 2 時，`continue` 語句會跳過當前迭代中 `print(i)` 的執行，直接進入下一次迴圈判斷。所以 2 不會被印出。",
+                hint: "`continue` 語句的作用是什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">count = 5\nwhile count > 0:\n    print(count)\n    count -= 2</code></pre>",
+                options: ["5\n3\n1", "5\n3\n1\n-1", "5\n4\n3\n2\n1", "錯誤"],
+                correctAnswer: 0,
+                explanation: "迴圈會依序印出 5、3、1。當 `count` 變為 -1 時，條件 `count > 0` 為 `False`，迴圈終止。",
+                hint: "追蹤 `count` 變數在每次迴圈後的遞減。"
+            },
+            {
+                question: "要確保 `while` 迴圈至少執行一次，即使條件一開始就為 `False`，您會怎麼做？",
+                options: ["使用 `do-while` 迴圈 (Python 沒有)", "在迴圈前預設執行一次", "將條件設為 `True` 並在內部判斷 `break`", "以上皆是"],
+                correctAnswer: 2,
+                explanation: "Python 沒有 `do-while` 迴圈。要模擬其行為，通常會使用 `while True` 結合內部條件判斷來 `break`，或者在迴圈前先執行一次程式碼。",
+                hint: "Python 的迴圈語法中，哪個可以確保至少執行一次？"
+            },
+
+            // Level 4: break, continue, pass, and nested loops
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">for i in range(3):\n    for j in range(2):\n        print(f\"({i},{j})\")</code></pre>",
+                options: ["(0,0)\n(0,1)\n(1,0)\n(1,1)\n(2,0)\n(2,1)", "(0,0)\n(1,1)\n(2,2)", "錯誤", "只有 (0,0)"],
+                correctAnswer: 0,
+                explanation: "這是一個巢狀迴圈。外層迴圈執行一次，內層迴圈就完整執行一次。`i` 從 0 到 2，`j` 從 0 到 1。",
+                hint: "巢狀迴圈的執行順序是外層每執行一次，內層就完整執行一遍。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">for i in range(5):\n    if i % 2 == 0:\n        continue\n    print(i)</code></pre>",
+                options: ["0\n2\n4", "1\n3", "0\n1\n2\n3\n4", "錯誤"],
+                correctAnswer: 1,
+                explanation: "當 `i` 是偶數時 (`i % 2 == 0` 為 `True`)，`continue` 會跳過 `print(i)`，直接進入下一次迭代。所以只會印出奇數 1 和 3。",
+                hint: "`continue` 會跳過當前迭代的剩餘部分。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">for char in \"hello\":\n    if char == 'l':\n        break\n    print(char)</code></pre>",
+                options: ["h\ne\nl\nl\no", "h\ne", "h\ne\nl", "錯誤"],
+                correctAnswer: 1,
+                explanation: "當 `char` 變為 `'l'` 時，`break` 語句會立即終止整個 `for` 迴圈。所以只會印出 `'h'` 和 `'e'`。",
+                hint: "`break` 會完全退出迴圈。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">num = 1\nwhile num < 5:\n    if num == 3:\n        num += 1\n        continue\n    print(num)\n    num += 1</code></pre>",
+                options: ["1\n2\n3\n4", "1\n2\n4", "1\n2\n3\n4\n5", "錯誤"],
+                correctAnswer: 1,
+                explanation: "當 `num` 為 3 時，進入 `if` 區塊，`num` 變成 4，然後 `continue` 跳過 `print(num)`，直接進入下一次迴圈。所以 3 不會被印出。",
+                hint: "追蹤 `num` 的值和 `continue` 的作用。"
+            },
+            {
+                question: "在 Python 中，`pass` 語句的作用是什麼？",
+                options: ["立即終止迴圈", "跳過當前迭代", "作為一個空操作的佔位符", "引發錯誤"],
+                correctAnswer: 2,
+                explanation: "`pass` 語句不做任何事情，它只是作為語法上需要一個語句時的佔位符。",
+                hint: "當您需要一個語句但不想讓它做任何事時，會用什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">for i in range(3):\n    if i == 1:\n        pass\n    else:\n        print(i)</code></pre>",
+                options: ["0\n1\n2", "0\n2", "1", "錯誤"],
+                correctAnswer: 1,
+                explanation: "當 `i` 為 1 時，`pass` 語句執行，不做任何事，然後進入 `else` 區塊之外。所以只有 `i` 為 0 和 2 時會被印出。",
+                hint: "`pass` 不會改變程式的執行流程。"
+            },
+
+            // Level 5: Complex Logic and Edge Cases
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">count = 0\nwhile count < 5:\n    if count % 2 == 0:\n        print(\"偶數\")\n    else:\n        print(\"奇數\")\n    count += 1</code></pre>",
+                options: ["偶數\n奇數\n偶數\n奇數\n偶數", "奇數\n偶數\n奇數\n偶數\n奇數", "偶數\n偶數\n偶數", "錯誤"],
+                correctAnswer: 0,
+                explanation: "迴圈從 `count = 0` 開始，每次遞增 1。會依序判斷 0 (偶數), 1 (奇數), 2 (偶數), 3 (奇數), 4 (偶數)。",
+                hint: "追蹤 `count` 的值和其奇偶性判斷。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">numbers = [1, 2, 3, 4]\nfor num in numbers:\n    if num % 2 == 0:\n        print(f\"{num} 是偶數\")\n        break\n    print(f\"{num} 是奇數\")</code></pre>",
+                options: ["1 是奇數\n2 是偶數", "1 是奇數\n2 是偶數\n3 是奇數\n4 是偶數", "2 是偶數", "錯誤"],
+                correctAnswer: 0,
+                explanation: "當 `num` 為 1 時，印出 `\"1 是奇數\"`。當 `num` 為 2 時，印出 `\"2 是偶數\"`，然後 `break` 終止迴圈。",
+                hint: "`break` 在迴圈中一旦被觸發，整個迴圈就會停止。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">items = [\"a\", \"b\", \"c\"]\nfor index, value in enumerate(items):\n    print(f\"{index}: {value}\")</code></pre>",
+                options: ["0: a\n1: b\n2: c", "a: 0\nb: 1\nc: 2", "錯誤", "a\nb\nc"],
+                correctAnswer: 0,
+                explanation: "`enumerate()` 函數會返回索引和值的元組。所以 `index` 依次是 0, 1, 2，`value` 依次是 `'a'`, `'b'`, `'c'`。",
+                hint: "`enumerate()` 函數的作用是什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">total = 0\nfor i in range(1, 4):\n    if i == 2:\n        continue\n    total += i\nprint(total)</code></pre>",
+                options: ["6", "4", "3", "錯誤"],
+                correctAnswer: 1,
+                explanation: "迴圈遍歷 1, 2, 3。當 `i` 為 2 時，`continue` 跳過 `total += i`。所以 `total` 只會加上 1 和 3，結果為 4。",
+                hint: "`continue` 會跳過哪些操作？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">data = [10, 20, 30]\nfor x in data:\n    if x > 25:\n        print(\"大於 25\")\n    else:\n        print(\"不大於 25\")</code></pre>",
+                options: ["不大於 25\n不大於 25\n大於 25", "大於 25\n不大於 25\n不大於 25", "不大於 25\n大於 25", "錯誤"],
+                correctAnswer: 0,
+                explanation: "10 不大於 25，20 不大於 25，30 大於 25。所以依序印出對應的結果。",
+                hint: "逐一檢查每個數字的判斷結果。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">count = 0\nwhile True:\n    print(count)\n    count += 1\n    if count >= 2:\n        break</code></pre>",
+                options: ["0\n1", "0\n1\n2", "無限迴圈", "錯誤"],
+                correctAnswer: 0,
+                explanation: "迴圈會印出 0 和 1。當 `count` 變為 2 時，`if count >= 2` 為 `True`，`break` 終止迴圈。所以 2 不會被印出。",
+                hint: "注意 `break` 語句在 `print` 之後還是之前執行。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">for i in range(2):\n    for j in range(2):\n        if i == j:\n            print(f\"相等: ({i},{j})\")\n        else:\n            print(f\"不相等: ({i},{j})\")</code></pre>",
+                options: ["相等: (0,0)\n不相等: (0,1)\n不相等: (1,0)\n相等: (1,1)", "相等: (0,0)\n相等: (1,1)", "不相等: (0,1)\n不相等: (1,0)", "錯誤"],
+                correctAnswer: 0,
+                explanation: "當 `i=0, j=0` 時，相等。當 `i=0, j=1` 時，不相等。當 `i=1, j=0` 時，不相等。當 `i=1, j=1` 時，相等。",
+                hint: "追蹤巢狀迴圈中 `i` 和 `j` 的所有組合。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">data = [1, 0, 3]\nfor x in data:\n    if x == 0:\n        print(\"零\")\n    elif x > 0:\n        print(\"正數\")\n    else:\n        print(\"負數\")</code></pre>",
+                options: ["正數\n零\n正數", "正數\n負數\n正數", "零\n正數\n負數", "錯誤"],
+                correctAnswer: 0,
+                explanation: "1 是正數，0 是零，3 是正數。",
+                hint: "逐一判斷每個數字的條件。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">count = 0\nwhile count < 3:\n    if count == 1:\n        pass\n    print(count)\n    count += 1</code></pre>",
+                options: ["0\n1\n2", "0\n2", "1", "錯誤"],
+                correctAnswer: 0,
+                explanation: "`pass` 語句不做任何事情。所以迴圈會正常執行並印出 0, 1, 2。",
+                hint: "`pass` 語句對程式流程沒有影響。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">for i in range(2, -1, -1):\n    print(i)</code></pre>",
+                options: ["2\n1\n0", "0\n1\n2", "2\n1", "錯誤"],
+                correctAnswer: 0,
+                explanation: "`range(2, -1, -1)` 表示從 2 開始，到 -1 之前（不包含 -1），步長為 -1。所以序列是 2, 1, 0。",
+                hint: "`range()` 函數可以接受負數步長來倒序遍歷。"
+            }
+        ];
+
+        // Game State Variables
+        let questions = []; // This will hold the 10 selected questions for the current game
+        let currentQuestionIndex = 0;
+        let lives = 3;
+        let score = 0;
+        const NUM_QUESTIONS_PER_GAME = 10; // Number of questions to play per game
+
+        // DOM Elements
+        const gameScreen = document.getElementById('game-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const gameCompleteScreen = document.getElementById('game-complete-screen');
+
+        const livesDisplay = document.getElementById('lives-display');
+        const questionArea = document.getElementById('question-area');
+        const checkAnswerBtn = document.getElementById('check-answer-btn');
+        const getHintBtn = document.getElementById('get-hint-btn'); // Hint button
+        const hintArea = document.getElementById('hint-area'); // Hint display area
+        const hintContent = document.getElementById('hint-content'); // Hint text content
+        const feedbackExplanationArea = document.getElementById('feedback-explanation-area');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const messageBox = document.getElementById('message-box'); // Custom message box
+
+        const gameOverScore = document.getElementById('game-over-score');
+        const restartGameBtn = document.getElementById('restart-game-btn');
+        const gameCompleteScore = document.getElementById('game-complete-score');
+        const playAgainBtn = document.getElementById('play-again-btn');
+
+        // Function to show a temporary message
+        function showMessage(message, type = 'info') {
+            messageBox.textContent = message;
+            messageBox.className = `message-box show ${type}`; // Add type class
+            clearTimeout(messageBox.timeoutId);
+            messageBox.timeoutId = setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 3000); // Message disappears after 3 seconds
+        }
+
+        // Function to update lives display
+        function updateLivesDisplay() {
+            let heartsHtml = '生命值: ';
+            for (let i = 0; i < 3; i++) {
+                if (i < lives) {
+                    // Full heart SVG
+                    heartsHtml += `<svg class="heart-icon" viewBox="0 0 24 24" fill="currentColor" style="color: #ef4444;">
+                        <path d="M12 21.35l-1.84-1.66C4.07 14.32 2 12.43 2 10.25 2 7.74 3.86 5.6 6.31 5.6c1.74 0 3.41.81 4.5 2.15C11.69 6.41 13.36 5.6 15.19 5.6c2.45 0 4.31 2.14 4.31 4.6 0 2.18-2.07 4.07-8.16 7.44L12 21.35z"/>
+                    </svg>`;
+                } else {
+                    // Empty heart SVG (outline)
+                    heartsHtml += `<svg class="heart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8;">
+                        <path d="M12 21.35l-1.84-1.66C4.07 14.32 2 12.43 2 10.25 2 7.74 3.86 5.6 6.31 5.6c1.74 0 3.41.81 4.5 2.15C11.69 6.41 13.36 5.6 15.19 5.6c2.45 0 4.31 2.14 4.31 4.6 0 2.18-2.07 4.07-8.16 7.44L12 21.35z"/>
+                    </svg>`;
+                }
+            }
+            livesDisplay.innerHTML = heartsHtml;
+        }
+
+        // Function to shuffle an array (Fisher-Yates algorithm)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+            return array;
+        }
+
+        // Function to render the current question
+        function renderQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                gameComplete();
+                return;
+            }
+
+            const q = questions[currentQuestionIndex];
+            questionArea.innerHTML = `
+                <p class="text-xl font-semibold text-gray-900 mb-4">第 ${currentQuestionIndex + 1} 題: ${q.question}</p>
+                <div class="space-y-3">
+                    ${q.options.map((option, optIndex) => `
+                        <label class="flex items-center cursor-pointer p-2 rounded-md hover:bg-blue-50 transition duration-150 ease-in-out">
+                            <input type="radio" name="currentQuestion" value="${optIndex}" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500 transition duration-150 ease-in-out">
+                            <span class="ml-3 text-gray-700 text-base">${option}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+
+            // Reset feedback area, hint area and buttons
+            feedbackExplanationArea.classList.add('hidden');
+            feedbackExplanationArea.innerHTML = '';
+            hintArea.classList.add('hidden'); // Hide hint area on new question
+            hintContent.textContent = ''; // Clear hint content
+            nextQuestionBtn.classList.add('hidden');
+            checkAnswerBtn.classList.remove('hidden');
+            checkAnswerBtn.disabled = false; // Enable check button
+            getHintBtn.disabled = false; // Enable hint button
+            updateLivesDisplay(); // Update lives display for the new game
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+
+            // Re-highlight code blocks if any in the question text
+            Prism.highlightAll();
+        }
+
+        // Function to check the answer
+        function checkAnswer() {
+            const selectedOption = document.querySelector('input[name="currentQuestion"]:checked');
+            if (!selectedOption) {
+                showMessage('請選擇一個答案！', 'error'); // Use custom message box
+                return;
+            }
+
+            checkAnswerBtn.disabled = true; // Disable check button after selection
+            getHintBtn.disabled = true; // Disable hint button after checking answer
+            const userAnswer = parseInt(selectedOption.value);
+            const q = questions[currentQuestionIndex];
+
+            feedbackExplanationArea.classList.remove('hidden');
+            feedbackExplanationArea.innerHTML = ''; // Clear previous content
+            hintArea.classList.add('hidden'); // Hide hint area when answer is checked
+
+            if (userAnswer === q.correctAnswer) {
+                score++;
+                feedbackExplanationArea.classList.remove('bg-red-50', 'bg-yellow-50');
+                feedbackExplanationArea.classList.add('bg-green-50', 'border', 'border-green-200');
+                feedbackExplanationArea.innerHTML = `
+                    <p class="font-bold text-green-700 text-lg mb-2">正確！</p>
+                    <p class="text-gray-700 mb-2">您的答案: ${q.options[userAnswer]}</p>
+                    <p class="font-semibold text-gray-800 mb-2">解釋:</p>
+                    <p class="text-gray-600">${q.explanation}</p>
+                `;
+            } else {
+                lives--;
+                feedbackExplanationArea.classList.remove('bg-green-50', 'bg-yellow-50');
+                feedbackExplanationArea.classList.add('bg-red-50', 'border', 'border-red-200');
+                feedbackExplanationArea.innerHTML = `
+                    <p class="font-bold text-red-700 text-lg mb-2">錯誤！</p>
+                    <p class="text-gray-700 mb-2">您的答案: ${q.options[userAnswer]}</p>
+                    <p class="text-gray-700 mb-2">正確答案: ${q.options[q.correctAnswer]}</p>
+                    <p class="font-semibold text-gray-800 mb-2">解釋:</p>
+                    <p class="text-gray-600">${q.explanation}</p>
+                `;
+                updateLivesDisplay(); // Update lives display immediately
+            }
+
+            nextQuestionBtn.classList.remove('hidden'); // Show next question button
+            // If lives run out, show game over screen
+            if (lives <= 0) {
+                gameOver();
+            } else if (currentQuestionIndex === questions.length - 1) { // Check if it's the last question
+                gameComplete();
+            }
+            // Re-highlight code blocks in explanation if any
+            Prism.highlightAll();
+        }
+
+        // Function to move to the next question
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                renderQuestion();
+            } else {
+                gameComplete();
+            }
+        }
+
+        // Function to handle game over
+        function gameOver() {
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.remove('hidden');
+            gameCompleteScreen.classList.add('hidden');
+            gameOverScore.textContent = `您答對了 ${score} 題。`;
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+        }
+
+        // Function to handle game complete
+        function gameComplete() {
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameCompleteScreen.classList.remove('hidden');
+            gameCompleteScore.textContent = `您答對了 ${score} / ${questions.length} 題。`;
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+        }
+
+        // Function to start/restart the game
+        function startGame() {
+            // Shuffle all questions and select the first NUM_QUESTIONS_PER_GAME
+            questions = shuffleArray([...allQuestions]).slice(0, NUM_QUESTIONS_PER_GAME);
+
+            currentQuestionIndex = 0;
+            lives = 3;
+            score = 0;
+            gameScreen.classList.remove('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameCompleteScreen.classList.add('hidden');
+            renderQuestion();
+        }
+
+        // Function to get a hint (now directly from questions array)
+        function getHint() {
+            const currentQuestion = questions[currentQuestionIndex];
+            if (currentQuestion.hint) {
+                hintArea.classList.remove('hidden'); // Show hint area
+                hintContent.textContent = currentQuestion.hint; // Display the embedded hint
+            } else {
+                hintArea.classList.remove('hidden');
+                hintContent.textContent = "抱歉，此題沒有提示。";
+            }
+            getHintBtn.disabled = true; // Disable hint button after showing hint
+        }
+
+
+        // Event Listeners
+        checkAnswerBtn.addEventListener('click', checkAnswer);
+        nextQuestionBtn.addEventListener('click', nextQuestion);
+        restartGameBtn.addEventListener('click', startGame);
+        playAgainBtn.addEventListener('click', startGame);
+        getHintBtn.addEventListener('click', getHint); // Event listener for hint button
+
+        // Initial game start when the page loads
+        document.addEventListener('DOMContentLoaded', startGame);
+    </script>
+</body>
+</html>

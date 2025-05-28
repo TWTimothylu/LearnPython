@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python 流程控制教學 - 完整網站</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <style>
+        /* Custom font for better readability */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            scroll-behavior: smooth; /* Smooth scrolling for anchor links */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        /* Style for code blocks - Prism.js will handle background and text colors */
+        pre {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto; /* Enable horizontal scrolling for long lines */
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; /* Monospace font for code */
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-top: 0.75rem;
+            margin-bottom: 2.5rem; /* Adjusted for better spacing */
+        }
+        code {
+            font-family: inherit; /* Inherit font from pre */
+            background-color: #e2e8f0; /* Light background for inline code */
+            color: #333; /* Darker text for inline code */
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+        }
+        /* Ensure Prism.js's background is applied correctly to pre */
+        pre[class*="language-"] {
+            background-color: #2d2d2d; /* Re-apply dark background for the pre block, as Prism's theme might only target code */
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center p-4">
+    <div class="w-full max-w-5xl bg-white p-6 sm:p-8 md:p-10 rounded-xl shadow-2xl border border-gray-200">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800 leading-tight mb-4">
+                Python 流程控制 (Flow Control) 教學
+            </h1>
+            <p class="text-xl text-gray-600">讓您的程式碼根據條件做出決策，重複執行任務</p>
+        </header>
+
+        <nav class="mb-10 p-4 bg-blue-100 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold text-blue-800 mb-4 text-center">目錄</h2>
+            <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <li><a href="#section1" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">1. 什麼是流程控制？</a></li>
+                <li><a href="#section2" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">2. 條件判斷語句</a></li>
+                <li><a href="#section3" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">3. 迴圈語句</a></li>
+                <li><a href="#section4" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">4. `break` 和 `continue`</a></li>
+                <li><a href="#section5" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">5. `pass` 語句</a></li>
+            </ul>
+        </nav>
+
+        <section id="section1" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">1. 什麼是流程控制 (Flow Control)？</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                在程式設計中，**流程控制 (Flow Control)** 是指程式碼執行的順序和邏輯。它允許您的程式根據特定條件做出決策、重複執行某段程式碼，或者跳過某些部分，而不是簡單地從上到下直線執行。
+            </p>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                流程控制語句是所有程式語言的基石，它們賦予了程式智慧和動態性。Python 提供了多種流程控制語句：
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li>**條件判斷語句 (Conditional Statements)**：<code>if</code>, <code>elif</code>, <code>else</code></li>
+                <li>**迴圈語句 (Looping Statements)**：<code>for</code>, <code>while</code></li>
+                <li>**跳轉語句 (Jump Statements)**：<code>break</code>, <code>continue</code>, <code>pass</code></li>
+            </ul>
+        </section>
+
+        <section id="section2" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">2. 條件判斷語句 (Conditional Statements)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                條件判斷語句允許您的程式碼根據條件的真假來執行不同的程式碼區塊。
+            </p>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">2.1 `if` 語句</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                <code>if</code> 語句是最基本的條件判斷語句。如果條件為 <code>True</code>，則執行 <code>if</code> 區塊內的程式碼。
+            </p>
+            <pre><code class="language-python">score = 90
+if score >= 60:
+    print("及格了！") # 輸出: 及格了！
+
+temperature = 20
+if temperature > 25:
+    print("天氣炎熱") # 這裡不會執行
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">2.2 `if-else` 語句</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                <code>if-else</code> 語句用於在條件為 <code>True</code> 或 <code>False</code> 時執行不同的程式碼區塊。
+            </p>
+            <pre><code class="language-python">num = 7
+if num % 2 == 0:
+    print("這是偶數")
+else:
+    print("這是奇數") # 輸出: 這是奇數
+
+age = 17
+if age >= 18:
+    print("已成年")
+else:
+    print("未成年") # 輸出: 未成年
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">2.3 `if-elif-else` 語句</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                當您需要檢查多個條件時，可以使用 <code>elif</code> (else if 的縮寫)。程式碼會依序檢查條件，一旦有一個條件為 <code>True</code>，其對應的區塊就會執行，然後跳過其餘的 <code>elif</code> 和 <code>else</code> 區塊。
+            </p>
+            <pre><code class="language-python">grade = 85
+
+if grade >= 90:
+    print("等級：A")
+elif grade >= 80:
+    print("等級：B") # 輸出: 等級：B
+elif grade >= 70:
+    print("等級：C")
+else:
+    print("等級：D")
+
+# 另一個例子
+traffic_light = "yellow"
+if traffic_light == "green":
+    print("通行")
+elif traffic_light == "yellow":
+    print("準備停止") # 輸出: 準備停止
+else:
+    print("停止")
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">2.4 巢狀 `if` 語句 (Nested `if` Statements)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                您可以在一個 <code>if</code> 或 <code>elif</code> 或 <code>else</code> 區塊內部再放置另一個 <code>if</code> 語句，形成巢狀結構。
+            </p>
+            <pre><code class="language-python">username = "admin"
+password = "123"
+
+if username == "admin":
+    if password == "123":
+        print("登入成功！") # 輸出: 登入成功！
+    else:
+        print("密碼錯誤。")
+else:
+    print("使用者名稱不存在。")
+
+# 判斷是否為正偶數
+num = 6
+if num > 0:
+    if num % 2 == 0:
+        print("這是個正偶數。") # 輸出: 這是個正偶數。
+    else:
+        print("這是個正奇數。")
+else:
+    print("這不是個正數。")
+</code></pre>
+        </section>
+
+        <section id="section3" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">3. 迴圈語句 (Looping Statements)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                迴圈語句用於重複執行一段程式碼，直到滿足特定條件為止。
+            </p>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">3.1 `for` 迴圈</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                <code>for</code> 迴圈用於遍歷 (iterate) 任何可迭代物件 (iterable)，例如列表 (List)、元組 (Tuple)、字串 (String) 或 <code>range()</code> 函數生成的序列。
+            </p>
+            <pre><code class="language-python"># 遍歷列表 (List)
+fruits = ["apple", "banana", "cherry"]
+for fruit in fruits:
+    print(fruit)
+# 輸出:
+# apple
+# banana
+# cherry
+
+# 遍歷字串 (String)
+for char in "Python":
+    print(char)
+# 輸出:
+# P
+# y
+# t
+# h
+# o
+# n
+
+# 使用 range() 函數遍歷數字序列
+# range(stop): 從 0 到 stop-1
+for i in range(5):
+    print(i) # 輸出: 0, 1, 2, 3, 4
+
+# range(start, stop): 從 start 到 stop-1
+for i in range(1, 4):
+    print(i) # 輸出: 1, 2, 3
+
+# range(start, stop, step): 從 start 到 stop-1，每次跳過 step
+for i in range(0, 10, 2):
+    print(i) # 輸出: 0, 2, 4, 6, 8
+
+# 計算列表 (List) 元素的總和
+numbers = [10, 20, 30, 40]
+total = 0
+for num in numbers:
+    total += num
+print(f"總和: {total}") # 輸出: 總和: 100
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">3.2 `while` 迴圈</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                <code>while</code> 迴圈會只要條件為 <code>True</code> 就一直重複執行程式碼區塊。
+            </p>
+            <pre><code class="language-python"># 基本 while 迴圈
+count = 0
+while count < 3:
+    print(f"計數: {count}")
+    count += 1
+# 輸出:
+# 計數: 0
+# 計數: 1
+# 計數: 2
+
+# 無限迴圈 (Infinite Loop) 和如何避免
+# 下面的程式碼會一直執行，除非您手動停止它 (Ctrl+C)
+# 注意：請不要在沒有停止條件的情況下執行 True: 的迴圈！
+# while True:
+#     print("我會永遠執行！")
+#     break # 只有加上 break 才能停止
+
+# 避免無限迴圈的關鍵是確保條件最終會變為 False
+num_guesses = 0
+correct_answer = 5
+user_guess = 0
+
+while user_guess != correct_answer:
+    user_guess = int(input("猜一個數字 (1-10): ")) # 模擬使用者輸入
+    num_guesses += 1
+    if user_guess == correct_answer:
+        print(f"恭喜！您猜對了，總共猜了 {num_guesses} 次。")
+    else:
+        print("猜錯了，請再試一次。")
+</code></pre>
+        </section>
+
+        <section id="section4" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">4. `break` 和 `continue` 語句</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                這兩個語句用於在迴圈執行過程中改變其預設的流程。
+            </p>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">4.1 `break` 語句</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                <code>break</code> 語句用於**立即終止**當前的迴圈 (<code>for</code> 或 <code>while</code>)，並跳到迴圈後的第一個語句。
+            </p>
+            <pre><code class="language-python"># 在 for 迴圈中使用 break
+for i in range(10):
+    if i == 5:
+        print("找到 5 了，迴圈終止！")
+        break # 遇到 5 就跳出迴圈
+    print(f"當前數字: {i}")
+# 輸出:
+# 當前數字: 0
+# 當前數字: 1
+# 當前數字: 2
+# 當前數字: 3
+# 當前數字: 4
+# 找到 5 了，迴圈終止！
+
+# 在 while 迴圈中使用 break
+count = 0
+while True: # 無限迴圈
+    print(f"計數: {count}")
+    count += 1
+    if count == 3:
+        print("計數達到 3，退出迴圈。")
+        break # 條件達成時退出
+# 輸出:
+# 計數: 0
+# 計數: 1
+# 計數: 2
+# 計數達到 3，退出迴圈。
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">4.2 `continue` 語句</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                <code>continue</code> 語句用於**跳過**當前迴圈迭代中其餘的程式碼，並立即進入下一次迴圈迭代的判斷。
+            </p>
+            <pre><code class="language-python"># 在 for 迴圈中使用 continue
+for i in range(5):
+    if i == 2:
+        print("跳過數字 2 的處理。")
+        continue # 跳過 i=2 時，print(i) 的執行
+    print(f"處理數字: {i}")
+# 輸出:
+# 處理數字: 0
+# 處理數字: 1
+# 跳過數字 2 的處理。
+# 處理數字: 3
+# 處理數字: 4
+
+# 在 while 迴圈中使用 continue
+count = 0
+while count < 5:
+    count += 1
+    if count % 2 != 0: # 如果是奇數
+        print(f"跳過奇數 {count} 的處理。")
+        continue # 跳過奇數的後續程式碼
+    print(f"處理偶數: {count}")
+# 輸出:
+# 跳過奇數 1 的處理。
+# 處理偶數: 2
+# 跳過奇數 3 的處理。
+# 處理偶數: 4
+# 跳過奇數 5 的處理。
+</code></pre>
+        </section>
+
+        <section id="section5" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">5. `pass` 語句</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                <code>pass</code> 語句是一個空操作 (no-operation) 語句。當語法要求一個語句但您暫時不想寫任何程式碼時，可以使用它作為佔位符 (placeholder)。它不做任何事情。
+            </p>
+            <pre><code class="language-python"># 在條件判斷中使用 pass
+age = 15
+if age >= 18:
+    pass # 這裡目前不做任何事
+else:
+    print("未成年人。") # 輸出: 未成年人。
+
+# 在函式 (function) 中使用 pass (定義空函式)
+def my_function():
+    pass # 函式 (function) 暫時為空
+
+my_function() # 執行不會有任何效果或錯誤
+
+# 在迴圈中使用 pass
+for i in range(5):
+    if i % 2 == 0:
+        pass # 偶數暫時不做處理
+    else:
+        print(f"奇數: {i}")
+# 輸出:
+# 奇數: 1
+# 奇數: 3
+</code></pre>
+        </section>
+
+        <footer class="text-center text-gray-500 text-sm mt-10 p-4 border-t border-gray-200">
+            &copy; 2025 Python 流程控制教學. 版權所有。
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python 清單 (List) 教學 - 完整網站</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <style>
+        /* Custom font for better readability */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            scroll-behavior: smooth; /* Smooth scrolling for anchor links */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        /* Style for code blocks - Prism.js will handle background and text colors */
+        pre {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto; /* Enable horizontal scrolling for long lines */
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; /* Monospace font for code */
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-top: 0.75rem;
+            margin-bottom: 2.5rem; /* Adjusted for better spacing */
+        }
+        code {
+            font-family: inherit; /* Inherit font from pre */
+            background-color: #e2e8f0; /* Light background for inline code */
+            color: #333; /* Darker text for inline code */
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+        }
+        /* Ensure Prism.js's background is applied correctly to pre */
+        pre[class*="language-"] {
+            background-color: #2d2d2d; /* Re-apply dark background for the pre block, as Prism's theme might only target code */
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center p-4">
+    <div class="w-full max-w-5xl bg-white p-6 sm:p-8 md:p-10 rounded-xl shadow-2xl border border-gray-200">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800 leading-tight mb-4">
+                Python 清單 (List) 教學
+            </h1>
+            <p class="text-xl text-gray-600">靈活的資料集合：學習 Python 清單的建立、操作與應用</p>
+        </header>
+
+        <nav class="mb-10 p-4 bg-blue-100 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold text-blue-800 mb-4 text-center">目錄</h2>
+            <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <li><a href="#section1" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">1. 什麼是清單？</a></li>
+                <li><a href="#section2" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">2. 建立清單</a></li>
+                <li><a href="#section3" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">3. 存取清單元素</a></li>
+                <li><a href="#section4" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">4. 清單切片</a></li>
+                <li><a href="#section5" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">5. 修改清單元素</a></li>
+                <li><a href="#section6" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">6. 新增清單元素</a></li>
+                <li><a href="#section7" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">7. 刪除清單元素</a></li>
+                <li><a href="#section8" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">8. 常見清單方法</a></li>
+                <li><a href="#section9" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">9. 遍歷清單</a></li>
+                <li><a href="#section10" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">10. 巢狀清單</a></li>
+            </ul>
+        </nav>
+
+        <section id="section1" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">1. 什麼是清單 (List)？</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                Python 清單 (List) 是一種<strong>有序 (ordered)</strong> 且<strong>可變 (mutable)</strong> 的資料集合，可以儲存任何資料型態 (Data Type) 的元素，包括數字、字串 (String)、布林值，甚至是其他清單 (List) 或字典 (Dictionary)。
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><strong>有序 (Ordered)</strong>：清單中的元素有固定的順序，這個順序不會改變。</li>
+                <li><strong>可變 (Mutable)</strong>：清單的內容可以在建立後被修改（新增、刪除、修改元素）。</li>
+                <li><strong>異質性 (Heterogeneous)</strong>：清單可以包含不同資料型態 (Data Type) 的元素。</li>
+                <li><strong>可索引 (Indexable)</strong>：可以透過索引值 (index) 存取清單中的元素。</li>
+            </ul>
+        </section>
+
+        <section id="section2" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">2. 建立清單 (Creating Lists)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                您可以使用方括號 <code>[]</code> 來建立清單，並在其中放置元素，元素之間用逗號 <code>,</code> 分隔。
+            </p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">建立空清單</h3>
+            <pre><code class="language-python">empty_list = []
+print(empty_list) # 輸出: []
+print(type(empty_list)) # 輸出: &lt;class 'list'&gt;
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">建立帶有元素的清單</h3>
+            <pre><code class="language-python"># 數字清單
+numbers = [1, 2, 3, 4, 5]
+print(numbers) # 輸出: [1, 2, 3, 4, 5]
+
+# 字串 (String) 清單
+fruits = ["apple", "banana", "cherry"]
+print(fruits) # 輸出: ['apple', 'banana', 'cherry']
+
+# 混合資料型態 (Data Type) 的清單
+mixed_list = [1, "hello", 3.14, True]
+print(mixed_list) # 輸出: [1, 'hello', 3.14, True]
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">使用 `list()` 函數建立清單</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                您也可以使用內建的 <code>list()</code> 函數將其他可迭代物件 (iterable) 轉換為清單 (List)。
+            </p>
+            <pre><code class="language-python"># 從字串 (String) 建立清單
+list_from_string = list("Python")
+print(list_from_string) # 輸出: ['P', 'y', 't', 'h', 'o', 'n']
+
+# 從元組 (Tuple) 建立清單
+list_from_tuple = list((10, 20, 30))
+print(list_from_tuple) # 輸出: [10, 20, 30]
+</code></pre>
+        </section>
+
+        <section id="section3" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">3. 存取清單元素 (Accessing List Elements)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                您可以透過索引值 (index) 來存取清單 (List) 中的單個元素。Python 的索引是<strong>從 0 開始</strong>的。
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><strong>正向索引：</strong> 從左到右，第一個元素的索引是 0。</li>
+                <li><strong>負向索引：</strong> 從右到左，最後一個元素的索引是 -1。</li>
+            </ul>
+            <pre><code class="language-python">my_list = ["apple", "banana", "cherry", "date"]
+
+# 正向索引
+print(my_list[0])  # 輸出: apple
+print(my_list[1])  # 輸出: banana
+print(my_list[3])  # 輸出: date
+
+# 負向索引
+print(my_list[-1]) # 輸出: date (最後一個元素)
+print(my_list[-2]) # 輸出: cherry (倒數第二個元素)
+
+# 嘗試存取超出範圍的索引會引發 IndexError
+# print(my_list[4]) # 這會引發 IndexError: list index out of range
+</code></pre>
+        </section>
+
+        <section id="section4" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">4. 清單切片 (List Slicing)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                切片允許您從清單 (List) 中提取一個子清單 (sub-list)。語法是 <code>[start:end:step]</code>。
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><code>start</code>：切片的起始索引（包含）。如果省略，預設為 0。</li>
+                <li><code>end</code>：切片的結束索引（不包含）。如果省略，預設為清單 (List) 的結尾。</li>
+                <li><code>step</code>：步長（每次跳過多少元素）。如果省略，預設為 1。</li>
+            </ul>
+            <pre><code class="language-python">numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+# 基本切片
+print(numbers[2:5])   # 輸出: [2, 3, 4] (從索引 2 到 4)
+
+# 省略起始索引 (從開頭開始)
+print(numbers[:3])    # 輸出: [0, 1, 2]
+
+# 省略結束索引 (到結尾結束)
+print(numbers[7:])    # 輸出: [7, 8, 9]
+
+# 複製整個清單 (List)
+print(numbers[:])     # 輸出: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] (會建立一個新的清單物件)
+
+# 使用步長 (每隔一個元素)
+print(numbers[0:10:2]) # 輸出: [0, 2, 4, 6, 8]
+
+# 反轉清單 (List)
+print(numbers[::-1])  # 輸出: [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+</code></pre>
+        </section>
+
+        <section id="section5" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">5. 修改清單元素 (Modifying List Elements)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                由於清單 (List) 是<strong>可變 (mutable)</strong> 的，您可以直接修改其內容。
+            </p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">透過索引修改單個元素</h3>
+            <pre><code class="language-python">fruits = ["apple", "banana", "cherry"]
+fruits[1] = "orange" # 將 'banana' 修改為 'orange'
+print(fruits) # 輸出: ['apple', 'orange', 'cherry']
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">透過切片修改多個元素</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                您可以使用切片來替換、插入或刪除清單 (List) 中的多個元素。
+            </p>
+            <pre><code class="language-python">my_list = [1, 2, 3, 4, 5]
+
+# 替換多個元素
+my_list[1:4] = [10, 20, 30] # 將索引 1 到 3 的元素替換為 [10, 20, 30]
+print(my_list) # 輸出: [1, 10, 20, 30, 5]
+
+# 插入多個元素 (替換空切片)
+my_list = [1, 2, 3, 4, 5]
+my_list[2:2] = [99, 88] # 在索引 2 的位置插入 [99, 88]
+print(my_list) # 輸出: [1, 2, 99, 88, 3, 4, 5]
+
+# 刪除多個元素 (替換為空清單)
+my_list = [1, 2, 3, 4, 5]
+my_list[1:4] = [] # 刪除索引 1 到 3 的元素
+print(my_list) # 輸出: [1, 5]
+</code></pre>
+        </section>
+
+        <section id="section6" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">6. 新增清單元素 (Adding List Elements)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                有多種方法可以向清單 (List) 中新增元素。
+            </p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">6.1 `append()`：在清單末尾新增單個元素</h3>
+            <pre><code class="language-python">fruits = ["apple", "banana"]
+fruits.append("cherry")
+print(fruits) # 輸出: ['apple', 'banana', 'cherry']
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">6.2 `insert()`：在指定位置插入單個元素</h3>
+            <pre><code class="language-python">numbers = [1, 2, 4, 5]
+numbers.insert(2, 3) # 在索引 2 的位置插入 3
+print(numbers) # 輸出: [1, 2, 3, 4, 5]
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">6.3 `extend()`：將另一個可迭代物件的元素新增到清單末尾</h3>
+            <pre><code class="language-python">list1 = [1, 2]
+list2 = [3, 4]
+list1.extend(list2)
+print(list1) # 輸出: [1, 2, 3, 4]
+
+# extend 也可以用來新增字串 (String) 的每個字元
+list3 = ['a', 'b']
+list3.extend("cd")
+print(list3) # 輸出: ['a', 'b', 'c', 'd']
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">6.4 `+` 運算符：連接兩個清單 (List)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                使用 <code>+</code> 運算符會建立一個包含兩個清單 (List) 元素的新清單 (List)。
+            </p>
+            <pre><code class="language-python">list_a = [1, 2]
+list_b = [3, 4]
+combined_list = list_a + list_b
+print(combined_list) # 輸出: [1, 2, 3, 4]
+print(list_a) # 輸出: [1, 2] (list_a 不受影響，因為創建了新清單)
+</code></pre>
+        </section>
+
+        <section id="section7" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">7. 刪除清單元素 (Deleting List Elements)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                有多種方法可以從清單 (List) 中刪除元素。
+            </p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">7.1 `del` 關鍵字：刪除指定索引或切片，或整個清單 (List)</h3>
+            <pre><code class="language-python">my_list = ["apple", "banana", "cherry"]
+del my_list[1] # 刪除索引為 1 的元素 ('banana')
+print(my_list) # 輸出: ['apple', 'cherry']
+
+my_list2 = [1, 2, 3, 4, 5]
+del my_list2[1:4] # 刪除索引 1 到 3 的元素 ([2, 3, 4])
+print(my_list2) # 輸出: [1, 5]
+
+# 刪除整個清單 (List)
+# del my_list2 # 執行後 my_list2 變數將不再存在
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">7.2 `remove()`：刪除清單中第一個匹配的元素</h3>
+            <pre><code class="language-python">fruits = ["apple", "banana", "cherry", "banana"]
+fruits.remove("banana") # 刪除第一個 'banana'
+print(fruits) # 輸出: ['apple', 'cherry', 'banana']
+
+# 如果元素不存在，會引發 ValueError
+# fruits.remove("grape") # 這會引發 ValueError
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">7.3 `pop()`：刪除並返回指定索引的元素（預設為最後一個）</h3>
+            <pre><code class="language-python">numbers = [10, 20, 30, 40]
+removed_item = numbers.pop(1) # 刪除索引為 1 的元素 (20)
+print(removed_item) # 輸出: 20
+print(numbers)      # 輸出: [10, 30, 40]
+
+last_item = numbers.pop() # 刪除並返回最後一個元素 (40)
+print(last_item)    # 輸出: 40
+print(numbers)      # 輸出: [10, 30]
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">7.4 `clear()`：清空清單 (List) 中的所有元素</h3>
+            <pre><code class="language-python">my_list = [1, 2, 3]
+my_list.clear()
+print(my_list) # 輸出: []
+</code></pre>
+        </section>
+
+        <section id="section8" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">8. 常見清單方法 (Common List Methods)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                清單 (List) 物件提供了許多實用的方法來操作和檢視其內容。
+            </p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">8.1 `len()`：取得清單 (List) 長度 (Length)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                內建函數 <code>len()</code> 用於返回清單 (List) 中元素的數量。
+            </p>
+            <pre><code class="language-python">my_list = ["a", "b", "c"]
+print(len(my_list)) # 輸出: 3
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">8.2 `count()`：計算元素出現次數</h3>
+            <pre><code class="language-python">numbers = [1, 2, 2, 3, 2, 4]
+print(numbers.count(2)) # 輸出: 3
+print(numbers.count(5)) # 輸出: 0
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">8.3 `index()`：查找元素索引值 (Index)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                返回指定元素第一次出現的索引值 (index)。如果元素不存在，會引發 <code>ValueError</code>。
+            </p>
+            <pre><code class="language-python">fruits = ["apple", "banana", "cherry"]
+print(fruits.index("banana")) # 輸出: 1
+
+# print(fruits.index("grape")) # 這會引發 ValueError
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">8.4 `sort()`：排序清單 (List)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                <strong>原地 (in-place) 排序</strong>清單 (List) 中的元素（即直接修改原清單），預設為升序。
+            </p>
+            <pre><code class="language-python">numbers = [3, 1, 4, 1, 5, 9, 2]
+numbers.sort()
+print(numbers) # 輸出: [1, 1, 2, 3, 4, 5, 9]
+
+# 降序排序
+numbers.sort(reverse=True)
+print(numbers) # 輸出: [9, 5, 4, 3, 2, 1, 1]
+
+# sorted() 函數：返回一個新的排序清單 (List)，不修改原清單
+original_list = [3, 1, 4]
+sorted_list = sorted(original_list)
+print(original_list) # 輸出: [3, 1, 4]
+print(sorted_list)   # 輸出: [1, 3, 4]
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">8.5 `reverse()`：反轉清單 (List)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                <strong>原地 (in-place) 反轉</strong>清單 (List) 中元素的順序。
+            </p>
+            <pre><code class="language-python">my_list = [1, 2, 3, 4, 5]
+my_list.reverse()
+print(my_list) # 輸出: [5, 4, 3, 2, 1]
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">8.6 `copy()`：複製清單 (List)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                返回清單 (List) 的一個淺拷貝 (shallow copy)。
+            </p>
+            <pre><code class="language-python">original_list = [1, 2, 3]
+copied_list = original_list.copy()
+print(copied_list) # 輸出: [1, 2, 3]
+
+copied_list[0] = 99
+print(original_list) # 輸出: [1, 2, 3] (原清單不受影響)
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">8.7 `min()`, `max()`, `sum()`：取得最小值、最大值、總和</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                這些是內建函數，適用於數字清單 (List)。
+            </p>
+            <pre><code class="language-python">numbers = [10, 5, 20, 15]
+print(min(numbers)) # 輸出: 5
+print(max(numbers)) # 輸出: 20
+print(sum(numbers)) # 輸出: 50
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">8.8 `in` 運算符：檢查元素是否存在</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                用於檢查特定元素是否存在於清單中，返回布林值。
+            </p>
+            <pre><code class="language-python">fruits = ["apple", "banana"]
+print("apple" in fruits) # 輸出: True
+print("grape" in fruits) # 輸出: False
+</code></pre>
+        </section>
+
+        <section id="section9" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">9. 遍歷清單 (Iterating Through Lists)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                您可以使用 <code>for</code> 迴圈來遍歷清單 (List) 中的每個元素。
+            </p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">9.1 直接遍歷元素</h3>
+            <pre><code class="language-python">fruits = ["apple", "banana", "cherry"]
+for fruit in fruits:
+    print(fruit)
+# 輸出:
+# apple
+# banana
+# cherry
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">9.2 遍歷索引和元素 (使用 `enumerate()`)</h3>
+            <pre><code class="language-python">my_list = ["a", "b", "c"]
+for index, value in enumerate(my_list):
+    print(f"索引 {index}: 元素 {value}")
+# 輸出:
+# 索引 0: 元素 a
+# 索引 1: 元素 b
+# 索引 2: 元素 c
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">9.3 遍歷索引 (使用 `range()` 和 `len()`)</h3>
+            <pre><code class="language-python">numbers = [10, 20, 30]
+for i in range(len(numbers)):
+    print(f"索引 {i}: 元素 {numbers[i]}")
+# 輸出:
+# 索引 0: 元素 10
+# 索引 1: 元素 20
+# 索引 2: 元素 30
+</code></pre>
+        </section>
+
+        <section id="section10" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">10. 巢狀清單 (Nested Lists)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                清單 (List) 的元素本身也可以是另一個清單 (List)，這允許您建立多維的資料結構，例如矩陣。
+            </p>
+            <pre><code class="language-python"># 巢狀清單範例 (2x3 矩陣)
+matrix = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+
+# 存取巢狀清單中的元素
+print(matrix[0])    # 輸出: [1, 2, 3] (第一列)
+print(matrix[1][1]) # 輸出: 5 (第二列的第二個元素)
+print(matrix[2][0]) # 輸出: 7 (第三列的第一個元素)
+
+# 遍歷巢狀清單
+for row in matrix:
+    for element in row:
+        print(element, end=" ")
+    print() # 換行
+# 輸出:
+# 1 2 3
+# 4 5 6
+# 7 8 9
+</code></pre>
+        </section>
+
+        <footer class="text-center text-gray-500 text-sm mt-10 p-4 border-t border-gray-200">
+            &copy; 2025 Python 清單教學. 版權所有。
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python 清單 (List) 遊戲化測驗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <style>
+        /* Custom font for better readability */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .heart-icon {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+            vertical-align: middle;
+            margin: 0 2px;
+        }
+        /* Message box styling */
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0; /* Initially hidden */
+        }
+        .message-box.show {
+            opacity: 1;
+        }
+        .message-box.info {
+            background-color: #e0f2fe; /* Light blue */
+            color: #0284c7; /* Darker blue */
+            border: 1px solid #94a3b8;
+        }
+        .message-box.error {
+            background-color: #fee2e2; /* Light red */
+            color: #dc2626; /* Darker red */
+            border: 1px solid #ef4444;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Style for code blocks - Prism.js will handle background and text colors */
+        pre {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto; /* Enable horizontal scrolling for long lines */
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; /* Monospace font for code */
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-top: 0.75rem;
+            margin-bottom: 2.5rem; /* Adjusted for better spacing */
+        }
+        code {
+            font-family: inherit; /* Inherit font from pre */
+            background-color: #e2e8f0; /* Light background for inline code */
+            color: #333; /* Darker text for inline code */
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+        }
+        /* Ensure Prism.js's background is applied correctly to pre */
+        pre[class*="language-"] {
+            background-color: #2d2d2d; /* Re-apply dark background for the pre block, as Prism's theme might only target code */
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div id="game-container" class="bg-white p-6 sm:p-8 md:p-10 rounded-xl shadow-2xl w-full max-w-3xl border border-gray-200">
+        <div id="game-screen">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-center text-gray-800 mb-6 leading-tight">
+                Python 清單 (List) 遊戲化測驗
+            </h1>
+
+            <div id="lives-display" class="text-center mb-6 text-red-500 text-2xl font-bold">
+                生命值:
+            </div>
+
+            <div id="question-area" class="space-y-6">
+                </div>
+
+            <div id="hint-area" class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200 text-blue-800 hidden">
+                <p class="font-semibold mb-2">提示:</p>
+                <p id="hint-content"></p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:space-x-4 mt-8">
+                <button id="check-answer-btn" class="w-full sm:w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg mb-4 sm:mb-0">
+                    檢查答案
+                </button>
+                <button id="get-hint-btn" class="w-full sm:w-1/2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                    獲取提示 ✨
+                </button>
+            </div>
+
+
+            <div id="feedback-explanation-area" class="mt-6 p-4 rounded-lg hidden">
+                </div>
+
+            <button id="next-question-btn" class="mt-4 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 shadow-lg hidden">
+                    下一題
+            </button>
+        </div>
+
+        <div id="game-over-screen" class="hidden text-center p-8 bg-red-50 rounded-lg border border-red-200">
+            <h2 class="text-3xl font-bold text-red-700 mb-4">遊戲結束！</h2>
+            <p id="game-over-score" class="text-xl text-gray-800 mb-6"></p>
+            <button id="restart-game-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                重新開始
+            </button>
+        </div>
+
+        <div id="game-complete-screen" class="hidden text-center p-8 bg-green-50 rounded-lg border border-green-200">
+            <h2 class="text-3xl font-bold text-green-700 mb-4">恭喜您！完成所有題目！</h2>
+            <p id="game-complete-score" class="text-xl text-gray-800 mb-6"></p>
+            <button id="play-again-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                再玩一次
+            </button>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box hidden"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <script>
+        // All 30 questions for the List quiz
+        const allQuestions = [
+            // Level 1: Basic Creation and Access
+            {
+                question: "在Python中，要建立一個空清單 (empty List)，以下哪種方式是正確的？",
+                options: ["`empty_list = {}`", "`empty_list = []`", "`empty_list = ()`", "`empty_list = set()`"],
+                correctAnswer: 1,
+                explanation: "在Python中，使用方括號 `[]` 可以建立一個空清單 (empty List)。空字典 (empty Dictionary) 使用 `{}`，空元組 (empty Tuple) 使用 `()`，空集合 (empty Set) 使用 `set()`。",
+                hint: "清單 (List) 的標誌性符號是什麼？"
+            },
+            {
+                question: "對於清單 (List) `fruits = [\"apple\", \"banana\", \"cherry\"]`，如何存取其第二個元素 `\"banana\"`？",
+                options: ["`fruits[2]`", "`fruits[1]`", "`fruits.get(1)`", "`fruits.second()`"],
+                correctAnswer: 1,
+                explanation: "清單 (List) 的索引是從 0 開始的，所以第二個元素的索引是 1。",
+                hint: "清單 (List) 的索引是從哪個數字開始的？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">my_list = [10, 20, 30]\nprint(my_list[-1])</code></pre>",
+                options: ["`10`", "`20`", "`30`", "錯誤"],
+                correctAnswer: 2,
+                explanation: "負向索引 `-1` 表示清單 (List) 的最後一個元素。",
+                hint: "負向索引是從清單 (List) 的哪一端開始計數的？"
+            },
+            {
+                question: "如何取得清單 (List) `numbers = [1, 2, 3, 4, 5]` 的長度 (Length)？",
+                options: ["`numbers.length()`", "`len(numbers)`", "`numbers.size()`", "`numbers.count()`"],
+                correctAnswer: 1,
+                explanation: "Python 的內建函數 `len()` 用於返回清單 (List) 的長度 (Length)。",
+                hint: "哪個內建函數可以計算清單 (List) 的元素數量？"
+            },
+            {
+                question: "以下哪種資料型態 (Data Type) 的元素不能直接儲存在清單 (List) 中？",
+                options: ["字串 (String)", "整數 (Integer)", "字典 (Dictionary)", "所有資料型態 (Data Type) 都可以"],
+                correctAnswer: 3,
+                explanation: "清單 (List) 是一種異質性 (Heterogeneous) 的資料集合，可以包含任何資料型態 (Data Type) 的元素。",
+                hint: "清單 (List) 的異質性 (Heterogeneous) 意味著什麼？"
+            },
+            {
+                question: "對於清單 (List) `data = [\"a\", \"b\", \"c\"]`，執行 `data[0] = \"x\"` 後，`data` 的內容是什麼？",
+                options: ["`[\"a\", \"b\", \"c\"]`", "`[\"x\", \"b\", \"c\"]`", "錯誤", "`[\"x\"]`"],
+                correctAnswer: 1,
+                explanation: "清單 (List) 是可變 (mutable) 的，您可以直接透過索引修改其元素。",
+                hint: "清單 (List) 是可變 (mutable) 的資料型態 (Data Type) 嗎？"
+            },
+
+            // Level 2: Slicing and Basic Operations
+            {
+                question: "要從清單 (List) `numbers = [0, 1, 2, 3, 4]` 中取得子清單 (sub-list) `[1, 2, 3]`，應該如何切片 (slice)？",
+                options: ["`numbers[1:4]`", "`numbers[1:3]`", "`numbers[0:3]`", "`numbers[2:4]`"],
+                correctAnswer: 0,
+                explanation: "切片語法 `[start:end]` 包含 `start` 索引但不包含 `end` 索引。所以 `numbers[1:4]` 會取得索引 1, 2, 3 的元素。",
+                hint: "切片 (slice) 的結束索引是包含還是不包含？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">my_list = [1, 2, 3, 4, 5]\nprint(my_list[:3])</code></pre>",
+                options: ["`[1, 2, 3]`", "`[0, 1, 2]`", "`[3, 4, 5]`", "錯誤"],
+                correctAnswer: 0,
+                explanation: "切片 (slice) 時省略起始索引，預設從 0 開始。所以 `my_list[:3]` 會取得索引 0, 1, 2 的元素。",
+                hint: "當切片 (slice) 省略起始索引時，預設從哪裡開始？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">data = [\"A\", \"B\", \"C\", \"D\"]\nprint(data[2:])</code></pre>",
+                options: ["`[\"A\", \"B\"]`", "`[\"C\", \"D\"]`", "`[\"D\"]`", "錯誤"],
+                correctAnswer: 1,
+                explanation: "切片 (slice) 時省略結束索引，預設到清單 (List) 的末尾。所以 `data[2:]` 會取得索引 2 和 3 的元素。",
+                hint: "當切片 (slice) 省略結束索引時，預設到哪裡結束？"
+            },
+            {
+                question: "要複製 (copy) 一個清單 (List) `original = [1, 2, 3]`，並確保對新清單 (new List) 的修改不會影響 `original`，以下哪種方式是正確的？",
+                options: ["`new_list = original`", "`new_list = original[:]`", "`new_list = original.copy()`", "選項 B 和 C 皆是"],
+                correctAnswer: 3,
+                explanation: "使用切片 `[:]` 或 `copy()` 方法都可以創建清單 (List) 的淺拷貝 (shallow copy)，使得對新清單 (List) 的頂層修改不會影響原始清單 (List)。",
+                hint: "如何創建一個獨立的清單副本 (List Copy)，而不是引用？"
+            },
+            {
+                question: "要將元素 `\"orange\"` 新增 (add) 到清單 (List) `fruits = [\"apple\", \"banana\"]` 的末尾，以下哪種方法是正確的？",
+                options: ["`fruits.add(\"orange\")`", "`fruits.append(\"orange\")`", "`fruits.insert(\"orange\")`", "`fruits.push(\"orange\")`"],
+                correctAnswer: 1,
+                explanation: "`append()` 方法用於在清單 (List) 的末尾新增單個元素。",
+                hint: "哪個清單方法 (List Method) 專門用於在清單 (List) 末尾新增元素？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">list1 = [1, 2]\nlist2 = [3, 4]\ncombined = list1 + list2\nprint(combined)</code></pre>",
+                options: ["`[1, 2, 3, 4]`", "`[1, 2], [3, 4]`", "`[1, 3, 2, 4]`", "錯誤"],
+                correctAnswer: 0,
+                explanation: "`+` 運算符會將兩個清單 (List) 連接 (concatenate) 起來，創建一個包含所有元素的新清單 (List)。",
+                hint: "清單 (List) 之間的 `+` 運算符有什麼作用？"
+            },
+
+            // Level 3: Adding and Deleting Elements
+            {
+                question: "要在清單 (List) `numbers = [1, 2, 4, 5]` 的索引 2 處插入 (insert) 數字 `3`，以下哪種方法是正確的？",
+                options: ["`numbers.add(2, 3)`", "`numbers.append(3, 2)`", "`numbers.insert(2, 3)`", "`numbers.put(2, 3)`"],
+                correctAnswer: 2,
+                explanation: "`insert(index, element)` 方法用於在指定索引處插入元素。",
+                hint: "哪個清單方法 (List Method) 可以讓您指定插入的位置？"
+            },
+            {
+                question: "要將清單 (List) `list_a = [1, 2]` 和清單 (List) `list_b = [3, 4]` 的元素合併到 `list_a` 的末尾，以下哪種方法會直接修改 `list_a`？",
+                options: ["`list_a + list_b`", "`list_a.extend(list_b)`", "`list_a.append(list_b)`", "`list_a.merge(list_b)`"],
+                correctAnswer: 1,
+                explanation: "`extend()` 方法會將另一個可迭代物件的所有元素新增到當前清單 (List) 的末尾，並直接修改原清單 (List)。`append()` 會將整個 `list_b` 作為一個單一元素新增。",
+                hint: "哪個清單方法 (List Method) 可以將另一個清單 (List) 的所有元素『擴展』到當前清單 (List) 中？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">my_list = [10, 20, 30, 40]\ndel my_list[1]\nprint(my_list)</code></pre>",
+                options: ["`[10, 30, 40]`", "`[20, 30, 40]`", "`[10, 20, 40]`", "錯誤"],
+                correctAnswer: 0,
+                explanation: "`del` 關鍵字用於刪除指定索引的元素。索引 1 是 `20`，所以 `20` 被刪除。",
+                hint: "`del` 關鍵字的作用是什麼？"
+            },
+            {
+                question: "要刪除清單 (List) `fruits = [\"apple\", \"banana\", \"cherry\"]` 中第一個出現的 `\"banana\"`，以下哪種方法是正確的？",
+                options: ["`fruits.delete(\"banana\")`", "`fruits.pop(\"banana\")`", "`fruits.remove(\"banana\")`", "`del fruits[\"banana\"]`"],
+                correctAnswer: 2,
+                explanation: "`remove()` 方法用於刪除清單 (List) 中第一個匹配的元素。",
+                hint: "哪個清單方法 (List Method) 可以根據元素的值來刪除它？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">numbers = [10, 20, 30]\nremoved = numbers.pop()\nprint(removed)\nprint(numbers)</code></pre>",
+                options: ["`30\n[10, 20]`", "`10\n[20, 30]`", "`None\n[10, 20, 30]`", "錯誤"],
+                correctAnswer: 0,
+                explanation: "`pop()` 方法如果沒有指定索引，會刪除並返回清單 (List) 的最後一個元素。",
+                hint: "`pop()` 方法在沒有參數時會移除清單 (List) 的哪個元素？"
+            },
+            {
+                question: "要清空清單 (List) `my_list = [1, 2, 3]` 中的所有元素，使其變為空清單 (empty List)，以下哪種方法是正確的？",
+                options: ["`my_list.delete_all()`", "`my_list.empty()`", "`my_list.clear()`", "`del my_list.all()`"],
+                correctAnswer: 2,
+                explanation: "`clear()` 方法會移除清單 (List) 中的所有元素，使其變為空清單 (empty List)。",
+                hint: "哪個清單方法 (List Method) 可以一次性移除所有元素？"
+            },
+
+            // Level 4: Common Methods
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">data = [1, 2, 2, 3, 2, 4]\nprint(data.count(2))</code></pre>",
+                options: ["`1`", "`2`", "`3`", "`4`"],
+                correctAnswer: 2,
+                explanation: "`count()` 方法用於計算指定元素在清單 (List) 中出現的次數。",
+                hint: "哪個清單方法 (List Method) 可以計算元素出現的頻率？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">fruits = [\"apple\", \"banana\", \"cherry\"]\nprint(fruits.index(\"banana\"))</code></pre>",
+                options: ["`0`", "`1`", "`2`", "錯誤"],
+                correctAnswer: 1,
+                explanation: "`index()` 方法返回指定元素第一次出現的索引值 (index)。`\"banana\"` 在索引 1 的位置。",
+                hint: "哪個清單方法 (List Method) 可以找到元素的索引值 (index)？"
+            },
+            {
+                question: "要將清單 (List) `numbers = [3, 1, 4, 2]` 進行升序排序 (ascending order)，以下哪種方法會直接修改原清單 (List)？",
+                options: ["`sorted(numbers)`", "`numbers.sort()`", "`numbers.order()`", "`numbers.ascending()`"],
+                correctAnswer: 1,
+                explanation: "`sort()` 方法會對清單 (List) 進行原地 (in-place) 排序，即直接修改原清單 (List)。`sorted()` 函數會返回一個新的排序清單 (List)。",
+                hint: "哪個清單方法 (List Method) 會『原地』修改清單 (List)？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">my_list = [1, 2, 3]\nmy_list.reverse()\nprint(my_list)</code></pre>",
+                options: ["`[1, 2, 3]`", "`[3, 2, 1]`", "錯誤", "`None`"],
+                correctAnswer: 1,
+                explanation: "`reverse()` 方法會原地 (in-place) 反轉清單 (List) 中元素的順序。",
+                hint: "哪個清單方法 (List Method) 可以反轉清單 (List) 的順序？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">numbers = [10, 5, 20]\nprint(max(numbers))</code></pre>",
+                options: ["`10`", "`5`", "`20`", "錯誤"],
+                correctAnswer: 2,
+                explanation: "`max()` 內建函數返回清單 (List) 中的最大值。",
+                hint: "哪個內建函數可以找到清單 (List) 中的最大值？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">fruits = [\"apple\", \"banana\"]\nprint(\"grape\" in fruits)</code></pre>",
+                options: ["`True`", "`False`", "錯誤", "`None`"],
+                correctAnswer: 1,
+                explanation: "`in` 運算符用於檢查元素是否存在於清單 (List) 中。由於 `\"grape\"` 不在 `fruits` 中，所以返回 `False`。",
+                hint: "`in` 運算符在清單 (List) 中檢查的是元素是否存在？"
+            },
+
+            // Level 5: Iteration and Nested Lists
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">for i in [1, 2, 3]:\n    print(i)</code></pre>",
+                options: ["1\n2\n3", "`[1, 2, 3]`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`for` 迴圈會直接遍歷清單 (List) 中的每個元素並印出。",
+                hint: "直接遍歷清單 (List) 時，每次迴圈會得到什麼？"
+            },
+            {
+                question: "要同時遍歷清單 (List) `items = [\"a\", \"b\", \"c\"]` 的索引 (index) 和元素，以下哪種方式是正確的？",
+                options: ["`for index, value in items:`", "`for index, value in enumerate(items):`", "`for index, value in items.index_values():`", "`for index in range(len(items)): print(items[index])`"],
+                correctAnswer: 1,
+                explanation: "`enumerate()` 函數會返回索引和值的元組 (Tuple)，適合在 `for` 迴圈中解包。",
+                hint: "哪個內建函數可以讓您同時獲取索引和元素？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">matrix = [[1, 2], [3, 4]]\nprint(matrix[0][1])</code></pre>",
+                options: ["`1`", "`2`", "`3`", "`4`"],
+                correctAnswer: 1,
+                explanation: "`matrix[0]` 存取第一列 `[1, 2]`，然後 `[1]` 存取該列的第二個元素 `2`。",
+                hint: "巢狀清單 (Nested List) 的存取需要逐層索引。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">my_list = [1, [2, 3], 4]\nprint(my_list[1][0])</code></pre>",
+                options: ["`1`", "`2`", "`3`", "`4`"],
+                correctAnswer: 1,
+                explanation: "`my_list[1]` 存取第二個元素 `[2, 3]`，然後 `[0]` 存取該子清單 (sub-list) 的第一個元素 `2`。",
+                hint: "這是一個包含子清單 (sub-list) 的清單 (List)。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">data = [10, 20, 30]\nfor i in range(len(data)):\n    print(data[i])</code></pre>",
+                options: ["`10\n20\n30`", "`0\n1\n2`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`range(len(data))` 會生成索引序列 0, 1, 2。然後 `data[i]` 透過索引存取並印出每個元素。",
+                hint: "`len()` 和 `range()` 常用於遍歷清單 (List) 的索引。"
+            },
+            {
+                question: "清單 (List) 的主要特性之一是它是：",
+                options: ["不可變 (immutable) 的", "無序 (unordered) 的", "可變 (mutable) 的", "只包含相同資料型態 (Data Type) 的元素"],
+                correctAnswer: 2,
+                explanation: "清單 (List) 是 Python 中最常用的可變 (mutable) 序列資料型態 (Data Type)。",
+                hint: "清單 (List) 的內容在創建後可以被修改嗎？"
+            }
+        ];
+
+        // Game State Variables
+        let questions = []; // This will hold the 10 selected questions for the current game
+        let currentQuestionIndex = 0;
+        let lives = 3;
+        let score = 0;
+        const NUM_QUESTIONS_PER_GAME = 10; // Number of questions to play per game
+
+        // DOM Elements
+        const gameScreen = document.getElementById('game-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const gameCompleteScreen = document.getElementById('game-complete-screen');
+
+        const livesDisplay = document.getElementById('lives-display');
+        const questionArea = document.getElementById('question-area');
+        const checkAnswerBtn = document.getElementById('check-answer-btn');
+        const getHintBtn = document.getElementById('get-hint-btn'); // Hint button
+        const hintArea = document.getElementById('hint-area'); // Hint display area
+        const hintContent = document.getElementById('hint-content'); // Hint text content
+        const feedbackExplanationArea = document.getElementById('feedback-explanation-area');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const messageBox = document.getElementById('message-box'); // Custom message box
+
+        const gameOverScore = document.getElementById('game-over-score');
+        const restartGameBtn = document.getElementById('restart-game-btn');
+        const gameCompleteScore = document.getElementById('game-complete-score');
+        const playAgainBtn = document.getElementById('play-again-btn');
+
+        // Function to show a temporary message
+        function showMessage(message, type = 'info') {
+            messageBox.textContent = message;
+            messageBox.className = `message-box show ${type}`; // Add type class
+            clearTimeout(messageBox.timeoutId);
+            messageBox.timeoutId = setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 3000); // Message disappears after 3 seconds
+        }
+
+        // Function to update lives display
+        function updateLivesDisplay() {
+            let heartsHtml = '生命值: ';
+            for (let i = 0; i < 3; i++) {
+                if (i < lives) {
+                    // Full heart SVG
+                    heartsHtml += `<svg class="heart-icon" viewBox="0 0 24 24" fill="currentColor" style="color: #ef4444;">
+                        <path d="M12 21.35l-1.84-1.66C4.07 14.32 2 12.43 2 10.25 2 7.74 3.86 5.6 6.31 5.6c1.74 0 3.41.81 4.5 2.15C11.69 6.41 13.36 5.6 15.19 5.6c2.45 0 4.31 2.14 4.31 4.6 0 2.18-2.07 4.07-8.16 7.44L12 21.35z"/>
+                    </svg>`;
+                } else {
+                    // Empty heart SVG (outline)
+                    heartsHtml += `<svg class="heart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8;">
+                        <path d="M12 21.35l-1.84-1.66C4.07 14.32 2 12.43 2 10.25 2 7.74 3.86 5.6 6.31 5.6c1.74 0 3.41.81 4.5 2.15C11.69 6.41 13.36 5.6 15.19 5.6c2.45 0 4.31 2.14 4.31 4.6 0 2.18-2.07 4.07-8.16 7.44L12 21.35z"/>
+                    </svg>`;
+                }
+            }
+            livesDisplay.innerHTML = heartsHtml;
+        }
+
+        // Function to shuffle an array (Fisher-Yates algorithm)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+            return array;
+        }
+
+        // Function to render the current question
+        function renderQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                gameComplete();
+                return;
+            }
+
+            const q = questions[currentQuestionIndex];
+            questionArea.innerHTML = `
+                <p class="text-xl font-semibold text-gray-900 mb-4">第 ${currentQuestionIndex + 1} 題: ${q.question}</p>
+                <div class="space-y-3">
+                    ${q.options.map((option, optIndex) => `
+                        <label class="flex items-center cursor-pointer p-2 rounded-md hover:bg-blue-50 transition duration-150 ease-in-out">
+                            <input type="radio" name="currentQuestion" value="${optIndex}" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500 transition duration-150 ease-in-out">
+                            <span class="ml-3 text-gray-700 text-base">${option}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+
+            // Reset feedback area, hint area and buttons
+            feedbackExplanationArea.classList.add('hidden');
+            feedbackExplanationArea.innerHTML = '';
+            hintArea.classList.add('hidden'); // Hide hint area on new question
+            hintContent.textContent = ''; // Clear hint content
+            nextQuestionBtn.classList.add('hidden');
+            checkAnswerBtn.classList.remove('hidden');
+            checkAnswerBtn.disabled = false; // Enable check button
+            getHintBtn.disabled = false; // Enable hint button
+            updateLivesDisplay(); // Update lives display for the new game
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+
+            // Re-highlight code blocks if any in the question text
+            Prism.highlightAll();
+        }
+
+        // Function to check the answer
+        function checkAnswer() {
+            const selectedOption = document.querySelector('input[name="currentQuestion"]:checked');
+            if (!selectedOption) {
+                showMessage('請選擇一個答案！', 'error'); // Use custom message box
+                return;
+            }
+
+            checkAnswerBtn.disabled = true; // Disable check button after selection
+            getHintBtn.disabled = true; // Disable hint button after checking answer
+            const userAnswer = parseInt(selectedOption.value);
+            const q = questions[currentQuestionIndex];
+
+            feedbackExplanationArea.classList.remove('hidden');
+            feedbackExplanationArea.innerHTML = ''; // Clear previous content
+            hintArea.classList.add('hidden'); // Hide hint area when answer is checked
+
+            if (userAnswer === q.correctAnswer) {
+                score++;
+                feedbackExplanationArea.classList.remove('bg-red-50', 'bg-yellow-50');
+                feedbackExplanationArea.classList.add('bg-green-50', 'border', 'border-green-200');
+                feedbackExplanationArea.innerHTML = `
+                    <p class="font-bold text-green-700 text-lg mb-2">正確！</p>
+                    <p class="text-gray-700 mb-2">您的答案: ${q.options[userAnswer]}</p>
+                    <p class="font-semibold text-gray-800 mb-2">解釋:</p>
+                    <p class="text-gray-600">${q.explanation}</p>
+                `;
+            } else {
+                lives--;
+                feedbackExplanationArea.classList.remove('bg-green-50', 'bg-yellow-50');
+                feedbackExplanationArea.classList.add('bg-red-50', 'border', 'border-red-200');
+                feedbackExplanationArea.innerHTML = `
+                    <p class="font-bold text-red-700 text-lg mb-2">錯誤！</p>
+                    <p class="text-gray-700 mb-2">您的答案: ${q.options[userAnswer]}</p>
+                    <p class="text-gray-700 mb-2">正確答案: ${q.options[q.correctAnswer]}</p>
+                    <p class="font-semibold text-gray-800 mb-2">解釋:</p>
+                    <p class="text-gray-600">${q.explanation}</p>
+                `;
+                updateLivesDisplay(); // Update lives display immediately
+            }
+
+            nextQuestionBtn.classList.remove('hidden'); // Show next question button
+            // If lives run out, show game over screen
+            if (lives <= 0) {
+                gameOver();
+            } else if (currentQuestionIndex === questions.length - 1) { // Check if it's the last question
+                gameComplete();
+            }
+            // Re-highlight code blocks in explanation if any
+            Prism.highlightAll();
+        }
+
+        // Function to move to the next question
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                renderQuestion();
+            } else {
+                gameComplete();
+            }
+        }
+
+        // Function to handle game over
+        function gameOver() {
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.remove('hidden');
+            gameCompleteScreen.classList.add('hidden');
+            gameOverScore.textContent = `您答對了 ${score} 題。`;
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+        }
+
+        // Function to handle game complete
+        function gameComplete() {
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameCompleteScreen.classList.remove('hidden');
+            gameCompleteScore.textContent = `您答對了 ${score} / ${questions.length} 題。`;
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+        }
+
+        // Function to start/restart the game
+        function startGame() {
+            // Shuffle all questions and select the first NUM_QUESTIONS_PER_GAME
+            questions = shuffleArray([...allQuestions]).slice(0, NUM_QUESTIONS_PER_GAME);
+
+            currentQuestionIndex = 0;
+            lives = 3;
+            score = 0;
+            gameScreen.classList.remove('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameCompleteScreen.classList.add('hidden');
+            renderQuestion();
+        }
+
+        // Function to get a hint (now directly from questions array)
+        function getHint() {
+            const currentQuestion = questions[currentQuestionIndex];
+            if (currentQuestion.hint) {
+                hintArea.classList.remove('hidden'); // Show hint area
+                hintContent.textContent = currentQuestion.hint; // Display the embedded hint
+            } else {
+                hintArea.classList.remove('hidden');
+                hintContent.textContent = "抱歉，此題沒有提示。";
+            }
+            getHintBtn.disabled = true; // Disable hint button after showing hint
+        }
+
+
+        // Event Listeners
+        checkAnswerBtn.addEventListener('click', checkAnswer);
+        nextQuestionBtn.addEventListener('click', nextQuestion);
+        restartGameBtn.addEventListener('click', startGame);
+        playAgainBtn.addEventListener('click', startGame);
+        getHintBtn.addEventListener('click', getHint); // Event listener for hint button
+
+        // Initial game start when the page loads
+        document.addEventListener('DOMContentLoaded', startGame);
+    </script>
+</body>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python 自定義函式 (Custom Functions) 教學 - 完整網站</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <style>
+        /* Custom font for better readability */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            scroll-behavior: smooth; /* Smooth scrolling for anchor links */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        /* Style for code blocks - Prism.js will handle background and text colors */
+        pre {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto; /* Enable horizontal scrolling for long lines */
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; /* Monospace font for code */
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-top: 0.75rem;
+            margin-bottom: 2.5rem; /* Adjusted for better spacing */
+        }
+        code {
+            font-family: inherit; /* Inherit font from pre */
+            background-color: #e2e8f0; /* Light background for inline code */
+            color: #333; /* Darker text for inline code */
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+        }
+        /* Ensure Prism.js's background is applied correctly to pre */
+        pre[class*="language-"] {
+            background-color: #2d2d2d; /* Re-apply dark background for the pre block, as Prism's theme might only target code */
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center p-4">
+    <div class="w-full max-w-5xl bg-white p-6 sm:p-8 md:p-10 rounded-xl shadow-2xl border border-gray-200">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800 leading-tight mb-4">
+                Python 自定義函式 (Custom Functions) 教學
+            </h1>
+            <p class="text-xl text-gray-600">組織程式碼、提高可重用性與可讀性</p>
+        </header>
+
+        <nav class="mb-10 p-4 bg-blue-100 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold text-blue-800 mb-4 text-center">目錄</h2>
+            <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <li><a href="#section1" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">1. 什麼是函式？</a></li>
+                <li><a href="#section2" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">2. 定義函式</a></li>
+                <li><a href="#section3" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">3. 呼叫函式</a></li>
+                <li><a href="#section4" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">4. 參數與引數</a></li>
+                <li><a href="#section5" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">5. 回傳值</a></li>
+                <li><a href="#section6" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">6. 變數作用域</a></li>
+                <li><a href="#section7" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">7. 文件字串 (Docstrings)</a></li>
+            </ul>
+        </nav>
+
+        <section id="section1" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">1. 什麼是函式 (Function)？</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                在程式設計中，**函式 (Function)** 是一段組織好的、可重複使用的程式碼區塊，它執行一個特定的任務。函式的主要目的是將複雜的程式碼分解為更小、更易於管理的部分，從而提高程式碼的<strong>可讀性 (Readability)</strong>、<strong>可維護性 (Maintainability)</strong> 和<strong>可重用性 (Reusability)</strong>。
+            </p>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                想像一下，如果您需要多次執行相同的操作，例如計算兩個數字的和，您可以將這段邏輯封裝在一個函式中，然後在需要時呼叫 (call) 這個函式，而不需要重複編寫相同的程式碼。
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><strong>模組化 (Modularity)</strong>：將程式碼分解為獨立的單元。</li>
+                <li><strong>可重用性 (Reusability)</strong>：一次定義，多次使用。</li>
+                <li><strong>可讀性 (Readability)</strong>：使程式碼更容易理解。</li>
+                <li><strong>易於除錯 (Easier Debugging)</strong>：問題通常可以被隔離到特定的函式中。</li>
+            </ul>
+        </section>
+
+        <section id="section2" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">2. 定義函式 (Defining Functions)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                在 Python 中，您使用 <code>def</code> 關鍵字來定義一個函式。
+            </p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">基本語法</h3>
+            <pre><code class="language-python">def function_name(parameters):
+    """Docstring (可選): 函式的簡要說明"""
+    # 函式主體 (Function Body)
+    # 執行任務的程式碼
+    # ...
+    return # 可選的回傳值
+</code></pre>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><code>def</code>：定義函式的關鍵字。</li>
+                <li><code>function_name</code>：函式的名稱，應遵循 Python 的命名規範（小寫字母，單字之間用底線分隔）。</li>
+                <li><code>(parameters)</code>：括號中包含函式接受的<strong>參數 (Parameters)</strong>。如果函式不接受任何參數，括號也必須存在，但可以留空。</li>
+                <li><code>:</code> (冒號)：標示函式定義的結束。</li>
+                <li><strong>縮排 (Indentation)</strong>：函式主體 (Function Body) 的所有程式碼都必須有相同的縮排（通常是 4 個空格），這在 Python 中非常重要。</li>
+                <li><code>return</code> (可選)：用於從函式中回傳 (return) 值。</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">範例：一個簡單的函式</h3>
+            <pre><code class="language-python">def greet():
+    print("Hello, World!")
+    print("歡迎來到 Python 學習！")
+
+def say_goodbye():
+    print("再見！")
+</code></pre>
+        </section>
+
+        <section id="section3" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">3. 呼叫函式 (Calling Functions)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                定義函式後，您需要<strong>呼叫 (Call)</strong> 它才能執行其中的程式碼。呼叫函式的方式是使用函式名稱，後面加上括號 <code>()</code>。
+            </p>
+            <pre><code class="language-python"># 定義函式
+def greet():
+    print("你好！")
+
+# 呼叫函式
+greet() # 輸出: 你好！
+
+# 呼叫多次
+greet() # 輸出: 你好！
+greet() # 輸出: 你好！
+</code></pre>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                如果函式接受參數，您需要在呼叫時在括號中提供對應的<strong>引數 (Arguments)</strong>。
+            </p>
+            <pre><code class="language-python"># 定義帶參數的函式
+def greet_name(name):
+    print(f"你好，{name}！")
+
+# 呼叫帶引數的函式
+greet_name("Alice") # 輸出: 你好，Alice！
+greet_name("Bob")   # 輸出: 你好，Bob！
+</code></pre>
+        </section>
+
+        <section id="section4" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">4. 參數 (Parameters) 與引數 (Arguments)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                雖然「參數 (Parameters)」和「引數 (Arguments)」這兩個詞經常互換使用，但在函式的上下文中，它們有細微的區別：
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><strong>參數 (Parameters)</strong>：函式定義中括號內列出的變數名稱。它們是函式期望接收的輸入。</li>
+                <li><strong>引數 (Arguments)</strong>：在呼叫函式時傳遞給函式的值。這些值會被賦值給函式的參數。</li>
+            </ul>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">4.1 位置引數 (Positional Arguments)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                這是最常見的傳遞引數方式，引數的順序必須與函式定義中的參數順序一致。
+            </p>
+            <pre><code class="language-python">def add_numbers(a, b): # a 和 b 是參數
+    result = a + b
+    print(f"和是: {result}")
+
+add_numbers(5, 10) # 5 和 10 是引數，5 會賦值給 a，10 會賦值給 b
+# 輸出: 和是: 15
+
+# 順序錯誤會導致邏輯錯誤
+add_numbers(10, 5) # 輸出: 和是: 15 (這裡結果一樣，但如果操作不同就會出錯)
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">4.2 關鍵字引數 (Keyword Arguments)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                您可以在呼叫函式時使用 <code>key=value</code> 的形式來指定引數，這樣引數的順序就不重要了。
+            </p>
+            <pre><code class="language-python">def describe_person(name, age, city):
+    print(f"{name} 住在 {city}，今年 {age} 歲。")
+
+# 使用位置引數
+describe_person("Alice", 30, "London") # 輸出: Alice 住在 London，今年 30 歲。
+
+# 使用關鍵字引數 (順序可以不同)
+describe_person(age=25, city="Paris", name="Bob") # 輸出: Bob 住在 Paris，今年 25 歲。
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">4.3 預設參數值 (Default Parameter Values)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                您可以在函式定義中為參數提供預設值。如果呼叫函式時沒有為該參數提供引數，就會使用預設值。
+            </p>
+            <pre><code class="language-python">def greet_with_default(name="訪客", greeting="你好"):
+    print(f"{greeting}，{name}！")
+
+greet_with_default()             # 輸出: 你好，訪客！ (使用所有預設值)
+greet_with_default("Alice")      # 輸出: 你好，Alice！ (只覆蓋 name)
+greet_with_default(greeting="哈囉", name="Bob") # 輸出: 哈囉，Bob！ (使用關鍵字引數)
+</code></pre>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                <strong>注意：</strong> 帶有預設值的參數必須放在不帶預設值的參數之後。
+            </p>
+            <pre><code class="language-python"># 錯誤的定義方式
+# def func(a=1, b): # 這會引發 SyntaxError
+#     pass
+
+# 正確的定義方式
+def func(a, b=1):
+    pass
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">4.4 任意數量的位置引數 (`*args`)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                如果您不知道函式會接收多少個位置引數，可以使用 <code>*args</code>。它會將所有額外的位置引數收集為一個元組 (Tuple)。
+            </p>
+            <pre><code class="language-python">def sum_all_numbers(*numbers):
+    total = 0
+    for num in numbers:
+        total += num
+    print(f"總和: {total}")
+
+sum_all_numbers(1, 2, 3)          # 輸出: 總和: 6
+sum_all_numbers(10, 20, 30, 40, 50) # 輸出: 總和: 150
+sum_all_numbers()                 # 輸出: 總和: 0
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">4.5 任意數量的關鍵字引數 (`**kwargs`)</h3>
+            <p class="text-700 leading-relaxed mb-4">
+                如果您不知道函式會接收多少個關鍵字引數，可以使用 <code>**kwargs</code>。它會將所有額外的關鍵字引數收集為一個字典 (Dictionary)。
+            </p>
+            <pre><code class="language-python">def print_user_info(**info):
+    for key, value in info.items():
+        print(f"{key}: {value}")
+
+print_user_info(name="Alice", age=30, city="New York")
+# 輸出:
+# name: Alice
+# age: 30
+# city: New York
+
+print_user_info(product="Laptop", price=1200)
+# 輸出:
+# product: Laptop
+# price: 1200
+</code></pre>
+        </section>
+
+        <section id="section5" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">5. 回傳值 (Return Values)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                函式可以使用 <code>return</code> 語句將結果回傳 (return) 給呼叫它的地方。
+            </p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">5.1 回傳單一值</h3>
+            <pre><code class="language-python">def multiply(a, b):
+    result = a * b
+    return result # 回傳計算結果
+
+product = multiply(4, 5) # 函式的回傳值會賦值給 product
+print(product) # 輸出: 20
+
+# 函式沒有明確回傳值時，預設回傳 None
+def do_nothing():
+    pass
+
+value = do_nothing()
+print(value) # 輸出: None
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">5.2 回傳多個值</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                函式可以回傳多個值，它們會被打包成一個元組 (Tuple)。
+            </p>
+            <pre><code class="language-python">def get_min_max(numbers):
+    min_val = min(numbers)
+    max_val = max(numbers)
+    return min_val, max_val # 回傳兩個值，作為一個元組
+
+my_numbers = [10, 5, 20, 15]
+minimum, maximum = get_min_max(my_numbers) # 接收時可以解包
+print(f"最小值: {minimum}, 最大值: {maximum}") # 輸出: 最小值: 5, 最大值: 20
+
+# 或者不解包，直接接收元組
+result_tuple = get_min_max(my_numbers)
+print(result_tuple) # 輸出: (5, 20)
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">5.3 `return` 的作用</h3>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li>終止函式的執行。</li>
+                <li>將值回傳給呼叫者。</li>
+                <li>如果沒有 `return` 語句或 `return` 後沒有值，函式會隱式回傳 `None`。</li>
+            </ul>
+        </section>
+
+        <section id="section6" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">6. 變數作用域 (Variable Scope)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                變數的作用域 (Scope) 指的是變數在程式碼中可以被存取 (access) 的範圍。在 Python 中，主要有兩種作用域：
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><strong>區域變數 (Local Variables)</strong>：在函式內部定義的變數，只能在該函式內部使用。</li>
+                <li><strong>全域變數 (Global Variables)</strong>：在函式外部定義的變數，可以在整個程式中被存取 (access)。</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">區域變數範例</h3>
+            <pre><code class="language-python">def my_function():
+    local_var = 10 # 區域變數
+    print(f"函式內部: {local_var}")
+
+my_function() # 輸出: 函式內部: 10
+
+# 嘗試在函式外部存取區域變數會引發錯誤
+# print(local_var) # 這會引發 NameError: name 'local_var' is not defined
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">全域變數範例</h3>
+            <pre><code class="language-python">global_var = 20 # 全域變數
+
+def another_function():
+    print(f"函式內部存取全域變數: {global_var}")
+
+another_function() # 輸出: 函式內部存取全域變數: 20
+print(f"函式外部存取全域變數: {global_var}") # 輸出: 函式外部存取全域變數: 20
+</code></pre>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">修改全域變數 (使用 `global` 關鍵字)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                如果您想在函式內部修改一個全域變數，您需要使用 <code>global</code> 關鍵字。
+            </p>
+            <pre><code class="language-python">counter = 0 # 全域變數
+
+def increment_counter():
+    global counter # 宣告要修改全域變數 counter
+    counter += 1
+    print(f"函式內部 counter: {counter}")
+
+print(f"初始 counter: {counter}") # 輸出: 初始 counter: 0
+increment_counter()             # 輸出: 函式內部 counter: 1
+increment_counter()             # 輸出: 函式內部 counter: 2
+print(f"最終 counter: {counter}") # 輸出: 最終 counter: 2
+</code></pre>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                <strong>注意：</strong> 雖然可以使用 `global` 關鍵字，但過度使用全域變數會使程式碼難以理解和維護，通常建議透過函式參數和回傳值來傳遞資料。
+            </p>
+        </section>
+
+        <section id="section7" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">7. 文件字串 (Docstrings)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                **文件字串 (Docstrings)** 是 Python 中用於為函式、類別 (Class)、模組 (Module) 或方法 (Method) 提供文件說明的一種特殊字串。它們使用三引號 (<code>"""</code> 或 <code>'''</code>) 定義，緊跟在函式定義的第一行。
+            </p>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                Docstrings 對於程式碼的<strong>可讀性 (Readability)</strong> 和<strong>可維護性 (Maintainability)</strong> 至關重要，因為它們解釋了函式的功能、參數、回傳值以及任何可能的副作用。
+            </p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">範例</h3>
+            <pre><code class="language-python">def calculate_area(length, width):
+    """
+    計算矩形的面積。
+
+    參數 (Parameters):
+        length (int/float): 矩形的長度。
+        width (int/float): 矩形的寬度。
+
+    回傳 (Returns):
+        int/float: 矩形的面積。
+    """
+    area = length * width
+    return area
+
+# 透過 help() 函數查看 Docstring
+# print(help(calculate_area))
+
+# 也可以直接存取 __doc__ 屬性
+print(calculate_area.__doc__)
+# 輸出 (部分):
+#     計算矩形的面積。
+#
+#     參數 (Parameters):
+#         length (int/float): 矩形的長度。
+#         width (int/float): 矩形的寬度。
+#
+#     回傳 (Returns):
+#         int/float: 矩形的面積。
+</code></pre>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                良好的 Docstrings 應該簡潔明瞭地說明函式的作用，而不是解釋程式碼如何運作（註解用於此目的）。
+            </p>
+        </section>
+
+        <footer class="text-center text-gray-500 text-sm mt-10 p-4 border-t border-gray-200">
+            &copy; 2025 Python 自定義函式教學. 版權所有。
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>

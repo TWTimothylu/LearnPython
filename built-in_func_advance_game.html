@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python 進階內建函式 (Advanced Built-in Functions) 遊戲化測驗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <style>
+        /* Custom font for better readability */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .heart-icon {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+            vertical-align: middle;
+            margin: 0 2px;
+        }
+        /* Message box styling */
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0; /* Initially hidden */
+        }
+        .message-box.show {
+            opacity: 1;
+        }
+        .message-box.info {
+            background-color: #e0f2fe; /* Light blue */
+            color: #0284c7; /* Darker blue */
+            border: 1px solid #94a3b8;
+        }
+        .message-box.error {
+            background-color: #fee2e2; /* Light red */
+            color: #dc2626; /* Darker red */
+            border: 1px solid #ef4444;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Style for code blocks - Prism.js will handle background and text colors */
+        pre {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto; /* Enable horizontal scrolling for long lines */
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; /* Monospace font for code */
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-top: 0.75rem;
+            margin-bottom: 2.5rem; /* Adjusted for better spacing */
+        }
+        code {
+            font-family: inherit; /* Inherit font from pre */
+            background-color: #e2e8f0; /* Light background for inline code */
+            color: #333; /* Darker text for inline code */
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+        }
+        /* Ensure Prism.js's background is applied correctly to pre */
+        pre[class*="language-"] {
+            background-color: #2d2d2d; /* Re-apply dark background for the pre block, as Prism's theme might only target code */
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div id="game-container" class="bg-white p-6 sm:p-8 md:p-10 rounded-xl shadow-2xl w-full max-w-3xl border border-gray-200">
+        <div id="game-screen">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-center text-gray-800 mb-6 leading-tight">
+                Python 進階內建函式 (Advanced Built-in Functions) 遊戲化測驗
+            </h1>
+
+            <div id="lives-display" class="text-center mb-6 text-red-500 text-2xl font-bold">
+                生命值:
+            </div>
+
+            <div id="question-area" class="space-y-6">
+                </div>
+
+            <div id="hint-area" class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200 text-blue-800 hidden">
+                <p class="font-semibold mb-2">提示:</p>
+                <p id="hint-content"></p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:space-x-4 mt-8">
+                <button id="check-answer-btn" class="w-full sm:w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg mb-4 sm:mb-0">
+                    檢查答案
+                </button>
+                <button id="get-hint-btn" class="w-full sm:w-1/2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                    獲取提示 ✨
+                </button>
+            </div>
+
+
+            <div id="feedback-explanation-area" class="mt-6 p-4 rounded-lg hidden">
+                </div>
+
+            <button id="next-question-btn" class="mt-4 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 shadow-lg hidden">
+                    下一題
+            </button>
+        </div>
+
+        <div id="game-over-screen" class="hidden text-center p-8 bg-red-50 rounded-lg border border-red-200">
+            <h2 class="text-3xl font-bold text-red-700 mb-4">遊戲結束！</h2>
+            <p id="game-over-score" class="text-xl text-gray-800 mb-6"></p>
+            <button id="restart-game-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                重新開始
+            </button>
+        </div>
+
+        <div id="game-complete-screen" class="hidden text-center p-8 bg-green-50 rounded-lg border border-green-200">
+            <h2 class="text-3xl font-bold text-green-700 mb-4">恭喜您！完成所有題目！</h2>
+            <p id="game-complete-score" class="text-xl text-gray-800 mb-6"></p>
+            <button id="play-again-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                再玩一次
+            </button>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box hidden"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <script>
+        // All 30 questions for the Advanced Built-in Functions quiz
+        const allQuestions = [
+            // Level 1: Iterators and Higher-Order Operations (enumerate(), zip(), map())
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">fruits = [\"apple\", \"banana\"]\nfor index, fruit in enumerate(fruits):\n    print(f\"{index}-{fruit}\")</code></pre>",
+                options: ["`0-apple\n1-banana`", "`apple-0\nbanana-1`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`enumerate()` 函式會同時提供元素的索引 (index) 和值 (value)。預設索引從 0 開始。",
+                hint: "`enumerate()` 函式會回傳什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">data = [\"A\", \"B\", \"C\"]\nfor i, val in enumerate(data, start=1):\n    print(f\"{i}:{val}\")</code></pre>",
+                options: ["`0:A\n1:B\n2:C`", "`1:A\n2:B\n3:C`", "錯誤", "沒有輸出"],
+                correctAnswer: 1,
+                explanation: "`enumerate()` 的 `start` 參數可以指定索引的起始值。",
+                hint: "`enumerate()` 函式可以自定義起始索引。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">names = [\"Alice\", \"Bob\"]\nages = [25, 30]\nfor name, age in zip(names, ages):\n    print(f\"{name} is {age}\")</code></pre>",
+                options: ["`Alice is 25\nBob is 30`", "`Alice is 25`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`zip()` 函式會將多個可迭代物件 (iterable) 中對應位置的元素打包成元組 (Tuple)，然後在 `for` 迴圈中解包。",
+                hint: "`zip()` 函式如何將多個序列組合起來？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">list1 = [1, 2, 3]\nlist2 = [\"a\", \"b\"]\nfor x, y in zip(list1, list2):\n    print(f\"{x}-{y}\")</code></pre>",
+                options: ["`1-a\n2-b\n3-None`", "`1-a\n2-b`", "錯誤", "沒有輸出"],
+                correctAnswer: 1,
+                explanation: "`zip()` 函式會以最短的可迭代物件 (iterable) 為準，當其中一個結束時，`zip()` 也會停止。",
+                hint: "`zip()` 函式處理長度不同的可迭代物件 (iterable) 時，會以哪個為準？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">numbers = [1, 2, 3]\nsquared = list(map(lambda x: x*x, numbers))\nprint(squared)</code></pre>",
+                options: ["`[1, 4, 9]`", "`[1, 2, 3]`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`map()` 函式將 `lambda x: x*x` 應用於 `numbers` 清單 (List) 中的每個元素，得到平方後的結果。",
+                hint: "`map()` 函式會對每個元素執行什麼操作？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">words = [\"hello\", \"world\"]\nupper_words = list(map(str.upper, words))\nprint(upper_words)</code></pre>",
+                options: ["`['HELLO', 'WORLD']`", "`['hello', 'world']`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`map()` 函式將 `str.upper` 方法應用於 `words` 清單 (List) 中的每個字串 (String)，將其轉換為大寫。",
+                hint: "`str.upper` 方法的作用是什麼？"
+            },
+
+            // Level 2: Object Introspection & Debugging Tools (dir(), help(), id())
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">my_string = \"Python\"\nprint('upper' in dir(my_string))</code></pre>",
+                options: ["`True`", "`False`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`dir()` 函式返回物件的所有屬性 (attributes) 和方法 (methods)。字串 (String) 物件有 `upper()` 方法。",
+                hint: "`dir()` 函式會列出物件的哪些資訊？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">my_list = [1, 2, 3]\nprint('append' in dir(my_list))</code></pre>",
+                options: ["`True`", "`False`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`dir()` 函式返回物件的所有屬性 (attributes) 和方法 (methods)。清單 (List) 物件有 `append()` 方法。",
+                hint: "`dir()` 函式會列出物件的哪些資訊？"
+            },
+            {
+                question: "以下關於 `help()` 函式的描述，哪一個是正確的？",
+                options: ["它用於執行程式碼", "它用於獲取函式或模組的說明文件", "它用於列出變數", "它用於除錯程式碼"],
+                correctAnswer: 1,
+                explanation: "`help()` 函式提供對象的幫助資訊和文件字串 (Docstring)。",
+                hint: "當您想了解一個函式的用法時，會使用哪個內建函式？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">a = 10\nb = 10\nprint(id(a) == id(b))</code></pre>",
+                options: ["`True`", "`False`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "對於小的整數 (Integer) 和一些不可變 (immutable) 的字面值，Python 會進行物件重複使用 (object interning)，所以 `a` 和 `b` 可能指向同一個物件，因此 `id()` 相同。",
+                hint: "`id()` 函式返回物件的唯一識別符。對於相同的不可變 (immutable) 值，Python 可能會進行優化。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">list1 = [1, 2]\nlist2 = [1, 2]\nprint(id(list1) == id(list2))</code></pre>",
+                options: ["`True`", "`False`", "錯誤", "沒有輸出"],
+                correctAnswer: 1,
+                explanation: "清單 (List) 是可變 (mutable) 的資料型態 (Data Type)。即使內容相同，兩個獨立創建的清單 (List) 也是不同的物件，因此 `id()` 不同。",
+                hint: "可變 (mutable) 和不可變 (immutable) 資料型態 (Data Type) 在 `id()` 上的行為有何不同？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def my_function():\n    pass\nprint('my_function' in dir())</code></pre>",
+                options: ["`True`", "`False`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`dir()` 函式在沒有參數時，會返回當前作用域 (scope) 中的名稱列表 (List)。`my_function` 在全域作用域 (global scope) 中被定義。",
+                hint: "沒有參數的 `dir()` 函式會列出什麼？"
+            },
+
+            // Level 3: Dynamic Execution (eval()) and mixed concepts
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">expression = \"5 * (2 + 3)\"\nresult = eval(expression)\nprint(result)</code></pre>",
+                options: ["`25`", "`13`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`eval()` 函式會對字串 (String) 中的 Python 表達式 (expression) 進行求值。`5 * (2 + 3)` 等於 `5 * 5 = 25`。",
+                hint: "`eval()` 函式會將字串 (String) 當作程式碼來執行。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">x = 10\ncode_str = \"x + 5\"\nprint(eval(code_str))</code></pre>",
+                options: ["`'x + 5'`", "`15`", "錯誤", "沒有輸出"],
+                correctAnswer: 1,
+                explanation: "`eval()` 函式可以在其執行環境中存取 (access) 變數。所以它會計算 `10 + 5 = 15`。",
+                hint: "`eval()` 函式可以讀取其作用域 (scope) 內的變數。"
+            },
+            {
+                question: "以下關於 `eval()` 函式的描述，哪一個是正確的？",
+                options: ["它只能用於數學運算", "它可以用來執行任意字串 (String) 中的 Python 程式碼，可能存在安全風險", "它比 `print()` 函式更快", "它用於將字串 (String) 轉換為整數 (Integer)"],
+                correctAnswer: 1,
+                explanation: "`eval()` 函式非常強大，可以執行動態程式碼，但也因此可能成為安全漏洞的來源。",
+                hint: "`eval()` 函式的強大功能也伴隨著什麼潛在問題？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">data = [\"1\", \"2\", \"3\"]\nnumbers = list(map(int, data))\nprint(numbers)</code></pre>",
+                options: ["`['1', '2', '3']`", "`[1, 2, 3]`", "錯誤", "沒有輸出"],
+                correctAnswer: 1,
+                explanation: "`map(int, data)` 會將清單 (List) `data` 中的每個字串 (String) 元素都轉換為整數 (Integer)。",
+                hint: "`map()` 函式如何應用型態轉換函式？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">keys = [\"name\", \"age\"]\nvalues = [\"Alice\", 30]\nmy_dict = dict(zip(keys, values))\nprint(my_dict)</code></pre>",
+                options: ["`{'name': 'Alice', 'age': 30}`", "`[('name', 'Alice'), ('age', 30)]`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`zip()` 函式將鍵和值打包成元組 (Tuple) 對，然後 `dict()` 函式將這些元組 (Tuple) 對轉換為字典 (Dictionary)。",
+                hint: "`zip()` 和 `dict()` 函式如何協同工作來創建字典 (Dictionary)？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">text = \"Python\"\nindexed_chars = list(enumerate(text))\nprint(indexed_chars[0])</code></pre>",
+                options: ["`('P')`", "`('P', 0)`", "`('P', 0)`", "` (0, 'P')`"],
+                correctAnswer: 3,
+                explanation: "`enumerate()` 函式返回索引和值的元組 (Tuple)。`indexed_chars` 會是 `[(0, 'P'), (1, 'y'), ...]`，所以 `indexed_chars[0]` 是 `(0, 'P')`。",
+                hint: "`enumerate()` 函式返回的元組 (Tuple) 中，索引和值哪個在前？"
+            },
+
+            // Level 4: Combined & Advanced Use Cases
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def custom_func(x):\n    return x * 2\nnumbers = [1, 2, 3]\nresult = list(map(custom_func, numbers))\nprint(result)</code></pre>",
+                options: ["`[1, 4, 9]`", "`[2, 4, 6]`", "錯誤", "沒有輸出"],
+                correctAnswer: 1,
+                explanation: "`map()` 函式將 `custom_func` 應用於每個數字，使其乘以 2。",
+                hint: "`map()` 函式如何應用自定義函式？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">data = {'a': 1, 'b': 2}\nprint('keys' in dir(data))</code></pre>",
+                options: ["`True`", "`False`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`dir()` 函式返回物件的所有屬性 (attributes) 和方法 (methods)。字典 (Dictionary) 物件有 `keys()` 方法。",
+                hint: "字典 (Dictionary) 有哪些方法可以獲取其鍵？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">a = 10\nb = a\nprint(id(a) == id(b))</code></pre>",
+                options: ["`True`", "`False`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "當 `b = a` 時，`b` 只是引用了 `a` 所指向的同一個物件，所以它們的 `id()` 相同。",
+                hint: "變數賦值是創建新物件還是引用現有物件？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">print(eval(\"len([1, 2, 3])\"))</code></pre>",
+                options: ["`3`", "`len([1, 2, 3])`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`eval()` 函式會執行字串 (String) 中的表達式，包括內建函式呼叫。",
+                hint: "`eval()` 函式能夠執行字串 (String) 中的內建函式呼叫嗎？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">numbers = [1, 2, 3]\nstrings = list(map(str, numbers))\nprint(strings)</code></pre>",
+                options: ["`[1, 2, 3]`", "`['1', '2', '3']`", "錯誤", "沒有輸出"],
+                correctAnswer: 1,
+                explanation: "`map(str, numbers)` 會將清單 (List) 中的每個數字轉換為字串 (String)。",
+                hint: "`str()` 函式的作用是什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">data = [1, 2, 3]\nresult = list(zip(data))\nprint(result)</code></pre>",
+                options: ["`[(1,), (2,), (3,)]`", "`[1, 2, 3]`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`zip()` 函式如果只傳遞一個可迭代物件 (iterable)，它會將每個元素打包成一個單元素的元組 (Tuple)。",
+                hint: "`zip()` 函式在只有一個可迭代物件 (iterable) 時的行為是什麼？"
+            },
+
+            // Level 5: Advanced Concepts & Edge Cases
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">my_list = [1, 2, 3]\nmy_list_id = id(my_list)\nmy_list.append(4)\nprint(my_list_id == id(my_list))</code></pre>",
+                options: ["`True`", "`False`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "清單 (List) 是可變 (mutable) 的。對清單 (List) 進行 `append()` 操作會修改其內容，但它仍然是同一個清單物件，因此其 `id()` 不會改變。",
+                hint: "可變 (mutable) 物件在內容改變時，其 `id()` 會改變嗎？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">my_str = \"hello\"\nmy_str_id = id(my_str)\nmy_str = my_str + \" world\"\nprint(my_str_id == id(my_str))</code></pre>",
+                options: ["`True`", "`False`", "錯誤", "沒有輸出"],
+                correctAnswer: 1,
+                explanation: "字串 (String) 是不可變 (immutable) 的。`my_str + \" world\"` 會創建一個新的字串物件，並將其賦值給 `my_str`，所以 `my_str` 現在指向一個新的物件，`id()` 會改變。",
+                hint: "不可變 (immutable) 物件在內容改變時，其 `id()` 會改變嗎？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">def get_help_text(obj):\n    return help(obj)\n# 假設有一個函式叫做 'my_custom_func'\n# print(get_help_text(my_custom_func))</code></pre>\n關於這段程式碼，哪一個說法是正確的？",
+                options: ["`help()` 函式會直接回傳字串 (String) 幫助資訊。", "`help()` 函式通常會將幫助資訊直接輸出到控制台，並回傳 `None`。", "`help()` 函式會引發錯誤。", "`help()` 函式只能在互動式環境中使用。"],
+                correctAnswer: 1,
+                explanation: "`help()` 函式的主要作用是顯示幫助資訊到標準輸出 (standard output)，而不是將其作為回傳值。因此，如果沒有捕獲其輸出，它通常會回傳 `None`。",
+                hint: "思考 `help()` 函式的主要用途和它的副作用 (side effect)。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">command = \"print('Hello')\"\n# eval(command)</code></pre>\n關於這段程式碼，哪一個說法是正確的？",
+                options: ["它會印出 `Hello`。", "它會引發 `SyntaxError`。", "`eval()` 函式不能執行 `print()`。", "它會印出 `command` 字串 (String) 本身。"],
+                correctAnswer: 0,
+                explanation: "`eval()` 函式可以執行字串 (String) 中包含的有效 Python 表達式 (expression)。`print('Hello')` 是一個有效的表達式，所以它會被執行並印出 `Hello`。",
+                hint: "`eval()` 函式可以執行字串 (String) 中的任何有效 Python 表達式 (expression)。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">data = [1, \"two\", 3.0]\nfor item_type in map(type, data):\n    print(item_type)</code></pre>",
+                options: ["`<class 'int'>\n<class 'str'>\n<class 'float'>`", "`int\nstr\nfloat`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`map(type, data)` 會將 `type()` 函式應用於 `data` 清單 (List) 中的每個元素，返回其資料型態 (Data Type) 的類別 (class) 物件。",
+                hint: "`type()` 函式的作用是什麼？`map()` 函式如何應用它？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">list_of_tuples = [(1, 'a'), (3, 'c'), (2, 'b')]\nsorted_list = sorted(list_of_tuples, key=lambda x: x[0])\nprint(sorted_list)</code></pre>",
+                options: ["`[(1, 'a'), (2, 'b'), (3, 'c')]`", "`[(1, 'a'), (3, 'c'), (2, 'b')]`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`sorted()` 函式的 `key` 參數指定了一個 `lambda` 函式，該函式返回元組 (Tuple) 的第一個元素 (`x[0]`) 作為排序依據。因此，清單 (List) 將根據元組 (Tuple) 的第一個數字進行排序。",
+                hint: "`sorted()` 函式的 `key` 參數如何影響排序結果？"
+            }
+        ];
+
+        // Game State Variables
+        let questions = []; // This will hold the 10 selected questions for the current game
+        let currentQuestionIndex = 0;
+        let lives = 3;
+        let score = 0;
+        const NUM_QUESTIONS_PER_GAME = 10; // Number of questions to play per game
+
+        // DOM Elements
+        const gameScreen = document.getElementById('game-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const gameCompleteScreen = document.getElementById('game-complete-screen');
+
+        const livesDisplay = document.getElementById('lives-display');
+        const questionArea = document.getElementById('question-area');
+        const checkAnswerBtn = document.getElementById('check-answer-btn');
+        const getHintBtn = document.getElementById('get-hint-btn'); // Hint button
+        const hintArea = document.getElementById('hint-area'); // Hint display area
+        const hintContent = document.getElementById('hint-content'); // Hint text content
+        const feedbackExplanationArea = document.getElementById('feedback-explanation-area');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const messageBox = document.getElementById('message-box'); // Custom message box
+
+        const gameOverScore = document.getElementById('game-over-score');
+        const restartGameBtn = document.getElementById('restart-game-btn');
+        const gameCompleteScore = document.getElementById('game-complete-score');
+        const playAgainBtn = document.getElementById('play-again-btn');
+
+        // Function to show a temporary message
+        function showMessage(message, type = 'info') {
+            messageBox.textContent = message;
+            messageBox.className = `message-box show ${type}`; // Add type class
+            clearTimeout(messageBox.timeoutId);
+            messageBox.timeoutId = setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 3000); // Message disappears after 3 seconds
+        }
+
+        // Function to update lives display
+        function updateLivesDisplay() {
+            let heartsHtml = '生命值: ';
+            for (let i = 0; i < 3; i++) {
+                if (i < lives) {
+                    // Full heart SVG
+                    heartsHtml += `<svg class="heart-icon" viewBox="0 0 24 24" fill="currentColor" style="color: #ef4444;">
+                        <path d="M12 21.35l-1.84-1.66C4.07 14.32 2 12.43 2 10.25 2 7.74 3.86 5.6 6.31 5.6c1.74 0 3.41.81 4.5 2.15C11.69 6.41 13.36 5.6 15.19 5.6c2.45 0 4.31 2.14 4.31 4.6 0 2.18-2.07 4.07-8.16 7.44L12 21.35z"/>
+                    </svg>`;
+                } else {
+                    // Empty heart SVG (outline)
+                    heartsHtml += `<svg class="heart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8;">
+                        <path d="M12 21.35l-1.84-1.66C4.07 14.32 2 12.43 2 10.25 2 7.74 3.86 5.6 6.31 5.6c1.74 0 3.41.81 4.5 2.15C11.69 6.41 13.36 5.6 15.19 5.6c2.45 0 4.31 2.14 4.31 4.6 0 2.18-2.07 4.07-8.16 7.44L12 21.35z"/>
+                    </svg>`;
+                }
+            }
+            livesDisplay.innerHTML = heartsHtml;
+        }
+
+        // Function to shuffle an array (Fisher-Yates algorithm)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+            return array;
+        }
+
+        // Function to render the current question
+        function renderQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                gameComplete();
+                return;
+            }
+
+            const q = questions[currentQuestionIndex];
+            questionArea.innerHTML = `
+                <p class="text-xl font-semibold text-gray-900 mb-4">第 ${currentQuestionIndex + 1} 題: ${q.question}</p>
+                <div class="space-y-3">
+                    ${q.options.map((option, optIndex) => `
+                        <label class="flex items-center cursor-pointer p-2 rounded-md hover:bg-blue-50 transition duration-150 ease-in-out">
+                            <input type="radio" name="currentQuestion" value="${optIndex}" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500 transition duration-150 ease-in-out">
+                            <span class="ml-3 text-gray-700 text-base">${option}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+
+            // Reset feedback area, hint area and buttons
+            feedbackExplanationArea.classList.add('hidden');
+            feedbackExplanationArea.innerHTML = '';
+            hintArea.classList.add('hidden'); // Hide hint area on new question
+            hintContent.textContent = ''; // Clear hint content
+            nextQuestionBtn.classList.add('hidden');
+            checkAnswerBtn.classList.remove('hidden');
+            checkAnswerBtn.disabled = false; // Enable check button
+            getHintBtn.disabled = false; // Enable hint button
+            updateLivesDisplay(); // Update lives display for the new game
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+
+            // Re-highlight code blocks if any in the question text
+            Prism.highlightAll();
+        }
+
+        // Function to check the answer
+        function checkAnswer() {
+            const selectedOption = document.querySelector('input[name="currentQuestion"]:checked');
+            if (!selectedOption) {
+                showMessage('請選擇一個答案！', 'error'); // Use custom message box
+                return;
+            }
+
+            checkAnswerBtn.disabled = true; // Disable check button after selection
+            getHintBtn.disabled = true; // Disable hint button after checking answer
+            const userAnswer = parseInt(selectedOption.value);
+            const q = questions[currentQuestionIndex];
+
+            feedbackExplanationArea.classList.remove('hidden');
+            feedbackExplanationArea.innerHTML = ''; // Clear previous content
+            hintArea.classList.add('hidden'); // Hide hint area when answer is checked
+
+            if (userAnswer === q.correctAnswer) {
+                score++;
+                feedbackExplanationArea.classList.remove('bg-red-50', 'bg-yellow-50');
+                feedbackExplanationArea.classList.add('bg-green-50', 'border', 'border-green-200');
+                feedbackExplanationArea.innerHTML = `
+                    <p class="font-bold text-green-700 text-lg mb-2">正確！</p>
+                    <p class="text-gray-700 mb-2">您的答案: ${q.options[userAnswer]}</p>
+                    <p class="font-semibold text-gray-800 mb-2">解釋:</p>
+                    <p class="text-gray-600">${q.explanation}</p>
+                `;
+            } else {
+                lives--;
+                feedbackExplanationArea.classList.remove('bg-green-50', 'bg-yellow-50');
+                feedbackExplanationArea.classList.add('bg-red-50', 'border', 'border-red-200');
+                feedbackExplanationArea.innerHTML = `
+                    <p class="font-bold text-red-700 text-lg mb-2">錯誤！</p>
+                    <p class="text-gray-700 mb-2">您的答案: ${q.options[userAnswer]}</p>
+                    <p class="text-gray-700 mb-2">正確答案: ${q.options[q.correctAnswer]}</p>
+                    <p class="font-semibold text-gray-800 mb-2">解釋:</p>
+                    <p class="text-gray-600">${q.explanation}</p>
+                `;
+                updateLivesDisplay(); // Update lives display immediately
+            }
+
+            nextQuestionBtn.classList.remove('hidden'); // Show next question button
+            // If lives run out, show game over screen
+            if (lives <= 0) {
+                gameOver();
+            } else if (currentQuestionIndex === questions.length - 1) { // Check if it's the last question
+                gameComplete();
+            }
+            // Re-highlight code blocks in explanation if any
+            Prism.highlightAll();
+        }
+
+        // Function to move to the next question
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                renderQuestion();
+            } else {
+                gameComplete();
+            }
+        }
+
+        // Function to handle game over
+        function gameOver() {
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.remove('hidden');
+            gameCompleteScreen.classList.add('hidden');
+            gameOverScore.textContent = `您答對了 ${score} 題。`;
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+        }
+
+        // Function to handle game complete
+        function gameComplete() {
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameCompleteScreen.classList.remove('hidden');
+            gameCompleteScore.textContent = `您答對了 ${score} / ${questions.length} 題。`;
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+        }
+
+        // Function to start/restart the game
+        function startGame() {
+            // Shuffle all questions and select the first NUM_QUESTIONS_PER_GAME
+            questions = shuffleArray([...allQuestions]).slice(0, NUM_QUESTIONS_PER_GAME);
+
+            currentQuestionIndex = 0;
+            lives = 3;
+            score = 0;
+            gameScreen.classList.remove('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameCompleteScreen.classList.add('hidden');
+            renderQuestion();
+        }
+
+        // Function to get a hint (now directly from questions array)
+        function getHint() {
+            const currentQuestion = questions[currentQuestionIndex];
+            if (currentQuestion.hint) {
+                hintArea.classList.remove('hidden'); // Show hint area
+                hintContent.textContent = currentQuestion.hint; // Display the embedded hint
+            } else {
+                hintArea.classList.remove('hidden');
+                hintContent.textContent = "抱歉，此題沒有提示。";
+            }
+            getHintBtn.disabled = true; // Disable hint button after showing hint
+        }
+
+
+        // Event Listeners
+        checkAnswerBtn.addEventListener('click', checkAnswer);
+        nextQuestionBtn.addEventListener('click', nextQuestion);
+        restartGameBtn.addEventListener('click', startGame);
+        playAgainBtn.addEventListener('click', startGame);
+        getHintBtn.addEventListener('click', getHint); // Event listener for hint button
+
+        // Initial game start when the page loads
+        document.addEventListener('DOMContentLoaded', startGame);
+    </script>
+</body>
+</html>

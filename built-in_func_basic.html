@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python 初階內建函式 (Beginner Built-in Functions) 教學 - 完整網站</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <style>
+        /* Custom font for better readability */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            scroll-behavior: smooth; /* Smooth scrolling for anchor links */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        /* Style for code blocks - Prism.js will handle background and text colors */
+        pre {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto; /* Enable horizontal scrolling for long lines */
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; /* Monospace font for code */
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-top: 0.75rem;
+            margin-bottom: 2.5rem; /* Adjusted for better spacing */
+        }
+        code {
+            font-family: inherit; /* Inherit font from pre */
+            background-color: #e2e8f0; /* Light background for inline code */
+            color: #333; /* Darker text for inline code */
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+        }
+        /* Ensure Prism.js's background is applied correctly to pre */
+        pre[class*="language-"] {
+            background-color: #2d2d2d; /* Re-apply dark background for the pre block, as Prism's theme might only target code */
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center p-4">
+    <div class="w-full max-w-5xl bg-white p-6 sm:p-8 md:p-10 rounded-xl shadow-2xl border border-gray-200">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800 leading-tight mb-4">
+                Python 初階內建函式 (Beginner Built-in Functions) 教學
+            </h1>
+            <p class="text-xl text-gray-600">程式碼的基礎構建模組</p>
+        </header>
+
+        <nav class="mb-10 p-4 bg-blue-100 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold text-blue-800 mb-4 text-center">目錄</h2>
+            <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <li><a href="#section1" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">1. 什麼是內建函式？</a></li>
+                <li><a href="#section2" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">2. 輸出/輸入與基本資訊</a></li>
+                <li><a href="#section3" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">3. 基礎型態轉換</a></li>
+                <li><a href="#section4" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">4. 基礎數學函式</a></li>
+                 <li><a href="#section5" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">5. 序列生成</a></li>
+                 <li><a href="#section6" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">6. 排序</a></li>
+            </ul>
+        </nav>
+
+        <section id="section1" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">1. 什麼是內建函式 (Built-in Functions)？</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                <strong>內建函式 (Built-in Functions)</strong> 是 Python 語言預先定義好的一組函式，您無需進行任何導入 (import) 操作，就可以在任何 Python 程式碼中直接使用它們。它們提供了許多常用且基礎的功能，是理解 Python 程式碼的基石。
+            </p>
+        </section>
+
+        <section id="section2" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">2. 輸出/輸入與基本資訊 (Basic I/O & Information)</h2>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">2.1 `print()`：輸出資訊</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                用於將資訊輸出到控制台 (console) 或標準輸出 (standard output)。
+            </p>
+            <pre><code class="language-python">print("Hello, Python!") # 輸出字串 (String)
+print(123)             # 輸出數字
+name = "Alice"
+print("我的名字是", name) # 輸出多個項目，用空格分隔
+
+# 使用 f-string 格式化輸出
+age = 30
+print(f"我今年 {age} 歲。")
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">2.2 `input()`：從使用者獲取輸入</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                用於從使用者那裡獲取輸入。所有輸入都會被讀取為字串 (String)。
+            </p>
+            <pre><code class="language-python"># user_name = input("請輸入您的名字: ")
+# print(f"您好，{user_name}！")
+
+# 注意：input() 總是回傳字串 (String)，如果需要數字，需要進行型態轉換 (Type Conversion)
+# num_str = input("請輸入一個數字: ")
+# num_int = int(num_str) # 將字串 (String) 轉換為整數 (Integer)
+# print(f"您輸入的數字是: {num_int}")
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">2.3 `len()`：取得長度</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                返回物件的長度 (Length) 或項目數量，適用於序列 (sequence)（如字串 (String)、清單 (List)、元組 (Tuple)）和集合 (collection)（如字典 (Dictionary)、集合 (Set)）。
+            </p>
+            <pre><code class="language-python">my_string = "Python"
+print(len(my_string)) # 輸出: 6
+
+my_list = [1, 2, 3, 4]
+print(len(my_list))   # 輸出: 4
+
+my_dict = {"a": 1, "b": 2}
+print(len(my_dict))   # 輸出: 2 (鍵的數量)
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">2.4 `type()`：取得物件型態</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                返回物件的資料型態 (Data Type)。
+            </p>
+            <pre><code class="language-python">print(type("hello"))  # 輸出: &lt;class 'str'&gt;
+print(type(123))      # 輸出: &lt;class 'int'&gt;
+print(type([1, 2]))   # 輸出: &lt;class 'list'&gt;
+</code></pre>
+        </section>
+
+        <section id="section3" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">3. 基礎型態轉換 (Basic Type Conversion)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                這些函式用於將一個資料型態 (Data Type) 的值轉換為另一個資料型態 (Data Type)。
+            </p>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">3.1 `int()`：轉換為整數 (Integer)</h3>
+            <pre><code class="language-python">print(int("123"))     # 輸出: 123
+print(int(3.14))      # 輸出: 3 (截斷小數部分)
+print(int(True))      # 輸出: 1
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">3.2 `float()`：轉換為浮點數 (Float)</h3>
+            <pre><code class="language-python">print(float("3.14"))  # 輸出: 3.14
+print(float(10))      # 輸出: 10.0
+print(float(False))   # 輸出: 0.0
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">3.3 `str()`：轉換為字串 (String)</h3>
+            <pre><code class="language-python">print(str(123))       # 輸出: "123"
+print(str(3.14))      # 輸出: "3.14"
+print(str([1, 2]))    # 輸出: "[1, 2]"
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">3.4 `bool()`：轉換為布林值 (Boolean)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                大多數值在布林上下文中都被視為 `True`。以下值會被視為 `False`：
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li>`None`</li>
+                <li>`False`</li>
+                <li>數字 `0` (整數 (Integer)、浮點數 (Float)、複數 (Complex))</li>
+                <li>空序列 (empty sequence)（`''`, `[]`, `()`）</li>
+                <li>空映射 (empty mapping)（`{}`）</li>
+                <li>空集合 (empty set)（`set()`）</li>
+            </ul>
+            <pre><code class="language-python">print(bool(1))        # 輸出: True
+print(bool(0))        # 輸出: False
+print(bool("hello"))  # 輸出: True
+print(bool(""))        # 輸出: False
+print(bool([]))       # 輸出: False
+print(bool(None))     # 輸出: False
+</code></pre>
+        </section>
+
+        <section id="section4" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">4. 基礎數學函式 (Basic Mathematical Functions)</h2>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">4.1 `abs()`：絕對值</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                返回數字的絕對值。
+            </p>
+            <pre><code class="language-python">print(abs(-10))   # 輸出: 10
+print(abs(3.14))  # 輸出: 3.14
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">4.2 `min()`：最小值</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                返回可迭代物件 (iterable) 中的最小值，或者多個引數中的最小值。
+            </p>
+            <pre><code class="language-python">print(min(1, 5, 2))      # 輸出: 1
+print(min([10, 2, 8]))   # 輸出: 2
+print(min("apple", "banana")) # 輸出: apple (按字母順序)
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">4.3 `max()`：最大值</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                返回可迭代物件 (iterable) 中的最大值，或者多個引數中的最大值。
+            </p>
+            <pre><code class="language-python">print(max(1, 5, 2))      # 輸出: 5
+print(max([10, 2, 8]))   # 輸出: 10
+print(max("apple", "banana")) # 輸出: banana
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">4.4 `sum()`：總和</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                返回數字可迭代物件 (iterable) 中所有元素的總和。
+            </p>
+            <pre><code class="language-python">print(sum([1, 2, 3]))    # 輸出: 6
+print(sum((10, 20, 30))) # 輸出: 60
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">4.5 `round()`：四捨五入</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                對數字進行四捨五入。可以指定保留的小數位數。
+            </p>
+            <pre><code class="language-python">print(round(3.14159))    # 輸出: 3
+print(round(3.14159, 2)) # 輸出: 3.14
+print(round(2.5))        # 輸出: 2 (注意：Python 3 遵循「四捨六入五成雙」規則)
+print(round(3.5))        # 輸出: 4
+</code></pre>
+        </section>
+
+        <section id="section5" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">5. 序列生成 (Sequence Generation)</h2>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">5.1 `range()`：生成數字序列</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                用於生成一個數字序列，常用於 `for` 迴圈。
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li>`range(stop)`：從 0 到 `stop-1`。</li>
+                <li>`range(start, stop)`：從 `start` 到 `stop-1`。</li>
+                <li>`range(start, stop, step)`：從 `start` 到 `stop-1`，每次跳過 `step`。</li>
+            </ul>
+            <pre><code class="language-python">for i in range(3):
+    print(i) # 輸出: 0, 1, 2
+
+for i in range(1, 5):
+    print(i) # 輸出: 1, 2, 3, 4
+
+for i in range(0, 10, 2):
+    print(i) # 輸出: 0, 2, 4, 6, 8
+</code></pre>
+        </section>
+
+        <section id="section6" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">6. 排序 (Sorting)</h2>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">6.1 `sorted()`：排序可迭代物件</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                返回一個新的排序清單 (List)，不修改原始可迭代物件 (iterable)。
+            </p>
+            <pre><code class="language-python">numbers = [3, 1, 4, 1, 5]
+sorted_numbers = sorted(numbers)
+print(sorted_numbers) # 輸出: [1, 1, 3, 4, 5]
+print(numbers)        # 輸出: [3, 1, 4, 1, 5] (原始清單 (List) 不變)
+
+# 降序排序
+print(sorted(numbers, reverse=True)) # 輸出: [5, 4, 3, 1, 1]
+</code></pre>
+        </section>
+
+        <footer class="text-center text-gray-500 text-sm mt-10 p-4 border-t border-gray-200">
+            &copy; 2025 Python 初階內建函式教學. 版權所有。
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>

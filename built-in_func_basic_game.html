@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python 初階內建函式 (Beginner Built-in Functions) 遊戲化測驗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <style>
+        /* Custom font for better readability */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .heart-icon {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+            vertical-align: middle;
+            margin: 0 2px;
+        }
+        /* Message box styling */
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0; /* Initially hidden */
+        }
+        .message-box.show {
+            opacity: 1;
+        }
+        .message-box.info {
+            background-color: #e0f2fe; /* Light blue */
+            color: #0284c7; /* Darker blue */
+            border: 1px solid #94a3b8;
+        }
+        .message-box.error {
+            background-color: #fee2e2; /* Light red */
+            color: #dc2626; /* Darker red */
+            border: 1px solid #ef4444;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Style for code blocks - Prism.js will handle background and text colors */
+        pre {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto; /* Enable horizontal scrolling for long lines */
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; /* Monospace font for code */
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-top: 0.75rem;
+            margin-bottom: 2.5rem; /* Adjusted for better spacing */
+        }
+        code {
+            font-family: inherit; /* Inherit font from pre */
+            background-color: #e2e8f0; /* Light background for inline code */
+            color: #333; /* Darker text for inline code */
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+        }
+        /* Ensure Prism.js's background is applied correctly to pre */
+        pre[class*="language-"] {
+            background-color: #2d2d2d; /* Re-apply dark background for the pre block, as Prism's theme might only target code */
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div id="game-container" class="bg-white p-6 sm:p-8 md:p-10 rounded-xl shadow-2xl w-full max-w-3xl border border-gray-200">
+        <div id="game-screen">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-center text-gray-800 mb-6 leading-tight">
+                Python 初階內建函式 (Beginner Built-in Functions) 遊戲化測驗
+            </h1>
+
+            <div id="lives-display" class="text-center mb-6 text-red-500 text-2xl font-bold">
+                生命值:
+            </div>
+
+            <div id="question-area" class="space-y-6">
+                </div>
+
+            <div id="hint-area" class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200 text-blue-800 hidden">
+                <p class="font-semibold mb-2">提示:</p>
+                <p id="hint-content"></p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:space-x-4 mt-8">
+                <button id="check-answer-btn" class="w-full sm:w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg mb-4 sm:mb-0">
+                    檢查答案
+                </button>
+                <button id="get-hint-btn" class="w-full sm:w-1/2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                    獲取提示 ✨
+                </button>
+            </div>
+
+
+            <div id="feedback-explanation-area" class="mt-6 p-4 rounded-lg hidden">
+                </div>
+
+            <button id="next-question-btn" class="mt-4 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 shadow-lg hidden">
+                    下一題
+            </button>
+        </div>
+
+        <div id="game-over-screen" class="hidden text-center p-8 bg-red-50 rounded-lg border border-red-200">
+            <h2 class="text-3xl font-bold text-red-700 mb-4">遊戲結束！</h2>
+            <p id="game-over-score" class="text-xl text-gray-800 mb-6"></p>
+            <button id="restart-game-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                重新開始
+            </button>
+        </div>
+
+        <div id="game-complete-screen" class="hidden text-center p-8 bg-green-50 rounded-lg border border-green-200">
+            <h2 class="text-3xl font-bold text-green-700 mb-4">恭喜您！完成所有題目！</h2>
+            <p id="game-complete-score" class="text-xl text-gray-800 mb-6"></p>
+            <button id="play-again-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-300 shadow-lg">
+                再玩一次
+            </button>
+        </div>
+    </div>
+
+    <div id="message-box" class="message-box hidden"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <script>
+        // All 30 questions for the Built-in Functions quiz
+        const allQuestions = [
+            // Level 1: Basic I/O & Information
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">print(\"Hello\")</code></pre>",
+                options: ["`Hello`", "`\"Hello\"`", "錯誤", "沒有輸出"],
+                correctAnswer: 0,
+                explanation: "`print()` 函式用於將內容輸出到控制台。",
+                hint: "`print()` 函式的作用是什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">name = input(\"請輸入名字: \")\nprint(type(name))</code></pre>",
+                options: ["`<class 'str'>`", "`<class 'int'>`", "`<class 'NoneType'>`", "錯誤"],
+                correctAnswer: 0,
+                explanation: "`input()` 函式總是將使用者輸入讀取為字串 (String)。",
+                hint: "`input()` 函式的回傳值是什麼資料型態 (Data Type)？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">my_string = \"Python\"\nprint(len(my_string))</code></pre>",
+                options: ["`6`", "`7`", "`0`", "錯誤"],
+                correctAnswer: 0,
+                explanation: "`len()` 函式返回字串 (String) 中的字元數量。",
+                hint: "`len()` 函式對於字串 (String) 的作用是什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">my_list = [1, 2, 3]\nprint(len(my_list))</code></pre>",
+                options: ["`1`", "`2`", "`3`", "錯誤"],
+                correctAnswer: 2,
+                explanation: "`len()` 函式返回清單 (List) 中的元素數量。",
+                hint: "`len()` 函式對於清單 (List) 的作用是什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">num = 123\nprint(type(num))</code></pre>",
+                options: ["`<class 'str'>`", "`<class 'int'>`", "`<class 'float'>`", "錯誤"],
+                correctAnswer: 1,
+                explanation: "`type()` 函式返回變數的資料型態 (Data Type)。`123` 是一個整數 (Integer)。",
+                hint: "`type()` 函式的作用是什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">text = \"hello\"\nprint(type(text))</code></pre>",
+                options: ["`<class 'str'>`", "`<class 'list'>`", "`<class 'dict'>`", "錯誤"],
+                correctAnswer: 0,
+                explanation: "`\"hello\"` 是一個字串 (String)。",
+                hint: "字串 (String) 的資料型態 (Data Type) 是什麼？"
+            },
+
+            // Level 2: Basic Type Conversion
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">num_str = \"456\"\nnum_int = int(num_str)\nprint(num_int + 1)</code></pre>",
+                options: ["`457`", "`\"4561\"`", "錯誤", "`456`"],
+                correctAnswer: 0,
+                explanation: "`int()` 函式將字串 (String) `\"456\"` 轉換為整數 (Integer) `456`，然後再加 1。",
+                hint: "字串 (String) 轉換為整數 (Integer) 後，可以進行數學運算。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">pi_float = 3.14\npi_int = int(pi_float)\nprint(pi_int)</code></pre>",
+                options: ["`3.14`", "`3`", "`4`", "錯誤"],
+                correctAnswer: 1,
+                explanation: "`int()` 函式將浮點數 (Float) 轉換為整數 (Integer) 時，會截斷小數部分。",
+                hint: "浮點數 (Float) 轉換為整數 (Integer) 時，小數點後的數字會如何處理？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">num_int = 7\nnum_float = float(num_int)\nprint(num_float)</code></pre>",
+                options: ["`7`", "`7.0`", "錯誤", "沒有輸出"],
+                correctAnswer: 1,
+                explanation: "`float()` 函式將整數 (Integer) 轉換為浮點數 (Float) 時，會加上 `.0`。",
+                hint: "整數 (Integer) 轉換為浮點數 (Float) 後，通常會是什麼形式？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">value = True\nvalue_int = int(value)\nprint(value_int)</code></pre>",
+                options: ["`True`", "`1`", "`0`", "錯誤"],
+                correctAnswer: 1,
+                explanation: "布林值 (Boolean) `True` 轉換為整數 (Integer) 時是 `1`，`False` 轉換為整數 (Integer) 時是 `0`。",
+                hint: "布林值 (Boolean) 在數值上對應的整數 (Integer) 是什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">num = 123\nnum_str = str(num)\nprint(num_str + \"abc\")</code></pre>",
+                options: ["`123abc`", "`\"123abc\"`", "錯誤", "`123`"],
+                correctAnswer: 1,
+                explanation: "`str()` 函式將數字轉換為字串 (String)，然後字串 (String) 可以與其他字串 (String) 連接。",
+                hint: "數字轉換為字串 (String) 後，可以進行字串 (String) 操作。"
+            },
+            {
+                question: "以下哪個值在 `bool()` 函式轉換後會是 `False`？",
+                options: ["`1`", "`\"hello\"`", "`[]`", "`True`"],
+                correctAnswer: 2,
+                explanation: "空清單 (empty List) `[]` 在布林上下文中被視為 `False`。",
+                hint: "哪些值在布林上下文中被視為『假』？"
+            },
+
+            // Level 3: Basic Mathematical Functions
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">print(abs(-5))</code></pre>",
+                options: ["`-5`", "`5`", "錯誤", "沒有輸出"],
+                correctAnswer: 1,
+                explanation: "`abs()` 函式返回數字的絕對值。",
+                hint: "`abs()` 函式的作用是什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">numbers = [10, 5, 20]\nprint(min(numbers))</code></pre>",
+                options: ["`10`", "`5`", "`20`", "錯誤"],
+                correctAnswer: 1,
+                explanation: "`min()` 函式返回清單 (List) 中的最小值。",
+                hint: "`min()` 函式的作用是什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">data = (1, 5, 2)\nprint(max(data))</code></pre>",
+                options: ["`1`", "`5`", "`2`", "錯誤"],
+                correctAnswer: 1,
+                explanation: "`max()` 函式返回元組 (Tuple) 中的最大值。",
+                hint: "`max()` 函式的作用是什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">values = [1, 2, 3]\nprint(sum(values))</code></pre>",
+                options: ["`123`", "`6`", "錯誤", "`0`"],
+                correctAnswer: 1,
+                explanation: "`sum()` 函式返回數字清單 (List) 中所有元素的總和。",
+                hint: "`sum()` 函式的作用是什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">print(round(4.6))</code></pre>",
+                options: ["`4`", "`5`", "錯誤", "沒有輸出"],
+                correctAnswer: 1,
+                explanation: "`round()` 函式將數字四捨五入到最接近的整數 (Integer)。",
+                hint: "`round()` 函式如何處理小數點？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">print(round(3.14159, 2))</code></pre>",
+                options: ["`3`", "`3.1`", "`3.14`", "`3.141`"],
+                correctAnswer: 2,
+                explanation: "`round(number, ndigits)` 函式將數字四捨五入到指定的小數位數。",
+                hint: "`round()` 函式的第二個參數控制什麼？"
+            },
+
+            // Level 4: Sequence Generation
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">for i in range(4):\n    print(i)</code></pre>",
+                options: ["0\n1\n2\n3", "1\n2\n3\n4", "0\n1\n2\n3\n4", "錯誤"],
+                correctAnswer: 0,
+                explanation: "`range(stop)` 函式從 0 開始生成序列，直到 `stop-1`。",
+                hint: "`range()` 函式預設從哪個數字開始？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">for i in range(1, 4):\n    print(i)</code></pre>",
+                options: ["0\n1\n2\n3", "1\n2\n3", "1\n2\n3\n4", "錯誤"],
+                correctAnswer: 1,
+                explanation: "`range(start, stop)` 函式從 `start` 開始生成序列，直到 `stop-1`。",
+                hint: "`range()` 函式的 `start` 和 `stop` 參數的範圍是什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">for i in range(0, 6, 2):\n    print(i)</code></pre>",
+                options: ["0\n1\n2\n3\n4\n5", "0\n2\n4", "2\n4\n6", "錯誤"],
+                correctAnswer: 1,
+                explanation: "`range(start, stop, step)` 函式從 `start` 開始，每次遞增 `step`，直到 `stop-1`。",
+                hint: "`range()` 函式的第三個參數控制什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">for i in range(5, 0, -1):\n    print(i)</code></pre>",
+                options: ["5\n4\n3\n2\n1", "0\n1\n2\n3\n4", "5\n4\n3\n2", "錯誤"],
+                correctAnswer: 0,
+                explanation: "`range()` 函式可以使用負數步長來倒序生成序列。",
+                hint: "`range()` 函式如何生成倒序序列？"
+            },
+
+            // Level 5: Sorting
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">numbers = [3, 1, 4, 2]\nsorted_numbers = sorted(numbers)\nprint(sorted_numbers)</code></pre>",
+                options: ["`[3, 1, 4, 2]`", "`[1, 2, 3, 4]`", "錯誤", "沒有輸出"],
+                correctAnswer: 1,
+                explanation: "`sorted()` 函式返回一個新的排序清單 (List)，預設為升序。",
+                hint: "`sorted()` 函式會創建一個新的排序清單 (List)。"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">words = [\"banana\", \"apple\", \"cherry\"]\nsorted_words = sorted(words)\nprint(sorted_words)</code></pre>",
+                options: ["`['banana', 'apple', 'cherry']`", "`['apple', 'banana', 'cherry']`", "錯誤", "沒有輸出"],
+                correctAnswer: 1,
+                explanation: "`sorted()` 函式對字串 (String) 清單 (List) 進行字母順序排序。",
+                hint: "`sorted()` 函式如何排序字串 (String)？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">numbers = [5, 1, 9, 3]\nsorted_desc = sorted(numbers, reverse=True)\nprint(sorted_desc)</code></pre>",
+                options: ["`[1, 3, 5, 9]`", "`[9, 5, 3, 1]`", "錯誤", "沒有輸出"],
+                correctAnswer: 1,
+                explanation: "設定 `reverse=True` 參數會讓 `sorted()` 函式返回降序排序的清單 (List)。",
+                hint: "哪個參數可以改變 `sorted()` 函式的排序方向？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">original_list = [3, 1, 2]\nsorted_list = sorted(original_list)\nprint(original_list)</code></pre>",
+                options: ["`[1, 2, 3]`", "`[3, 1, 2]`", "錯誤", "沒有輸出"],
+                correctAnswer: 1,
+                explanation: "`sorted()` 函式返回一個**新的**排序清單 (List)，它不會修改原始清單 (List)。",
+                hint: "`sorted()` 函式會修改原始清單 (List) 嗎？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">data = [\"apple\", 1, \"banana\", 2]\nprint(sorted(data))</code></pre>",
+                options: ["`[1, 2, 'apple', 'banana']`", "`['apple', 'banana', 1, 2]`", "錯誤", "沒有輸出"],
+                correctAnswer: 2,
+                explanation: "`sorted()` 函式無法直接排序包含不同資料型態 (Data Type) 的清單 (List)，因為字串 (String) 和數字之間無法直接比較大小，會引發 `TypeError`。",
+                hint: "`sorted()` 函式在排序不同資料型態 (Data Type) 的元素時，會發生什麼？"
+            },
+            {
+                question: "以下程式碼的輸出是什麼？<pre><code class=\"language-python\">my_tuple = (5, 2, 8, 1)\nsorted_tuple = sorted(my_tuple)\nprint(sorted_tuple)</code></pre>",
+                options: ["`(1, 2, 5, 8)`", "`[1, 2, 5, 8]`", "錯誤", "沒有輸出"],
+                correctAnswer: 1,
+                explanation: "`sorted()` 函式可以接受任何可迭代物件 (iterable) 作為輸入，但總是返回一個清單 (List)。",
+                hint: "`sorted()` 函式的回傳值總是哪種資料型態 (Data Type)？"
+            }
+        ];
+
+        // Game State Variables
+        let questions = []; // This will hold the 10 selected questions for the current game
+        let currentQuestionIndex = 0;
+        let lives = 3;
+        let score = 0;
+        const NUM_QUESTIONS_PER_GAME = 10; // Number of questions to play per game
+
+        // DOM Elements
+        const gameScreen = document.getElementById('game-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const gameCompleteScreen = document.getElementById('game-complete-screen');
+
+        const livesDisplay = document.getElementById('lives-display');
+        const questionArea = document.getElementById('question-area');
+        const checkAnswerBtn = document.getElementById('check-answer-btn');
+        const getHintBtn = document.getElementById('get-hint-btn'); // Hint button
+        const hintArea = document.getElementById('hint-area'); // Hint display area
+        const hintContent = document.getElementById('hint-content'); // Hint text content
+        const feedbackExplanationArea = document.getElementById('feedback-explanation-area');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const messageBox = document.getElementById('message-box'); // Custom message box
+
+        const gameOverScore = document.getElementById('game-over-score');
+        const restartGameBtn = document.getElementById('restart-game-btn');
+        const gameCompleteScore = document.getElementById('game-complete-score');
+        const playAgainBtn = document.getElementById('play-again-btn');
+
+        // Function to show a temporary message
+        function showMessage(message, type = 'info') {
+            messageBox.textContent = message;
+            messageBox.className = `message-box show ${type}`; // Add type class
+            clearTimeout(messageBox.timeoutId);
+            messageBox.timeoutId = setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 3000); // Message disappears after 3 seconds
+        }
+
+        // Function to update lives display
+        function updateLivesDisplay() {
+            let heartsHtml = '生命值: ';
+            for (let i = 0; i < 3; i++) {
+                if (i < lives) {
+                    // Full heart SVG
+                    heartsHtml += `<svg class="heart-icon" viewBox="0 0 24 24" fill="currentColor" style="color: #ef4444;">
+                        <path d="M12 21.35l-1.84-1.66C4.07 14.32 2 12.43 2 10.25 2 7.74 3.86 5.6 6.31 5.6c1.74 0 3.41.81 4.5 2.15C11.69 6.41 13.36 5.6 15.19 5.6c2.45 0 4.31 2.14 4.31 4.6 0 2.18-2.07 4.07-8.16 7.44L12 21.35z"/>
+                    </svg>`;
+                } else {
+                    // Empty heart SVG (outline)
+                    heartsHtml += `<svg class="heart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8;">
+                        <path d="M12 21.35l-1.84-1.66C4.07 14.32 2 12.43 2 10.25 2 7.74 3.86 5.6 6.31 5.6c1.74 0 3.41.81 4.5 2.15C11.69 6.41 13.36 5.6 15.19 5.6c2.45 0 4.31 2.14 4.31 4.6 0 2.18-2.07 4.07-8.16 7.44L12 21.35z"/>
+                    </svg>`;
+                }
+            }
+            livesDisplay.innerHTML = heartsHtml;
+        }
+
+        // Function to shuffle an array (Fisher-Yates algorithm)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+            return array;
+        }
+
+        // Function to render the current question
+        function renderQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                gameComplete();
+                return;
+            }
+
+            const q = questions[currentQuestionIndex];
+            questionArea.innerHTML = `
+                <p class="text-xl font-semibold text-gray-900 mb-4">第 ${currentQuestionIndex + 1} 題: ${q.question}</p>
+                <div class="space-y-3">
+                    ${q.options.map((option, optIndex) => `
+                        <label class="flex items-center cursor-pointer p-2 rounded-md hover:bg-blue-50 transition duration-150 ease-in-out">
+                            <input type="radio" name="currentQuestion" value="${optIndex}" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500 transition duration-150 ease-in-out">
+                            <span class="ml-3 text-gray-700 text-base">${option}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+
+            // Reset feedback area, hint area and buttons
+            feedbackExplanationArea.classList.add('hidden');
+            feedbackExplanationArea.innerHTML = '';
+            hintArea.classList.add('hidden'); // Hide hint area on new question
+            hintContent.textContent = ''; // Clear hint content
+            nextQuestionBtn.classList.add('hidden');
+            checkAnswerBtn.classList.remove('hidden');
+            checkAnswerBtn.disabled = false; // Enable check button
+            getHintBtn.disabled = false; // Enable hint button
+            updateLivesDisplay(); // Update lives display for the new game
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+
+            // Re-highlight code blocks if any in the question text
+            Prism.highlightAll();
+        }
+
+        // Function to check the answer
+        function checkAnswer() {
+            const selectedOption = document.querySelector('input[name="currentQuestion"]:checked');
+            if (!selectedOption) {
+                showMessage('請選擇一個答案！', 'error'); // Use custom message box
+                return;
+            }
+
+            checkAnswerBtn.disabled = true; // Disable check button after selection
+            getHintBtn.disabled = true; // Disable hint button after checking answer
+            const userAnswer = parseInt(selectedOption.value);
+            const q = questions[currentQuestionIndex];
+
+            feedbackExplanationArea.classList.remove('hidden');
+            feedbackExplanationArea.innerHTML = ''; // Clear previous content
+            hintArea.classList.add('hidden'); // Hide hint area when answer is checked
+
+            if (userAnswer === q.correctAnswer) {
+                score++;
+                feedbackExplanationArea.classList.remove('bg-red-50', 'bg-yellow-50');
+                feedbackExplanationArea.classList.add('bg-green-50', 'border', 'border-green-200');
+                feedbackExplanationArea.innerHTML = `
+                    <p class="font-bold text-green-700 text-lg mb-2">正確！</p>
+                    <p class="text-gray-700 mb-2">您的答案: ${q.options[userAnswer]}</p>
+                    <p class="font-semibold text-gray-800 mb-2">解釋:</p>
+                    <p class="text-gray-600">${q.explanation}</p>
+                `;
+            } else {
+                lives--;
+                feedbackExplanationArea.classList.remove('bg-green-50', 'bg-yellow-50');
+                feedbackExplanationArea.classList.add('bg-red-50', 'border', 'border-red-200');
+                feedbackExplanationArea.innerHTML = `
+                    <p class="font-bold text-red-700 text-lg mb-2">錯誤！</p>
+                    <p class="text-gray-700 mb-2">您的答案: ${q.options[userAnswer]}</p>
+                    <p class="text-gray-700 mb-2">正確答案: ${q.options[q.correctAnswer]}</p>
+                    <p class="font-semibold text-gray-800 mb-2">解釋:</p>
+                    <p class="text-gray-600">${q.explanation}</p>
+                `;
+                updateLivesDisplay(); // Update lives display immediately
+            }
+
+            nextQuestionBtn.classList.remove('hidden'); // Show next question button
+            // If lives run out, show game over screen
+            if (lives <= 0) {
+                gameOver();
+            } else if (currentQuestionIndex === questions.length - 1) { // Check if it's the last question
+                gameComplete();
+            }
+            // Re-highlight code blocks in explanation if any
+            Prism.highlightAll();
+        }
+
+        // Function to move to the next question
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                renderQuestion();
+            } else {
+                gameComplete();
+            }
+        }
+
+        // Function to handle game over
+        function gameOver() {
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.remove('hidden');
+            gameCompleteScreen.classList.add('hidden');
+            gameOverScore.textContent = `您答對了 ${score} 題。`;
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+        }
+
+        // Function to handle game complete
+        function gameComplete() {
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameCompleteScreen.classList.remove('hidden');
+            gameCompleteScore.textContent = `您答對了 ${score} / ${questions.length} 題。`;
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top
+        }
+
+        // Function to start/restart the game
+        function startGame() {
+            // Shuffle all questions and select the first NUM_QUESTIONS_PER_GAME
+            questions = shuffleArray([...allQuestions]).slice(0, NUM_QUESTIONS_PER_GAME);
+
+            currentQuestionIndex = 0;
+            lives = 3;
+            score = 0;
+            gameScreen.classList.remove('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameCompleteScreen.classList.add('hidden');
+            renderQuestion();
+        }
+
+        // Function to get a hint (now directly from questions array)
+        function getHint() {
+            const currentQuestion = questions[currentQuestionIndex];
+            if (currentQuestion.hint) {
+                hintArea.classList.remove('hidden'); // Show hint area
+                hintContent.textContent = currentQuestion.hint; // Display the embedded hint
+            } else {
+                hintArea.classList.remove('hidden');
+                hintContent.textContent = "抱歉，此題沒有提示。";
+            }
+            getHintBtn.disabled = true; // Disable hint button after showing hint
+        }
+
+
+        // Event Listeners
+        checkAnswerBtn.addEventListener('click', checkAnswer);
+        nextQuestionBtn.addEventListener('click', nextQuestion);
+        restartGameBtn.addEventListener('click', startGame);
+        playAgainBtn.addEventListener('click', startGame);
+        getHintBtn.addEventListener('click', getHint); // Event listener for hint button
+
+        // Initial game start when the page loads
+        document.addEventListener('DOMContentLoaded', startGame);
+    </script>
+</body>
+</html>
