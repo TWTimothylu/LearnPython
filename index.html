@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Python 學習中心</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom font for better readability */
@@ -41,7 +42,8 @@
         </header>
 
         <main id="content-cards" class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            </main>
+            <!-- Content cards will be rendered here by JavaScript -->
+        </main>
 
         <footer class="text-center text-gray-500 text-sm mt-auto p-4 border-t border-gray-200">
             &copy; 2025 Python 學習中心. 版權所有。
@@ -144,6 +146,13 @@
                 description: "挑戰您對 Python 進階內建函式的理解和應用。",
                 link: "built-in_func_advance_game.html",
                 type: "quiz"
+            },
+            // 類別 (Class)
+            {
+                title: "類別 (Class) 教學",
+                description: "物件導向程式設計的基石：學習如何定義類別、建立物件、使用屬性與方法。",
+                link: "class.html", // 新增的 Class 教學頁面
+                type: "tutorial"
             }
             // Add more pages here as you create them:
             // {

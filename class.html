@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python 類別 (Class) 教學 - 完整網站</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Prism.js CSS for syntax highlighting (Okaidia theme for dark background) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <style>
+        /* Custom font for better readability */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            scroll-behavior: smooth; /* Smooth scrolling for anchor links */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        /* Style for code blocks - Prism.js will handle background and text colors */
+        pre {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto; /* Enable horizontal scrolling for long lines */
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; /* Monospace font for code */
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-top: 0.75rem;
+            margin-bottom: 2.5rem; /* Adjusted for better spacing */
+        }
+        code {
+            font-family: inherit; /* Inherit font from pre */
+            background-color: #e2e8f0; /* Light background for inline code */
+            color: #333; /* Darker text for inline code */
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+        }
+        /* Ensure Prism.js's background is applied correctly to pre */
+        pre[class*="language-"] {
+            background-color: #2d2d2d; /* Re-apply dark background for the pre block, as Prism's theme might only target code */
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center p-4">
+    <div class="w-full max-w-5xl bg-white p-6 sm:p-8 md:p-10 rounded-xl shadow-2xl border border-gray-200">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800 leading-tight mb-4">
+                Python 類別 (Class) 教學
+            </h1>
+            <p class="text-xl text-gray-600">物件導向程式設計的基石</p>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="mb-10 p-4 bg-blue-100 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold text-blue-800 mb-4 text-center">目錄</h2>
+            <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <li><a href="#section1" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">1. 什麼是類別？</a></li>
+                <li><a href="#section2" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">2. 定義類別</a></li>
+                <li><a href="#section3" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">3. 建立物件 (實例)</a></li>
+                <li><a href="#section4" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">4. 屬性 (Attributes)</a></li>
+                <li><a href="#section5" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">5. 方法 (Methods)</a></li>
+                <li><a href="#section6" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">6. 繼承 (Inheritance)</a></li>
+                <li><a href="#section7" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">7. 封裝 (Encapsulation)</a></li>
+                <li><a href="#section8" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">8. 多型 (Polymorphism)</a></li>
+            </ul>
+        </nav>
+
+        <!-- Content Sections -->
+        <section id="section1" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">1. 什麼是類別 (Class)？</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                在物件導向程式設計 (Object-Oriented Programming, OOP) 中，**類別 (Class)** 是一種藍圖 (blueprint) 或模板 (template)，用於建立物件 (Object)。它定義了一組屬性 (Attributes) 和方法 (Methods)，這些屬性 (Attributes) 和方法 (Methods) 將由該類別 (Class) 的所有物件 (Object) 共享。
+            </p>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                想像一下，如果您要製造許多輛汽車，您不需要為每輛車從頭開始設計。您可以先設計一個「汽車」的藍圖 (blueprint)（即類別 - Class），其中定義了所有汽車共有的特徵（如顏色、品牌、速度）和行為（如啟動、加速、煞車）。然後，您可以根據這個藍圖 (blueprint) 製造出許多不同的實際汽車（即物件 - Object）。
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><strong>類別 (Class)</strong>：定義了物件 (Object) 的結構和行為。</li>
+                <li><strong>物件 (Object) / 實例 (Instance)</strong>：根據類別 (Class) 建立的具體實體。</li>
+                <li><strong>屬性 (Attributes)</strong>：物件 (Object) 的特徵或資料（變數）。</li>
+                <li><strong>方法 (Methods)</strong>：物件 (Object) 的行為或功能（函式）。</li>
+            </ul>
+        </section>
+
+        <section id="section2" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">2. 定義類別 (Defining Classes)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                在 Python 中，您使用 <code>class</code> 關鍵字來定義一個類別 (Class)。
+            </p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">基本語法</h3>
+            <pre><code class="language-python">class ClassName:
+    # 類別主體 (Class Body)
+    # 屬性 (Attributes) 和方法 (Methods) 的定義
+    pass # 如果類別 (Class) 目前是空的，可以使用 pass
+</code></pre>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><code>class</code>：定義類別 (Class) 的關鍵字。</li>
+                <li><code>ClassName</code>：類別 (Class) 的名稱，應遵循 Python 的命名規範（通常使用駝峰式命名法 - CamelCase，即每個單字的首字母大寫）。</li>
+                <li><code>:</code> (冒號)：標示類別 (Class) 定義的結束。</li>
+                <li><strong>縮排 (Indentation)</strong>：類別 (Class) 主體的所有程式碼都必須有相同的縮排。</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">範例：一個簡單的 `Dog` 類別</h3>
+            <pre><code class="language-python">class Dog:
+    # 類別屬性 (Class Attribute)
+    species = "Canis familiaris"
+
+    # 初始化方法 (Initializer Method)
+    def __init__(self, name, age):
+        self.name = name # 實例屬性 (Instance Attribute)
+        self.age = age   # 實例屬性 (Instance Attribute)
+
+    # 實例方法 (Instance Method)
+    def bark(self):
+        print(f"{self.name} 汪！汪！")
+
+    def get_age_in_human_years(self):
+        return self.age * 7
+</code></pre>
+        </section>
+
+        <section id="section3" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">3. 建立物件 (Object) / 實例 (Instance)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                定義類別 (Class) 後，您可以透過呼叫類別 (Class) 名稱，就像呼叫函式 (Function) 一樣，來建立該類別 (Class) 的物件 (Object) 或實例 (Instance)。
+            </p>
+            <pre><code class="language-python">class Dog:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+    def bark(self):
+        print(f"{self.name} 汪！汪！")
+
+# 建立 Dog 類別 (Class) 的物件 (Object) / 實例 (Instance)
+my_dog = Dog("Buddy", 3)
+your_dog = Dog("Lucy", 5)
+
+print(my_dog.name) # 輸出: Buddy
+my_dog.bark()      # 輸出: Buddy 汪！汪！
+
+print(your_dog.name) # 輸出: Lucy
+your_dog.bark()      # 輸出: Lucy 汪！汪！
+</code></pre>
+        </section>
+
+        <section id="section4" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">4. 屬性 (Attributes)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                屬性 (Attributes) 是儲存在類別 (Class) 或物件 (Object) 中的變數，它們代表了物件 (Object) 的特徵或狀態。
+            </p>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">4.1 實例屬性 (Instance Attributes)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                實例屬性 (Instance Attributes) 是每個物件 (Object) 獨有的屬性 (Attributes)。它們在類別 (Class) 的 <code>__init__</code> 方法中定義，並使用 <code>self.</code> 前綴。
+            </p>
+            <pre><code class="language-python">class Car:
+    def __init__(self, brand, model, year):
+        self.brand = brand   # 實例屬性 (Instance Attribute)
+        self.model = model   # 實例屬性 (Instance Attribute)
+        self.year = year     # 實例屬性 (Instance Attribute)
+
+my_car = Car("Toyota", "Camry", 2020)
+your_car = Car("Honda", "Civic", 2022)
+
+print(my_car.brand)    # 輸出: Toyota
+print(your_car.model)  # 輸出: Civic
+
+# 可以修改實例屬性 (Instance Attribute)
+my_car.year = 2021
+print(my_car.year)     # 輸出: 2021
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">4.2 類別屬性 (Class Attributes)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                類別屬性 (Class Attributes) 是所有該類別 (Class) 的物件 (Object) 共享的屬性 (Attributes)。它們在類別 (Class) 定義的頂層，方法 (Methods) 之外定義。
+            </p>
+            <pre><code class="language-python">class Animal:
+    category = "Mammal" # 類別屬性 (Class Attribute)
+
+    def __init__(self, name):
+        self.name = name # 實例屬性 (Instance Attribute)
+
+dog = Animal("Buddy")
+cat = Animal("Whiskers")
+
+print(dog.category)  # 輸出: Mammal (透過實例存取)
+print(cat.category)  # 輸出: Mammal
+
+print(Animal.category) # 輸出: Mammal (透過類別 (Class) 存取)
+
+# 修改類別屬性 (Class Attribute) 會影響所有實例 (Instance)
+Animal.category = "Vertebrate"
+print(dog.category) # 輸出: Vertebrate
+print(cat.category) # 輸出: Vertebrate
+</code></pre>
+        </section>
+
+        <section id="section5" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">5. 方法 (Methods)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                方法 (Methods) 是定義在類別 (Class) 內部的函式 (Function)。它們描述了物件 (Object) 可以執行的行為。
+            </p>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">5.1 實例方法 (Instance Methods)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                實例方法 (Instance Methods) 是最常見的方法 (Methods) 類型。它們操作物件 (Object) 的實例屬性 (Instance Attributes)，並且必須將 <code>self</code> 作為第一個參數。
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><code>self</code> 參數：指向該方法 (Method) 所屬的物件 (Object) 實例 (Instance) 本身。透過 <code>self</code>，方法 (Method) 可以存取 (access) 和修改物件 (Object) 的屬性 (Attributes)。</li>
+            </ul>
+            <pre><code class="language-python">class Person:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+    def introduce(self): # 實例方法 (Instance Method)
+        print(f"大家好，我是 {self.name}，今年 {self.age} 歲。")
+
+    def celebrate_birthday(self): # 實例方法 (Instance Method)
+        self.age += 1
+        print(f"祝 {self.name} 生日快樂！現在 {self.name} {self.age} 歲了。")
+
+p1 = Person("Alice", 30)
+p1.introduce()        # 輸出: 大家好，我是 Alice，今年 30 歲。
+p1.celebrate_birthday() # 輸出: 祝 Alice 生日快樂！現在 Alice 31 歲了。
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">5.2 `__init__` 方法 (Initializer Method)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                <code>__init__</code> 是一個特殊的方法 (Method)，稱為<strong>初始化方法 (Initializer Method)</strong> 或<strong>建構子 (Constructor)</strong>。當您建立一個類別 (Class) 的新物件 (Object) 時，它會自動被呼叫。它的主要作用是初始化物件 (Object) 的實例屬性 (Instance Attributes)。
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><code>self</code> 是 <code>__init__</code> 的第一個參數，指向新建立的物件 (Object) 本身。</li>
+                <li>其他參數用於接收建立物件 (Object) 時傳遞的初始值。</li>
+            </ul>
+            <pre><code class="language-python">class Book:
+    def __init__(self, title, author, pages): # 初始化方法 (Initializer Method)
+        self.title = title
+        self.author = author
+        self.pages = pages
+
+    def get_info(self):
+        return f"{self.title} by {self.author}, {self.pages} pages."
+
+book1 = Book("Python Basics", "John Doe", 300)
+print(book1.get_info()) # 輸出: Python Basics by John Doe, 300 pages.
+</code></pre>
+        </section>
+
+        <section id="section6" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">6. 繼承 (Inheritance)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                **繼承 (Inheritance)** 是一種物件導向程式設計 (OOP) 的機制，它允許一個類別 (Class)（子類別 - Child Class / 派生類別 - Derived Class）繼承 (inherit) 另一個類別 (Class)（父類別 - Parent Class / 基底類別 - Base Class）的屬性 (Attributes) 和方法 (Methods)。這有助於程式碼的重用和建立類別 (Class) 之間的層次結構。
+            </p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">6.1 定義子類別 (Defining a Child Class)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                在定義子類別 (Child Class) 時，將父類別 (Parent Class) 的名稱放在子類別 (Child Class) 名稱後的括號中。
+            </p>
+            <pre><code class="language-python">class Animal: # 父類別 (Parent Class)
+    def __init__(self, name):
+        self.name = name
+        print(f"{self.name} 是一隻動物。")
+
+    def speak(self):
+        raise NotImplementedError("子類別 (Child Class) 必須實現此方法 (Method)")
+
+class Dog(Animal): # Dog 繼承自 Animal
+    def __init__(self, name, breed):
+        super().__init__(name) # 呼叫父類別 (Parent Class) 的 __init__
+        self.breed = breed
+        print(f"{self.name} 是一隻 {self.breed} 狗。")
+
+    def speak(self): # 覆寫 (Override) 父類別 (Parent Class) 的 speak 方法 (Method)
+        print(f"{self.name} 汪汪叫！")
+
+class Cat(Animal): # Cat 繼承自 Animal
+    def __init__(self, name):
+        super().__init__(name)
+        print(f"{self.name} 是一隻貓。")
+
+    def speak(self):
+        print(f"{self.name} 喵喵叫！")
+
+my_dog = Dog("Buddy", "Golden Retriever")
+# 輸出:
+# Buddy 是一隻動物。
+# Buddy 是一隻 Golden Retriever 狗。
+my_dog.speak() # 輸出: Buddy 汪汪叫！
+
+my_cat = Cat("Whiskers")
+# 輸出:
+# Whiskers 是一隻動物。
+# Whiskers 是一隻貓。
+my_cat.speak() # 輸出: Whiskers 喵喵叫！
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">6.2 `super()` 函式</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                <code>super()</code> 函式用於呼叫父類別 (Parent Class) 的方法 (Methods)，特別是在子類別 (Child Class) 的 <code>__init__</code> 方法中呼叫父類別 (Parent Class) 的 <code>__init__</code> 方法，以確保父類別 (Parent Class) 的屬性 (Attributes) 也能被正確初始化。
+            </p>
+            <pre><code class="language-python">class Parent:
+    def __init__(self, value):
+        self.value = value
+
+class Child(Parent):
+    def __init__(self, value, extra_data):
+        super().__init__(value) # 呼叫 Parent.__init__(self, value)
+        self.extra_data = extra_data
+
+c = Child(10, "abc")
+print(c.value)      # 輸出: 10
+print(c.extra_data) # 輸出: abc
+</code></pre>
+
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">6.3 方法覆寫 (Method Overriding)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                子類別 (Child Class) 可以重新定義 (redefine) 父類別 (Parent Class) 中已經存在的方法 (Methods)。當子類別 (Child Class) 的物件 (Object) 呼叫該方法 (Method) 時，會執行子類別 (Child Class) 中定義的版本。
+            </p>
+            <pre><code class="language-python">class Vehicle:
+    def drive(self):
+        print("駕駛車輛。")
+
+class Car(Vehicle):
+    def drive(self): # 覆寫 (Override) Vehicle 的 drive 方法 (Method)
+        print("駕駛汽車。")
+
+class Bicycle(Vehicle):
+    def drive(self): # 覆寫 (Override) Vehicle 的 drive 方法 (Method)
+        print("騎自行車。")
+
+v = Vehicle()
+c = Car()
+b = Bicycle()
+
+v.drive() # 輸出: 駕駛車輛。
+c.drive() # 輸出: 駕駛汽車。
+b.drive() # 輸出: 騎自行車。
+</code></pre>
+        </section>
+
+        <section id="section7" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">7. 封裝 (Encapsulation)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                **封裝 (Encapsulation)** 是物件導向程式設計 (OOP) 的一個原則，它將資料 (data)（屬性 - Attributes）和操作資料的程式碼 (code)（方法 - Methods）綁定 (bundle) 在一個單一的單元（類別 - Class）中。它也涉及對物件 (Object) 內部狀態的保護，防止外部程式碼直接存取 (access) 和修改，從而確保資料的完整性。
+            </p>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                在 Python 中，封裝 (Encapsulation) 主要透過命名約定來實現，而不是嚴格的存取控制 (access control)。
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><strong>公開屬性 (Public Attributes)</strong>：可以直接從類別 (Class) 外部存取 (access) 和修改。</li>
+                <li><strong>受保護屬性 (Protected Attributes)</strong>：以單個底線 <code>_</code> 開頭的屬性 (Attributes)。這是一個約定，表示這些屬性 (Attributes) 應該在類別 (Class) 內部或其子類別 (Child Class) 中使用，不應從外部直接存取 (access)。</li>
+                <li><strong>私有屬性 (Private Attributes)</strong>：以雙底線 <code>__</code> 開頭的屬性 (Attributes)。Python 會對其進行名稱修飾 (name mangling)，使其在類別 (Class) 外部難以直接存取 (access)，但並非完全不可能。這是一種更強的約定，表示這些屬性 (Attributes) 僅供類別 (Class) 內部使用。</li>
+            </ul>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">範例</h3>
+            <pre><code class="language-python">class MyClass:
+    def __init__(self):
+        self.public_var = "我是一個公開變數"
+        self._protected_var = "我是一個受保護變數" # 約定：不應直接存取 (access)
+        self.__private_var = "我是一個私有變數"   # 名稱修飾 (name mangling)
+
+    def get_private(self):
+        return self.__private_var
+
+obj = MyClass()
+print(obj.public_var)      # 輸出: 我是一個公開變數
+print(obj._protected_var)  # 輸出: 我是一個受保護變數 (可以存取 (access)，但不建議)
+
+# 嘗試直接存取私有屬性會引發 AttributeError
+# print(obj.__private_var) # 這會引發 AttributeError
+
+print(obj.get_private())   # 輸出: 我是一個私有變數 (透過方法 (Method) 存取 (access))
+
+# 名稱修飾 (name mangling) 後的存取方式 (不推薦直接使用)
+# print(obj._MyClass__private_var) # 輸出: 我是一個私有變數
+</code></pre>
+        </section>
+
+        <section id="section8" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">8. 多型 (Polymorphism)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                **多型 (Polymorphism)** 是物件導向程式設計 (OOP) 的一個概念，意指「多種形式」。在 Python 中，它允許不同的類別 (Class) 的物件 (Object) 以相同的方式響應相同的操作或方法 (Methods)。這通常透過繼承 (Inheritance) 和方法覆寫 (Method Overriding) 來實現。
+            </p>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                簡單來說，多型 (Polymorphism) 讓您可以寫出更通用 (generic) 和靈活 (flexible) 的程式碼，因為您可以對不同類別 (Class) 的物件 (Object) 使用相同的介面 (interface)。
+            </p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">範例</h3>
+            <pre><code class="language-python">class Dog:
+    def speak(self):
+        return "汪汪！"
+
+class Cat:
+    def speak(self):
+        return "喵喵！"
+
+class Duck:
+    def speak(self):
+        return "嘎嘎！"
+
+# 定義一個通用函式，可以接受不同類別 (Class) 的物件 (Object)
+def make_animal_speak(animal):
+    print(animal.speak())
+
+# 建立不同類別 (Class) 的物件 (Object)
+my_dog = Dog()
+my_cat = Cat()
+my_duck = Duck()
+
+# 呼叫相同的函式，但傳遞不同類別 (Class) 的物件 (Object)
+make_animal_speak(my_dog)  # 輸出: 汪汪！
+make_animal_speak(my_cat)  # 輸出: 喵喵！
+make_animal_speak(my_duck) # 輸出: 嘎嘎！
+</code></pre>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                在這個範例中，`make_animal_speak` 函式並不需要知道它接收到的是 `Dog`、`Cat` 還是 `Duck` 物件 (Object)。它只需要知道這些物件 (Object) 都有一個 `speak()` 方法 (Method)，並且可以呼叫它。這就是多型 (Polymorphism) 的力量。
+            </p>
+        </section>
+
+        <footer class="text-center text-gray-500 text-sm mt-10 p-4 border-t border-gray-200">
+            &copy; 2025 Python 類別教學. 版權所有。
+        </footer>
+    </div>
+
+    <!-- Prism.js core and Python language support -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
