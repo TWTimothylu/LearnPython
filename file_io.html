@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python 檔案讀寫教學 - 完整網站</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <style>
+        /* Custom font for better readability */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            scroll-behavior: smooth; /* Smooth scrolling for anchor links */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        /* Style for code blocks - Prism.js will handle background and text colors */
+        pre {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto; /* Enable horizontal scrolling for long lines */
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; /* Monospace font for code */
+            font-size: 0.9rem;
+            line-height: 1.4;
+            /* Adjusted margin-bottom to create more space */
+            margin-top: 0.75rem;
+            margin-bottom: 2.5rem; /* Increased for better spacing */
+        }
+        code {
+            font-family: inherit; /* Inherit font from pre */
+            background-color: #e2e8f0; /* Light background for inline code */
+            color: #333; /* Darker text for inline code */
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+        }
+        /* Ensure Prism.js's background is applied correctly to pre */
+        pre[class*="language-"] {
+            background-color: #2d2d2d; /* Re-apply dark background for the pre block, as Prism's theme might only target code */
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center p-4">
+    <div class="w-full max-w-5xl bg-white p-6 sm:p-8 md:p-10 rounded-xl shadow-2xl border border-gray-200">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800 leading-tight mb-4">
+                Python 檔案讀寫 (File I/O) 教學
+            </h1>
+            <p class="text-xl text-gray-600">從基礎到進階，全面掌握 Python 處理檔案的技巧</p>
+        </header>
+
+        <nav class="mb-10 p-4 bg-blue-100 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold text-blue-800 mb-4 text-center">目錄</h2>
+            <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <li><a href="#section1" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">1. 開啟檔案 (open)</a></li>
+                <li><a href="#section2" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">2. 使用 with 語句 (推薦)</a></li>
+                <li><a href="#section3" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">3. 讀取檔案內容</a></li>
+                <li><a href="#section4" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">4. 寫入檔案內容</a></li>
+                <li><a href="#section5" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">5. 附加內容到檔案</a></li>
+                <li><a href="#section6" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">6. 讀寫 txt 檔案</a></li>
+                <li><a href="#section7" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">7. 讀寫 CSV 檔案</a></li>
+                <li><a href="#section8" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">8. 處理檔案路徑</a></li>
+            </ul>
+        </nav>
+
+        <section id="section1" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">1. 開啟檔案 (open)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                在 Python 中，與檔案互動的第一步是使用內建函式 <code>open()</code> 開啟檔案。它會回傳一個檔案物件。<br>
+                每次開啟檔案後，最後都必須呼叫 <code>close()</code> 方法來關閉檔案釋放系統資源。
+            </p>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-3">存取模式 (Mode)</h3>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                開啟檔案時需要指定一個存取模式，告訴 Python 您打算對這個檔案做什麼：
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><code>'r'</code>：讀取模式 (Read-only)。預設模式。如果檔案不存在會引發錯誤。</li>
+                <li><code>'w'</code>：寫入模式 (Write-only)。如果檔案存在，會**覆寫**原內容；如果不存在，則建立新檔案。</li>
+                <li><code>'a'</code>：附加模式 (Append)。如果檔案存在，新的內容會被加入到檔案的**尾端**；如果不存在，則建立新檔案。</li>
+                <li><code>'x'</code>：互斥建立 (Exclusive creation)。建立新檔案，如果檔案已存在則引發錯誤。</li>
+                <li><code>'b'</code>：二進位模式 (Binary)。處理非文字檔案 (如圖片、影片)，例如 <code>'rb'</code> 或 <code>'wb'</code>。</li>
+                <li><code>'+'</code>：更新模式。可同時讀取和寫入，例如 <code>'r+'</code> 或 <code>'w+'</code>。</li>
+            </ul>
+            <pre><code class="language-python"># 開啟檔案準備讀取 (預設是 'r' 模式)
+file = open("example.txt", "r", encoding="utf-8")
+
+# 記得要關閉檔案！
+file.close()</code></pre>
+        </section>
+
+        <section id="section2" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">2. 使用 with 語句 (推薦)</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                手動呼叫 <code>close()</code> 很容易忘記，或者當程式發生錯誤時沒有執行到 <code>close()</code>。
+                在 Python 中，強烈建議使用 <code>with</code> 語句（這是一個上下文管理器 Context Manager）來開啟檔案。
+            </p>
+            <p class="text-gray-700 leading-relaxed mb-4 text-blue-700 bg-blue-50 p-3 rounded-md border border-blue-200">
+                <strong>好處：</strong> 在 <code>with</code> 區塊結束或發生例外狀況時，檔案會**自動被關閉**。
+            </p>
+            <pre><code class="language-python"># 使用 with 自動關閉檔案 (強烈推薦的寫法)
+with open("example.txt", "r", encoding="utf-8") as file:
+    # 這裡的縮排代表還在檔案開啟的狀態內
+    pass  # 在此處對檔案進行讀取或寫入
+
+# 當縮排結束，跳回原來的層級時，檔案會自動被關閉
+print("檔案已經自動關閉了！")</code></pre>
+        </section>
+
+        <section id="section3" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">3. 讀取檔案內容</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                開啟檔案 (使用 <code>'r'</code> 模式) 後，可以使用以下方法讀取裡面的內容。
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><code>.read()</code>：讀取整個檔案的內容，回傳一個**字串**。</li>
+                <li><code>.readline()</code>：每次讀取檔案的**一行**，回傳一個字串。</li>
+                <li><code>.readlines()</code>：讀取所有的行，並回傳一個包含每行內容字串的**列表 (list)**。</li>
+            </ul>
+            <pre><code class="language-python"># 準備一個範例檔案內容:
+# 這是第一行
+# 這是第二行
+# 這是第三行
+
+# 1. 讀取整個檔案
+with open("example.txt", "r", encoding="utf-8") as f:
+    content = f.read()
+    print("--- 讀取整個檔案 ---")
+    print(content)
+
+# 2. 逐行讀取 (通常配合 for 迴圈使用)
+with open("example.txt", "r", encoding="utf-8") as f:
+    print("--- 逐行讀取 ---")
+    for line in f:
+        print(line.strip()) # strip() 可以消除每行尾端的換行符號
+
+# 3. 讀取所有行並存成一個列表
+with open("example.txt", "r", encoding="utf-8") as f:
+    lines = f.readlines()
+    print("--- 以列表形式讀取 ---")
+    print(lines) 
+    # 輸出: ['這是第一行\n', '這是第二行\n', '這是第三行\n']</code></pre>
+        </section>
+
+        <section id="section4" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">4. 寫入檔案內容</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                要寫入資料到檔案，您必須以 <code>'w'</code> (寫入) 模式開啟檔案。<br>
+                **注意：** <code>'w'</code> 模式如果檔案已存在，原本的內容將會被完全清空並覆寫！
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4">
+                <li><code>.write(string)</code>：將字串寫入檔案。</li>
+                <li><code>.writelines(list)</code>：將包含文字的列表寫入檔案中 (不會自動加上換行符號)。</li>
+            </ul>
+            <pre><code class="language-python"># 寫入單行或多行文字
+with open("output.txt", "w", encoding="utf-8") as f:
+    f.write("Hello，這是新寫入的第一行！\n")
+    f.write("這是第二行！\n")
+    f.write("如果沒有加上 \\n (換行符號)，文字就會連在一起。")
+
+# 寫入一個列表
+lines_to_write = ["第一行資料\n", "第二行資料\n", "最後一行資料"]
+with open("output2.txt", "w", encoding="utf-8") as f:
+    f.writelines(lines_to_write)</code></pre>
+        </section>
+
+        <section id="section5" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">5. 附加內容到檔案</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                如果您不想覆寫原來的檔案內容，而是想在現有的內容結尾處加入新資料，請使用 <code>'a'</code> (附加) 模式。
+            </p>
+            <pre><code class="language-python"># 假設 output.txt 已經有內容
+with open("output.txt", "a", encoding="utf-8") as f:
+    f.write("\n這行文字會被加在檔案的最結尾！")
+    f.write("\n又加了一行！")</code></pre>
+        </section>
+
+        <section id="section6" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">6. 讀寫 txt 檔案</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                讀寫 <code>.txt</code> 檔案是 Python 檔案處理中最基礎且常見的操作。我們通常會結合前面學到的 <code>open()</code> 函式與各種讀寫方法來處理純文字。
+            </p>
+            <pre><code class="language-python"># 1. 寫入多行文字到 txt 檔案
+lines = [
+    "第一行：這是純文字檔的內容。\n",
+    "第二行：Python 處理文字非常方便。\n",
+    "第三行：記得加上換行符號！\n"
+]
+
+with open("my_data.txt", "w", encoding="utf-8") as f:
+    f.writelines(lines)
+    print("成功寫入 my_data.txt，檔案內容已更新！")
+
+# 2. 讀取並處理 txt 檔案的內容
+print("\n--- 讀取 my_data.txt 的內容 ---")
+with open("my_data.txt", "r", encoding="utf-8") as f:
+    for index, line in enumerate(f):
+        # 使用 enumerate 可以同時取得行號 (從 0 開始) 和內容
+        # strip() 移除結尾的換行符號，讓輸出更好看
+        print(f"第 {index + 1} 行內容: {line.strip()}")
+</code></pre>
+        </section>
+
+        <section id="section7" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">7. 讀寫 CSV 檔案</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                CSV (逗號分隔值) 檔案非常常見於儲存表格資料。雖然您可以直接用一般的字串切割方式，但 Python 內建的 <code>csv</code> 模組處理起來更簡單穩健。
+            </p>
+            <pre><code class="language-python">import csv
+
+# 1. 寫入 CSV 檔案
+data = [
+    ["姓名", "年齡", "城市"],
+    ["小明", 25, "台北"],
+    ["小華", 30, "台中"],
+    ["小美", 22, "高雄"]
+]
+
+with open("people.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f)
+    # 將巢狀列表寫入
+    writer.writerows(data)
+    
+# 2. 讀取 CSV 檔案
+with open("people.csv", "r", encoding="utf-8") as f:
+    reader = csv.reader(f)
+    for row in reader:
+        print(row) # 每一列 row 都會是一個列表例如: ['小明', '25', '台北']
+</code></pre>
+        </section>
+
+        <section id="section8" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">8. 處理檔案路徑</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                如果要開啟或建立的檔案不在目前的執行目錄下，您可以提供檔案的絕對路徑或相對路徑。使用 Python 內建的 <code>os</code> 或 <code>pathlib</code> 模組可以更安全跨平台地處理路徑。
+            </p>
+            <pre><code class="language-python">import os
+
+# 取得目前工作目錄
+current_dir = os.getcwd()
+print(f"目前目錄：{current_dir}")
+
+# 組合路徑 (自動處理 Windows/Mac/Linux 或雙斜線等問題)
+file_path = os.path.join(current_dir, "my_folder", "data.txt")
+print(f"目標檔案路徑：{file_path}")
+
+# 檢查檔案或目錄是否存在
+if os.path.exists(file_path):
+    print("檔案存在！")
+else:
+    print("檔案不存在！")
+</code></pre>
+        </section>
+
+        <footer class="text-center text-gray-500 text-sm mt-10 p-4 border-t border-gray-200">
+            &copy; 2025 Python 檔案讀寫教學. 版權所有。
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
