@@ -68,6 +68,7 @@
                 <li><a href="#section1" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">1. 什麼是字串？</a></li>
                 <li><a href="#section2" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">2. 字串索引</a></li>
                 <li><a href="#section3" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">3. 字串切片</a></li>
+                <li><a href="#slicing-practice" class="block p-3 bg-emerald-200 hover:bg-emerald-300 rounded-md text-emerald-900 font-semibold transition duration-200 ease-in-out text-center">切片練習（10 題）</a></li>
                 <li><a href="#section4" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">4. 字串運算子</a></li>
                 <li><a href="#section5" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">5. 常見字串方法</a></li>
                 <li><a href="#section6" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">6. 字串的不可變性</a></li>
@@ -155,6 +156,41 @@ print(text[0:10:2]) # 輸出: HloPto (H,l,o,P,t,o)
 
 # 反轉字串
 print(text[::-1])  # 輸出: dlroW nohtyP olleH</code></pre>
+        </section>
+
+        <section id="slicing-practice" class="mb-10 p-6 bg-emerald-50 rounded-lg border border-emerald-200 shadow-sm">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-6">
+                <div>
+                    <p class="text-sm font-bold tracking-wide text-emerald-700">動手檢查學習成果</p>
+                    <h2 class="text-3xl font-bold text-gray-800">字串切片練習（10 題）</h2>
+                </div>
+                <div id="slicing-score" class="hidden rounded-full bg-white px-4 py-2 font-bold text-emerald-800 border border-emerald-300" aria-live="polite"></div>
+            </div>
+            <p class="text-gray-700 leading-relaxed mb-6">
+                前 5 題為選擇題，後 5 題請直接輸入切片表達式，例如 <code>text[1:4]</code>。完成後按下「檢查全部答案」。
+            </p>
+
+            <form id="slicing-practice-form" class="space-y-8">
+                <div>
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-4">A. 選擇題（5 題）</h3>
+                    <div id="slicing-choice-questions" class="space-y-4"></div>
+                </div>
+
+                <div>
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-2">B. 實作題（5 題）</h3>
+                    <p class="text-gray-600 mb-4">每題只需填入切片表達式，不必輸入 <code>print()</code>。</p>
+                    <div id="slicing-code-questions" class="space-y-4"></div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button type="submit" class="rounded-lg bg-emerald-600 px-6 py-3 font-bold text-white shadow hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300">
+                        檢查全部答案
+                    </button>
+                    <button id="reset-slicing-practice" type="button" class="rounded-lg bg-white px-6 py-3 font-bold text-emerald-800 border border-emerald-300 hover:bg-emerald-100 focus:outline-none focus:ring-4 focus:ring-emerald-200">
+                        重新作答
+                    </button>
+                </div>
+            </form>
         </section>
 
         <section id="section4" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
@@ -441,5 +477,163 @@ print(f"{total=:.2f}") # 輸出: total=123.46
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script>
+        const slicingChoiceQuestions = [
+            {
+                prompt: '執行 <code>text = "Python"</code> 後，<code>text[1:4]</code> 的結果是什麼？',
+                options: ['<code>"Pyt"</code>', '<code>"yth"</code>', '<code>"ytho"</code>', '<code>"tho"</code>'],
+                answer: 1,
+                explanation: '起點 1 會包含，終點 4 不包含，因此取得索引 1、2、3 的 <code>"yth"</code>。'
+            },
+            {
+                prompt: '<code>letters = "abcdefgh"</code>，<code>letters[::2]</code> 的結果是什麼？',
+                options: ['<code>"aceg"</code>', '<code>"bdfh"</code>', '<code>"abcdefgh"</code>', '<code>"geca"</code>'],
+                answer: 0,
+                explanation: '步長 2 會從索引 0 開始，每隔一個字元取一次，所以得到 <code>"aceg"</code>。'
+            },
+            {
+                prompt: '哪一個切片可以將 <code>word = "Python"</code> 反轉？',
+                options: ['<code>word[-1]</code>', '<code>word[1::-1]</code>', '<code>word[::-1]</code>', '<code>word[:]</code>'],
+                answer: 2,
+                explanation: '省略起點與終點並使用步長 -1，會從尾端一路取到開頭。'
+            },
+            {
+                prompt: '<code>word = "Python"</code>，<code>word[-4:-1]</code> 的結果是什麼？',
+                options: ['<code>"tho"</code>', '<code>"hon"</code>', '<code>"th"</code>', '<code>"Pyt"</code>'],
+                answer: 0,
+                explanation: '索引 -4 對應 <code>t</code>，-1 對應最後的 <code>n</code>；終點不包含，所以結果是 <code>"tho"</code>。'
+            },
+            {
+                prompt: '<code>data = "abcdefg"</code>，<code>data[5:1:-1]</code> 的結果是什麼？',
+                options: ['<code>"fedc"</code>', '<code>"fedcb"</code>', '<code>"bcde"</code>', '<code>"gfed"</code>'],
+                answer: 0,
+                explanation: '負步長會由右向左取值，依序取得索引 5、4、3、2；索引 1 不包含。'
+            }
+        ];
+
+        const slicingCodeQuestions = [
+            { variable: 'fruit', value: 'strawberry', expected: 'straw', prompt: '從 <code>fruit = "strawberry"</code> 取出 <code>"straw"</code>。', sample: 'fruit[:5]' },
+            { variable: 'language', value: 'Python', expected: 'hon', prompt: '從 <code>language = "Python"</code> 取出最後 3 個字元 <code>"hon"</code>。', sample: 'language[-3:]' },
+            { variable: 'code', value: 'ABCDEFGHIJ', expected: 'BDFHJ', prompt: '從 <code>code = "ABCDEFGHIJ"</code> 取出偶數位置（索引 1、3、5、7、9）的字元。', sample: 'code[1::2]' },
+            { variable: 'word', value: 'drawer', expected: 'reward', prompt: '使用切片將 <code>word = "drawer"</code> 反轉成 <code>"reward"</code>。', sample: 'word[::-1]' },
+            { variable: 'filename', value: '2026_report_final.pdf', expected: 'report', prompt: '從 <code>filename = "2026_report_final.pdf"</code> 取出 <code>"report"</code>。', sample: 'filename[5:11]' }
+        ];
+
+        const choiceContainer = document.getElementById('slicing-choice-questions');
+        const codeContainer = document.getElementById('slicing-code-questions');
+        const practiceForm = document.getElementById('slicing-practice-form');
+        const scoreDisplay = document.getElementById('slicing-score');
+
+        function renderSlicingPractice() {
+            choiceContainer.innerHTML = slicingChoiceQuestions.map((question, questionIndex) => `
+                <fieldset class="rounded-lg border border-gray-200 bg-white p-4" data-choice-question="${questionIndex}">
+                    <legend class="px-1 font-semibold text-gray-900">${questionIndex + 1}. ${question.prompt}</legend>
+                    <div class="mt-3 grid gap-2 sm:grid-cols-2">
+                        ${question.options.map((option, optionIndex) => `
+                            <label class="flex cursor-pointer items-center gap-2 rounded-md border border-gray-200 p-3 hover:bg-emerald-50">
+                                <input type="radio" name="slice-choice-${questionIndex}" value="${optionIndex}" class="h-4 w-4 accent-emerald-600">
+                                <span>${option}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                    <p class="mt-3 hidden text-sm" data-feedback></p>
+                </fieldset>
+            `).join('');
+
+            codeContainer.innerHTML = slicingCodeQuestions.map((question, questionIndex) => `
+                <div class="rounded-lg border border-gray-200 bg-white p-4" data-code-question="${questionIndex}">
+                    <label for="slice-code-${questionIndex}" class="block font-semibold text-gray-900">${questionIndex + 6}. ${question.prompt}</label>
+                    <input id="slice-code-${questionIndex}" name="slice-code-${questionIndex}" type="text" autocomplete="off" spellcheck="false"
+                        class="mt-3 w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                        placeholder="請輸入切片表達式">
+                    <p class="mt-3 hidden text-sm" data-feedback></p>
+                </div>
+            `).join('');
+        }
+
+        function evaluateSliceExpression(expression, question) {
+            const match = expression.trim().match(/^([A-Za-z_]\w*)\[\s*(-?\d*)\s*:\s*(-?\d*)\s*(?::\s*(-?\d*)\s*)?\]$/);
+            if (!match || match[1] !== question.variable) return null;
+
+            const text = question.value;
+            const length = text.length;
+            const parsePart = value => value === undefined || value === '' ? null : Number(value);
+            let start = parsePart(match[2]);
+            let end = parsePart(match[3]);
+            const parsedStep = parsePart(match[4]);
+            const step = parsedStep === null ? 1 : parsedStep;
+            if (step === 0) return null;
+
+            let result = '';
+            if (step > 0) {
+                start = start === null ? 0 : (start < 0 ? start + length : start);
+                end = end === null ? length : (end < 0 ? end + length : end);
+                start = Math.min(Math.max(start, 0), length);
+                end = Math.min(Math.max(end, 0), length);
+                for (let index = start; index < end; index += step) result += text[index];
+            } else {
+                start = start === null ? length - 1 : (start < 0 ? start + length : start);
+                const hasOmittedEnd = end === null;
+                end = hasOmittedEnd ? -1 : (end < 0 ? end + length : end);
+                start = Math.min(Math.max(start, -1), length - 1);
+                end = Math.min(Math.max(end, -1), length - 1);
+                for (let index = start; index > end; index += step) result += text[index];
+            }
+            return result;
+        }
+
+        function setFeedback(element, isCorrect, message) {
+            element.classList.remove('hidden', 'text-green-700', 'text-red-700');
+            element.classList.add(isCorrect ? 'text-green-700' : 'text-red-700');
+            element.innerHTML = `<strong>${isCorrect ? '答對了！' : '再想一想。'}</strong> ${message}`;
+        }
+
+        practiceForm.addEventListener('submit', event => {
+            event.preventDefault();
+            let choiceScore = 0;
+            let codeScore = 0;
+
+            slicingChoiceQuestions.forEach((question, questionIndex) => {
+                const card = choiceContainer.querySelector(`[data-choice-question="${questionIndex}"]`);
+                const selected = card.querySelector(`input[name="slice-choice-${questionIndex}"]:checked`);
+                const isCorrect = selected !== null && Number(selected.value) === question.answer;
+                if (isCorrect) choiceScore += 1;
+                setFeedback(card.querySelector('[data-feedback]'), isCorrect, question.explanation);
+            });
+
+            slicingCodeQuestions.forEach((question, questionIndex) => {
+                const card = codeContainer.querySelector(`[data-code-question="${questionIndex}"]`);
+                const input = card.querySelector('input');
+                const actual = evaluateSliceExpression(input.value, question);
+                const isCorrect = actual === question.expected;
+                if (isCorrect) codeScore += 1;
+                const message = isCorrect
+                    ? `這個切片會得到 <code>"${question.expected}"</code>。`
+                    : `可參考答案：<code>${question.sample}</code>（結果應為 <code>"${question.expected}"</code>）。`;
+                setFeedback(card.querySelector('[data-feedback]'), isCorrect, message);
+                input.classList.toggle('border-green-500', isCorrect);
+                input.classList.toggle('border-red-500', !isCorrect);
+            });
+
+            const total = choiceScore + codeScore;
+            scoreDisplay.textContent = `總分 ${total} / 10（選擇 ${choiceScore} / 5、實作 ${codeScore} / 5）`;
+            scoreDisplay.classList.remove('hidden');
+            scoreDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+
+        document.getElementById('reset-slicing-practice').addEventListener('click', () => {
+            practiceForm.reset();
+            scoreDisplay.classList.add('hidden');
+            document.querySelectorAll('#slicing-practice [data-feedback]').forEach(element => {
+                element.className = 'mt-3 hidden text-sm';
+                element.textContent = '';
+            });
+            document.querySelectorAll('#slicing-code-questions input').forEach(input => {
+                input.classList.remove('border-green-500', 'border-red-500');
+            });
+        });
+
+        renderSlicingPractice();
+    </script>
 </body>
 </html>
