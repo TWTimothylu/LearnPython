@@ -70,9 +70,11 @@
                 <li><a href="#section3" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">3. 字串切片</a></li>
                 <li><a href="#slicing-practice" class="block p-3 bg-emerald-200 hover:bg-emerald-300 rounded-md text-emerald-900 font-semibold transition duration-200 ease-in-out text-center">切片練習（10 題）</a></li>
                 <li><a href="#section4" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">4. 字串運算子</a></li>
+                <li><a href="#operators-practice" class="block p-3 bg-amber-200 hover:bg-amber-300 rounded-md text-amber-900 font-semibold transition duration-200 ease-in-out text-center">運算子練習（10 題）</a></li>
                 <li><a href="#section5" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">5. 常見字串方法</a></li>
                 <li><a href="#section6" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">6. 字串的不可變性</a></li>
                 <li><a href="#section7" class="block p-3 bg-blue-200 hover:bg-blue-300 rounded-md text-blue-800 font-semibold transition duration-200 ease-in-out text-center">7. f-string</a></li>
+                <li><a href="#fstring-practice" class="block p-3 bg-violet-200 hover:bg-violet-300 rounded-md text-violet-900 font-semibold transition duration-200 ease-in-out text-center">f-string 練習（10 題）</a></li>
             </ul>
         </nav>
 
@@ -159,18 +161,17 @@ print(text[::-1])  # 輸出: dlroW nohtyP olleH</code></pre>
         </section>
 
         <section id="slicing-practice" class="mb-10 p-6 bg-emerald-50 rounded-lg border border-emerald-200 shadow-sm">
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-6">
-                <div>
-                    <p class="text-sm font-bold tracking-wide text-emerald-700">動手檢查學習成果</p>
-                    <h2 class="text-3xl font-bold text-gray-800">字串切片練習（10 題）</h2>
-                </div>
-                <div id="slicing-score" class="hidden rounded-full bg-white px-4 py-2 font-bold text-emerald-800 border border-emerald-300" aria-live="polite"></div>
-            </div>
-            <p class="text-gray-700 leading-relaxed mb-6">
-                前 5 題為選擇題，後 5 題請直接輸入切片表達式，例如 <code>text[1:4]</code>。完成後按下「檢查全部答案」。
-            </p>
+            <details>
+                <summary class="cursor-pointer text-2xl font-bold text-gray-800 marker:text-emerald-600">
+                    字串切片練習（10 題）<span class="ml-2 text-sm font-semibold text-emerald-700">點擊展開／收合</span>
+                </summary>
+                <div class="mt-6">
+                    <div id="slicing-score" class="hidden mb-5 rounded-lg bg-white px-4 py-3 font-bold text-emerald-800 border border-emerald-300" aria-live="polite"></div>
+                    <p class="text-gray-700 leading-relaxed mb-6">
+                        前 5 題為選擇題，後 5 題請直接輸入切片表達式，例如 <code>text[1:4]</code>。完成後按下「檢查全部答案」。
+                    </p>
 
-            <form id="slicing-practice-form" class="space-y-8">
+                    <form id="slicing-practice-form" class="space-y-8">
                 <div>
                     <h3 class="text-2xl font-semibold text-gray-800 mb-4">A. 選擇題（5 題）</h3>
                     <div id="slicing-choice-questions" class="space-y-4"></div>
@@ -190,7 +191,9 @@ print(text[::-1])  # 輸出: dlroW nohtyP olleH</code></pre>
                         重新作答
                     </button>
                 </div>
-            </form>
+                    </form>
+                </div>
+            </details>
         </section>
 
         <section id="section4" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
@@ -218,6 +221,33 @@ sentence = "Python is powerful"
 print("Python" in sentence) # 輸出: True
 print("java" in sentence)   # 輸出: False
 </code></pre>
+        </section>
+
+        <section id="operators-practice" class="mb-10 p-6 bg-amber-50 rounded-lg border border-amber-200 shadow-sm">
+            <details>
+                <summary class="cursor-pointer text-2xl font-bold text-gray-800 marker:text-amber-600">
+                    第 4 節練習：字串運算子（10 題）<span class="ml-2 text-sm font-semibold text-amber-700">點擊展開／收合</span>
+                </summary>
+                <div class="mt-6">
+                    <p class="text-gray-700 mb-6">前 5 題可直接批改；後 5 題請閱讀題目後，使用 Python IDE 撰寫並執行程式。</p>
+                    <div id="operators-score" class="hidden mb-5 rounded-lg bg-white px-4 py-3 font-bold text-amber-800 border border-amber-300" aria-live="polite"></div>
+                    <form id="operators-practice-form" class="space-y-8">
+                        <div>
+                            <h3 class="text-2xl font-semibold text-gray-800 mb-4">A. 選擇題（5 題）</h3>
+                            <div id="operators-choice-questions" class="space-y-4"></div>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-semibold text-gray-800 mb-2">B. IDE 實作題（5 題）</h3>
+                            <p class="text-gray-600 mb-4">這裡不需輸入答案，請將程式寫在 Python IDE 中。</p>
+                            <div id="operators-code-questions" class="space-y-4"></div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button type="submit" class="rounded-lg bg-amber-600 px-6 py-3 font-bold text-white shadow hover:bg-amber-700 focus:outline-none focus:ring-4 focus:ring-amber-300">檢查選擇題</button>
+                            <button id="reset-operators-practice" type="button" class="rounded-lg bg-white px-6 py-3 font-bold text-amber-800 border border-amber-300 hover:bg-amber-100 focus:outline-none focus:ring-4 focus:ring-amber-200">重新作答</button>
+                        </div>
+                    </form>
+                </div>
+            </details>
         </section>
 
         <section id="section5" class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
@@ -470,6 +500,33 @@ print(f"{total=:.2f}") # 輸出: total=123.46
 </code></pre>
         </section>
 
+        <section id="fstring-practice" class="mb-10 p-6 bg-violet-50 rounded-lg border border-violet-200 shadow-sm">
+            <details>
+                <summary class="cursor-pointer text-2xl font-bold text-gray-800 marker:text-violet-600">
+                    第 7 節練習：f-string（10 題）<span class="ml-2 text-sm font-semibold text-violet-700">點擊展開／收合</span>
+                </summary>
+                <div class="mt-6">
+                    <p class="text-gray-700 mb-6">前 5 題可直接批改；後 5 題請閱讀題目後，使用 Python IDE 撰寫並執行程式。</p>
+                    <div id="fstring-score" class="hidden mb-5 rounded-lg bg-white px-4 py-3 font-bold text-violet-800 border border-violet-300" aria-live="polite"></div>
+                    <form id="fstring-practice-form" class="space-y-8">
+                        <div>
+                            <h3 class="text-2xl font-semibold text-gray-800 mb-4">A. 選擇題（5 題）</h3>
+                            <div id="fstring-choice-questions" class="space-y-4"></div>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-semibold text-gray-800 mb-2">B. IDE 實作題（5 題）</h3>
+                            <p class="text-gray-600 mb-4">這裡不需輸入答案，請將程式寫在 Python IDE 中。</p>
+                            <div id="fstring-code-questions" class="space-y-4"></div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button type="submit" class="rounded-lg bg-violet-600 px-6 py-3 font-bold text-white shadow hover:bg-violet-700 focus:outline-none focus:ring-4 focus:ring-violet-300">檢查選擇題</button>
+                            <button id="reset-fstring-practice" type="button" class="rounded-lg bg-white px-6 py-3 font-bold text-violet-800 border border-violet-300 hover:bg-violet-100 focus:outline-none focus:ring-4 focus:ring-violet-200">重新作答</button>
+                        </div>
+                    </form>
+                </div>
+            </details>
+        </section>
+
         <footer class="text-center text-gray-500 text-sm mt-10 p-4 border-t border-gray-200">
             &copy; 2025 Python 字串教學. 版權所有。
         </footer>
@@ -517,6 +574,93 @@ print(f"{total=:.2f}") # 輸出: total=123.46
             { variable: 'code', value: 'ABCDEFGHIJ', expected: 'BDFHJ', prompt: '從 <code>code = "ABCDEFGHIJ"</code> 取出偶數位置（索引 1、3、5、7、9）的字元。', sample: 'code[1::2]' },
             { variable: 'word', value: 'drawer', expected: 'reward', prompt: '使用切片將 <code>word = "drawer"</code> 反轉成 <code>"reward"</code>。', sample: 'word[::-1]' },
             { variable: 'filename', value: '2026_report_final.pdf', expected: 'report', prompt: '從 <code>filename = "2026_report_final.pdf"</code> 取出 <code>"report"</code>。', sample: 'filename[5:11]' }
+        ];
+
+        const additionalPracticeGroups = [
+            {
+                id: 'operators',
+                choices: [
+                    {
+                        prompt: '<code>"Py" + "thon"</code> 的結果是什麼？',
+                        options: ['<code>"Py thon"</code>', '<code>"Python"</code>', '<code>"Py+thon"</code>', '發生錯誤'],
+                        answer: 1,
+                        explanation: '<code>+</code> 會直接連接兩個字串，不會自動加入空格。'
+                    },
+                    {
+                        prompt: '<code>"-" * 5</code> 的結果是什麼？',
+                        options: ['<code>"-5"</code>', '<code>"-----"</code>', '<code>5</code>', '發生錯誤'],
+                        answer: 1,
+                        explanation: '字串乘以整數會將該字串重複指定次數。'
+                    },
+                    {
+                        prompt: '<code>"cat" in "concatenate"</code> 會得到什麼？',
+                        options: ['<code>True</code>', '<code>False</code>', '<code>"cat"</code>', '<code>3</code>'],
+                        answer: 0,
+                        explanation: '<code>"concatenate"</code> 中包含連續的子字串 <code>"cat"</code>，所以結果是 <code>True</code>。'
+                    },
+                    {
+                        prompt: '<code>"Java" not in "Python"</code> 會得到什麼？',
+                        options: ['<code>True</code>', '<code>False</code>', '<code>None</code>', '發生錯誤'],
+                        answer: 0,
+                        explanation: '<code>"Python"</code> 不包含 <code>"Java"</code>，因此 <code>not in</code> 的結果是 <code>True</code>。'
+                    },
+                    {
+                        prompt: '<code>"ha" * 2 + "!"</code> 的結果是什麼？',
+                        options: ['<code>"haha!"</code>', '<code>"ha2!"</code>', '<code>"ha!ha!"</code>', '<code>"haha!!"</code>'],
+                        answer: 0,
+                        explanation: '先將 <code>"ha"</code> 重複兩次得到 <code>"haha"</code>，再連接驚嘆號。'
+                    }
+                ],
+                tasks: [
+                    '建立變數 <code>first_name = "Mei"</code> 與 <code>last_name = "Lin"</code>，只使用字串連接運算子，輸出 <code>Mei Lin</code>。',
+                    '設定 <code>symbol = "="</code>、<code>width = 20</code>，使用字串重複運算子輸出一條由 20 個等號組成的分隔線。',
+                    '設定 <code>sentence = "Learning Python is fun"</code> 與 <code>keyword = "Python"</code>，使用 <code>in</code> 判斷關鍵字是否出現在句子中並印出結果。',
+                    '設定 <code>email = "student@example.com"</code>，分別檢查字串中是否包含 <code>@</code>，以及是否包含 <code>.com</code>，並印出兩個布林值。',
+                    '設定 <code>team = "Python"</code>，搭配 <code>+</code> 與 <code>*</code> 產生並輸出 <code>Go Python! Go Python! Go Python!</code>。'
+                ]
+            },
+            {
+                id: 'fstring',
+                choices: [
+                    {
+                        prompt: '若 <code>name = "Amy"</code>，哪個寫法可以輸出 <code>Hello, Amy!</code>？',
+                        options: ['<code>"Hello, {name}!"</code>', '<code>f"Hello, {name}!"</code>', '<code>f"Hello, name!"</code>', '<code>"Hello, " + {name}</code>'],
+                        answer: 1,
+                        explanation: 'f-string 必須在字串前加上 <code>f</code>，並將變數放在大括號中。'
+                    },
+                    {
+                        prompt: '<code>f"{2 + 3}"</code> 的結果是什麼？',
+                        options: ['<code>"2 + 3"</code>', '<code>"23"</code>', '<code>"5"</code>', '<code>5</code>（整數）'],
+                        answer: 2,
+                        explanation: '大括號中的表達式會先運算，再轉成字串放入結果中。'
+                    },
+                    {
+                        prompt: '若 <code>pi = 3.14159</code>，<code>f"{pi:.2f}"</code> 的結果是什麼？',
+                        options: ['<code>"3.1"</code>', '<code>"3.14"</code>', '<code>"3.142"</code>', '<code>"03.14"</code>'],
+                        answer: 1,
+                        explanation: '<code>.2f</code> 會將浮點數格式化為小數點後 2 位。'
+                    },
+                    {
+                        prompt: '若 <code>number = 1234567</code>，<code>f"{number:,}"</code> 的結果是什麼？',
+                        options: ['<code>"1234567,"</code>', '<code>"1.234.567"</code>', '<code>"1,234,567"</code>', '<code>"123,456,7"</code>'],
+                        answer: 2,
+                        explanation: '格式符號 <code>,</code> 會加入千位分隔符。'
+                    },
+                    {
+                        prompt: '若 <code>rate = 0.875</code>，<code>f"{rate:.1%}"</code> 的結果是什麼？',
+                        options: ['<code>"0.9%"</code>', '<code>"8.8%"</code>', '<code>"87.5%"</code>', '<code>"875.0%"</code>'],
+                        answer: 2,
+                        explanation: '百分比格式會先乘以 100，再以指定的小數位數顯示百分號。'
+                    }
+                ],
+                tasks: [
+                    '設定 <code>name = "Kevin"</code>、<code>age = 16</code>，使用 f-string 輸出：<code>我是 Kevin，今年 16 歲。</code>',
+                    '設定 <code>price = 49.5</code>、<code>quantity = 3</code>，在 f-string 的大括號中直接計算總價，輸出：<code>總價：148.5 元</code>',
+                    '設定 <code>score = 87.456</code>，使用 f-string 將分數格式化至小數點後 2 位，輸出：<code>成績：87.46</code>',
+                    '設定 <code>product = "Keyboard"</code>、<code>price = 1299</code>，使用欄位寬度與千位分隔格式，輸出一行對齊整齊的商品名稱與價格。',
+                    '使用 <code>datetime</code> 建立 <code>2026-10-01 14:05</code>，再使用 f-string 格式化輸出：<code>2026/10/01 14:05</code>。'
+                ]
+            }
         ];
 
         const choiceContainer = document.getElementById('slicing-choice-questions');
@@ -588,6 +732,59 @@ print(f"{total=:.2f}") # 輸出: total=123.46
             element.innerHTML = `<strong>${isCorrect ? '答對了！' : '再想一想。'}</strong> ${message}`;
         }
 
+        function renderAdditionalPractice(group) {
+            const choiceArea = document.getElementById(`${group.id}-choice-questions`);
+            const codeArea = document.getElementById(`${group.id}-code-questions`);
+            const form = document.getElementById(`${group.id}-practice-form`);
+            const score = document.getElementById(`${group.id}-score`);
+
+            choiceArea.innerHTML = group.choices.map((question, questionIndex) => `
+                <fieldset class="rounded-lg border border-gray-200 bg-white p-4" data-question="${questionIndex}">
+                    <legend class="px-1 font-semibold text-gray-900">${questionIndex + 1}. ${question.prompt}</legend>
+                    <div class="mt-3 grid gap-2 sm:grid-cols-2">
+                        ${question.options.map((option, optionIndex) => `
+                            <label class="flex cursor-pointer items-center gap-2 rounded-md border border-gray-200 p-3 hover:bg-gray-50">
+                                <input type="radio" name="${group.id}-choice-${questionIndex}" value="${optionIndex}" class="h-4 w-4 accent-blue-600">
+                                <span>${option}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                    <p class="mt-3 hidden text-sm" data-feedback></p>
+                </fieldset>
+            `).join('');
+
+            codeArea.innerHTML = group.tasks.map((task, taskIndex) => `
+                <article class="rounded-lg border border-gray-200 bg-white p-4">
+                    <p class="font-semibold text-gray-900">${taskIndex + 6}. ${task}</p>
+                    <p class="mt-2 text-sm text-gray-500">請在 Python IDE 中撰寫、執行並確認輸出結果。</p>
+                </article>
+            `).join('');
+
+            form.addEventListener('submit', event => {
+                event.preventDefault();
+                let correctCount = 0;
+                group.choices.forEach((question, questionIndex) => {
+                    const card = choiceArea.querySelector(`[data-question="${questionIndex}"]`);
+                    const selected = card.querySelector(`input[name="${group.id}-choice-${questionIndex}"]:checked`);
+                    const isCorrect = selected !== null && Number(selected.value) === question.answer;
+                    if (isCorrect) correctCount += 1;
+                    setFeedback(card.querySelector('[data-feedback]'), isCorrect, question.explanation);
+                });
+                score.textContent = `選擇題得分：${correctCount} / 5；另有 5 題 IDE 實作題。`;
+                score.classList.remove('hidden');
+                score.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+
+            document.getElementById(`reset-${group.id}-practice`).addEventListener('click', () => {
+                form.reset();
+                score.classList.add('hidden');
+                choiceArea.querySelectorAll('[data-feedback]').forEach(element => {
+                    element.className = 'mt-3 hidden text-sm';
+                    element.textContent = '';
+                });
+            });
+        }
+
         practiceForm.addEventListener('submit', event => {
             event.preventDefault();
             let choiceScore = 0;
@@ -634,6 +831,7 @@ print(f"{total=:.2f}") # 輸出: total=123.46
         });
 
         renderSlicingPractice();
+        additionalPracticeGroups.forEach(renderAdditionalPractice);
     </script>
 </body>
 </html>
